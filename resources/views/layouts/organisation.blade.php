@@ -143,16 +143,9 @@
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" href="#">
+                                            <a class="nav-link {{ Request::routeIs('organisation.hunting-concessions.*') ? 'active' : '' }}" href="{{ route('organisation.hunting-concessions.index', $organisation->slug) }}">
                                                 <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text">Level 2</span>
-                                                </div>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#">
-                                                <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text">Level 3</span>
+                                                    <span class="nav-link-text">Hunting Concessions</span>
                                                 </div>
                                             </a>
                                         </li>

@@ -36,7 +36,6 @@ class DatabaseSeeder extends Seeder
             HuntingOutComeSeeder::class,
             IdentificationTypeSeeder::class,
             GenderSeeder::class,
-            ShotsTableSeeder::class,
             ProvinceSeeder::class,
             CitySeeder::class,
             CategorySeeder::class,

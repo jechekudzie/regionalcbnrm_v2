@@ -84,16 +84,6 @@ class HuntingConcession extends Model
         return $totalQuotas;
     }
 
-    public function huntingActivities() // Activities taking place in this concession
-    {
-        return $this->hasMany(HuntingActivity::class);
-    }
-
-    //hunting Detail
-    public function huntingDetails()
-    {
-        return $this->hasMany(HuntingDetail::class);
-    }
 
     public function getSlugOptions(): SlugOptions
     {

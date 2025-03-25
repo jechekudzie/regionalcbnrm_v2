@@ -10,7 +10,7 @@
     <!-- ===============================================-->
     <!--    Document Title-->
     <!-- ===============================================-->
-    <title> @yield('title', 'Company Management System - Administration') </title>
+    <title> @yield('title', 'Regional CBNRM - Administration') </title>
 
 
     <!-- ===============================================-->
@@ -85,21 +85,7 @@
     <!--    Main Content-->
     <!-- ===============================================-->
     <main class="main" id="top">
-        <nav class="navbar navbar-vertical navbar-expand-lg">
-            <script>
-                var navbarStyle = window.config.config.phoenixNavbarStyle;
-                if (navbarStyle && navbarStyle !== 'transparent') {
-                    document.querySelector('body').classList.add(`navbar-${navbarStyle}`);
-                }
-            </script>
-           
-            <div class="navbar-vertical-footer">
-                <button
-                    class="btn navbar-vertical-toggle border-0 fw-semi-bold w-100 white-space-nowrap d-flex align-items-center">
-                    <span class="uil uil-left-arrow-to-left fs-0"></span><span class="uil uil-arrow-from-right fs-0"></span><span
-                        class="navbar-vertical-footer-text ms-2">Collapsed View</span></button>
-            </div>
-        </nav>
+
 
         <nav class="navbar navbar-top fixed-top navbar-expand" id="navbarDefault">
             <div class="collapse navbar-collapse justify-content-between">
@@ -112,7 +98,7 @@
                         <div class="d-flex align-items-center">
                             <div class="d-flex align-items-center">
                                 <!-- <img src="{{asset('logo/logo.png')}}" alt="phoenix" width="80" /> -->
-                                <p class="logo-text ms-2 d-none d-sm-block">Company Management System</p>
+                                <p class="logo-text ms-2 d-none d-sm-block">Regional CBNRM</p>
                             </div>
                         </div>
                     </a>
@@ -316,7 +302,7 @@
             <footer class="footer position-absolute">
                 <div class="row g-0 justify-content-between align-items-center h-100">
                     <div class="col-12 col-sm-auto text-center">
-                        <p class="mb-0 mt-2 mt-sm-0 text-900">Company Management System<span
+                        <p class="mb-0 mt-2 mt-sm-0 text-900">Regional CBNRM<span
                                 class="d-none d-sm-inline-block"></span><span class="d-none d-sm-inline-block mx-1">|</span><br
                                 class="d-sm-none" />{{date('Y')}} &copy;<a class="mx-1" href="https://leadingdigital.africa">Developed
                                 By Leading Digital</a></p>

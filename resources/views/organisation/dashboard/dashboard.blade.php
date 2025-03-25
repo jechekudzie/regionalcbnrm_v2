@@ -25,7 +25,7 @@
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{route('organisation.dashboard')}}" class="btn btn-soft-primary">
+                        <a href="" class="btn btn-soft-primary">
                             <i class="fa fa-arrow-left me-2"></i>Dashboard
                         </a>
                         @can('view-generic')

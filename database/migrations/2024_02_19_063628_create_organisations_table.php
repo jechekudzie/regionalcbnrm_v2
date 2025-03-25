@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedBigInteger('organisation_type_id');
             $table->unsignedBigInteger('organisation_id')->nullable();
+            $table->string('logo')->nullable();
+            $table->longText('description')->nullable();
             $table->string('slug')->nullable();
             $table->timestamps();
         });

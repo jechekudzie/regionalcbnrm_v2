@@ -14,7 +14,7 @@ class Module extends Model
 
     protected $guarded = [];
 
-   /*  protected static function booted()
+    protected static function booted()
     {
         static::created(function ($module) {
             $actions = ['view', 'create', 'read', 'update', 'delete'];
@@ -24,7 +24,7 @@ class Module extends Model
                 Permission::create(['name' => $permissionName]);
             }
         });
-    } */
+    } 
 
     public function permissions()
     {

@@ -16,11 +16,34 @@ class DatabaseSeeder extends Seeder
        
 
         $this->call([
-        
+            ModuleSeeder::class,
             OrganisationTypesSeeder::class,
             OrganisationTypeRelationshipSeeder::class,
             OrganisationsSeeder::class,
+           
+            SpeciesSeeder::class,
+            SpeciesGenderSeeder::class,
+            MaturitySeeder::class,
+            CountingMethodSeeder::class,
+            CountriesSeeder::class,
+            ConflictTypeSeeder::class,
+            ConflictOutComeSeeder::class,
+            ControlMeasureSeeder::class,
+            OffenceTypeSeeder::class,
+            PoacherTypeSeeder::class,
+            PoachingMethodSeeder::class,
+            PoachingReasonSeeder::class,
+            HuntingOutComeSeeder::class,
+            IdentificationTypeSeeder::class,
+            GenderSeeder::class,
+            ShotsTableSeeder::class,
+            ProvinceSeeder::class,
+            CitySeeder::class,
+            CategorySeeder::class,
+            PayableItemSeeder::class,
             UsersTableSeeder::class,
+            CropTypeSeeder::class,
+            LiveStockTypeSeeder::class,
            
         ]);
         User::factory()->create([

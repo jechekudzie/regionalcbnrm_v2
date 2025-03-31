@@ -1,9 +1,11 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\HistoricalData;
 
-use App\Models\Organisation;
-use App\Models\OrganisationType;
-use App\Models\Species;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\Organisation;
+use App\Models\Admin\OrganisationType;
+use App\Models\Organisation\Species;
 use App\Models\HistoricalData\ConflictRecord;
 use Illuminate\Http\Request;
 

@@ -18,7 +18,7 @@ class PoachingReasonSeeder extends Seeder
             'Commercial',
         ];
         foreach ($poachingReasons as $poachingReason) {
-            \App\Models\PoachingReason::create([
+            \App\Models\Admin\PoachingReason::create([
                 'name' => $poachingReason,
             ]);
         }

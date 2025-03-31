@@ -2,7 +2,6 @@
 
 namespace App\Models\HistoricalData;
 
-use App\Models\Organisation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,6 +13,6 @@ class IncomeRecord extends Model
 
     public function organisation()
     {
-        return $this->belongsTo(Organisation::class);
+        return $this->belongsTo(\App\Models\Admin\Organisation::class);
     }
-} 
+}

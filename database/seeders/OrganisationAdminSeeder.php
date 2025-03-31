@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Mail\AccountCreatedMail;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;

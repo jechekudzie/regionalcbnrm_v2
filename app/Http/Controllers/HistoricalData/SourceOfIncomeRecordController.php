@@ -4,7 +4,7 @@ namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
 use App\Models\HistoricalData\SourceOfIncomeRecord;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,7 +40,7 @@ class SourceOfIncomeRecordController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Organisation  $organisation
+     * @param  \App\Models\Admin\Organisation  $organisation
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, Organisation $organisation)
@@ -52,7 +52,7 @@ class SourceOfIncomeRecordController extends Controller
             'meat_amount' => 'required|numeric|min:0',
             'hunting_concession_fee_amount' => 'required|numeric|min:0',
             'photographic_fee_amount' => 'required|numeric|min:0',
-            'other_amount' => 'required|numeric|min:0',
+            'other_amount' => 'required|numeric|min:0', 
             'other_description' => 'nullable|string|max:500',
         ]);
 

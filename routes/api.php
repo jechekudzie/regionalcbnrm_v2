@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ApiController;
+use App\Http\Controllers\Organisation\QuotaAllocationController;
 //organisation types
 Route::get('/admin/organisation-types', [ApiController::class, 'fetchTemplate'])->name('admin.organisation-types.index');
 //organisations
@@ -20,3 +21,7 @@ Route::get('/admin/organisations/by-type/{typeId}', [ApiController::class, 'getO
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
+
+// Quota allocation routes
+
+Route::get('/organisations/{organisation}/quota-allocations', [QuotaAllocationController::class, 'getQuotaAllocation']);

@@ -27,7 +27,7 @@
                         <button class="btn btn-soft-primary" id="collapseAll">
                             <i class="fas fa-chevron-right me-1"></i> Collapse All
                         </button>
-                        @if($rootType = \App\Models\OrganisationType::first())
+                        @if($rootType = \App\Models\Admin\OrganisationType::first())
                             <a class="btn btn-primary" href="{{ route('admin.organisations.create-root', ['type' => $rootType->id]) }}">
                                 <i class="fa-solid fa-plus me-2"></i>Add {{ $rootType->name }}
                             </a>

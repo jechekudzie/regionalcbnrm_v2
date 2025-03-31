@@ -4,9 +4,9 @@ namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
 use App\Models\HistoricalData\PoachingRecord;
-use App\Models\Organisation;
-use App\Models\PoachingMethod;
-use App\Models\Species;
+use App\Models\Admin\Organisation;
+use App\Models\Organisation\Species;
+use App\Models\Admin\PoachingMethod;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

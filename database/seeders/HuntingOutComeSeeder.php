@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\HuntingOutCome;
+use App\Models\Admin\HuntingOutcome;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

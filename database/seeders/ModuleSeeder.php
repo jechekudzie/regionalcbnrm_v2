@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\Module;
+
+use App\Models\Admin\Module;
+use Spatie\Permission\Models\Permission;
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -33,6 +36,13 @@ class ModuleSeeder extends Seeder
 
         foreach ($modules as $module) {
             Module::create(['name' => ucfirst($module)]);
+
+            //create permissions for the module
+            $module = Module::where('name', $module)->first();
+            $permissions = ['view', 'create', 'read', 'update', 'delete'];
+            foreach ($permissions as $permission) {
+                Permission::create(['name' => $permission . '-' . $module->slug]);
+            }
         }
     }
 }

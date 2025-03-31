@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Organisation;
 
 use App\Http\Controllers\Controller;
-use App\Models\HuntingConcession;
+use App\Models\Organisation\HuntingConcession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 
 class HuntingConcessionController extends Controller
 {
@@ -19,14 +19,16 @@ class HuntingConcessionController extends Controller
 
     public function create(Organisation $organisation)
     {
-        return view('organisation.hunting-concessions.create',compact('organisation'));
+        $safaris = $organisation->getSafariOperators();
+
+        return view('organisation.hunting-concessions.create',compact('organisation','safaris'));
     }
 
     public function store(Request $request, Organisation $organisation)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'safari_id' => 'nullable|exists:safaris,id',
+            'safari_id' => 'nullable|exists:organisations,id',
             'hectarage' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'latitude' => 'nullable|string|max:255',
@@ -50,14 +52,15 @@ class HuntingConcessionController extends Controller
 
     public function edit(Organisation $organisation, HuntingConcession $huntingConcession)
     {
-        return view('organisation.hunting-concessions.edit', compact('huntingConcession', 'organisation'));
+        $safaris = $organisation->getSafariOperators();
+        return view('organisation.hunting-concessions.edit', compact('huntingConcession', 'organisation', 'safaris'));
     }
 
     public function update(Request $request, Organisation $organisation, HuntingConcession $huntingConcession)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'safari_id' => 'nullable|exists:safaris,id',
+            'safari_id' => 'nullable|exists:organisations,id',
             'hectarage' => 'nullable|string|max:255',
             'description' => 'nullable|string',
             'latitude' => 'nullable|string|max:255',
@@ -81,4 +84,4 @@ class HuntingConcessionController extends Controller
             ->route('organisation.hunting-concessions.index', $organisation->slug)
             ->with('success', 'Hunting concession deleted successfully.');
     }
-} 
+}

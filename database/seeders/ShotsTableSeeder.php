@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Shot;
+use App\Models\Admin\Shot;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

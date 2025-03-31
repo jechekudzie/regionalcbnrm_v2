@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\CountingMethod;
+use App\Models\Admin\CountingMethod;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

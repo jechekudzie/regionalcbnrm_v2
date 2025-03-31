@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\LiveStockType;
+use App\Models\Admin\LiveStockType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

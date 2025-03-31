@@ -16,7 +16,7 @@ class SpeciesGenderSeeder extends Seeder
         $speciesGender = ['Male', 'Female', 'Unsexed'];
 
         foreach ($speciesGender as $gender) {
-            \App\Models\SpeciesGender::create([
+            \App\Models\Admin\SpeciesGender::create([
                 'name' => $gender,
             ]);
         }

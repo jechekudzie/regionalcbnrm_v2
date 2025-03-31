@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
-use App\Models\Gender;
+use App\Models\Admin\Gender;
 use App\Models\HistoricalData\HumanConflictRecord;
-use App\Models\Organisation;
-use App\Models\Species;
+use App\Models\Admin\Organisation;
+use App\Models\Organisation\Species;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\IdentificationType;
+use App\Models\Admin\IdentificationType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

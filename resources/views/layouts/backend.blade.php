@@ -306,79 +306,14 @@
                     </div>
                 </div>
                 <ul class="navbar-nav navbar-nav-icons flex-row">
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link" id="navbarDropdownOrganisation" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" data-bs-auto-close="outside" aria-expanded="false">
-                            <div class="d-flex align-items-center">
-                                <span class="d-none d-sm-inline-block me-2">
-                                    @if(request()->route('organisation') && !is_string(request()->route('organisation')))
-                                        {{ request()->route('organisation')->name }}
-                                    @else
-                                        Organizations
-                                    @endif
-                                </span>
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M8 0C6.06875 0 4.5 1.56875 4.5 3.5C4.5 5.43125 6.06875 7 8 7C9.93125 7 11.5 5.43125 11.5 3.5C11.5 1.56875 9.93125 0 8 0ZM8 1.5C9.10313 1.5 10 2.39687 10 3.5C10 4.60313 9.10313 5.5 8 5.5C6.89687 5.5 6 4.60313 6 3.5C6 2.39687 6.89687 1.5 8 1.5Z" fill="currentColor"/>
-                                    <path d="M10 8H6C2.68749 8 0 10.6875 0 14V15.5C0 15.775 0.225 16 0.5 16H15.5C15.775 16 16 15.775 16 15.5V14C16 10.6875 13.3125 8 10 8ZM14.5 14.5H1.5V14C1.5 11.5 3.5 9.5 6 9.5H10C12.5 9.5 14.5 11.5 14.5 14V14.5Z" fill="currentColor"/>
-                                </svg>
-                            </div>
+                    @if(auth()->check() && auth()->user()->organisations->count() > 0)
+                    <li class="nav-item">
+                        <a href="{{ route('organisation.dashboard') }}" class="nav-link" title="Back to Organisation Dashboard">
+                            <span class="d-none d-sm-inline-block me-1">Organisations</span>
+                            <i class="fas fa-building"></i>
                         </a>
-
-                        <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-nine-dots shadow border" aria-labelledby="navbarDropdownOrganisation">
-                            <div class="card bg-body-emphasis position-relative border-0">
-                                <div class="card-body pt-3 px-3 pb-0 overflow-auto scrollbar" style="height: 20rem;">
-                                    <div class="d-flex justify-content-between align-items-center border-bottom border-300 pb-2 mb-2">
-                                        <h5 class="mb-0 text-body-emphasis">Your Organisations</h5>
-                                    </div>
-                                    @if(auth()->check() && auth()->user()->organisations->count() > 0)
-                                        <div class="row g-2 py-1">
-                                            @foreach(auth()->user()->organisations as $organisation)
-                                                @php
-                                                    $routeOrg = request()->route('organisation');
-                                                    // Check if the route parameter is an Organization model
-                                                    $isActive = false;
-                                                    if (is_object($routeOrg) && method_exists($routeOrg, 'getKey')) {
-                                                        $isActive = $routeOrg->getKey() == $organisation->getKey();
-                                                    }
-                                                @endphp
-                                                <div class="col-12">
-                                                    <a href="{{ route('organisation.dashboard.index', $organisation->slug) }}" class="d-block bg-body-secondary-hover p-2 rounded-3 text-decoration-none mb-1 position-relative {{ $isActive ? 'bg-soft-primary' : '' }}">
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar avatar-xl me-2 bg-soft-primary text-primary rounded-circle text-center">
-                                                                <span class="avatar-name">
-                                                                    @php
-                                                                        $words = explode(' ', $organisation->name);
-                                                                        $initials = array_reduce($words, function($carry, $word) {
-                                                                            return $carry . strtoupper(substr($word, 0, 1));
-                                                                        }, '');
-                                                                        echo substr($initials, 0, 2);
-                                                                    @endphp
-                                                                </span>
-                                                            </div>
-                                                            <div class="flex-grow-1">
-                                                                <h6 class="mb-0 text-body-emphasis">{{ $organisation->name }}</h6>
-                                                                <p class="mb-0 text-body-emphasis text-truncate fs-10 mt-1">{{ $organisation->organisationType->name ?? 'Organization' }}</p>
-                                                            </div>
-                                                            @if($isActive)
-                                                                <span class="position-absolute end-0 top-50 translate-middle-y me-2 text-success">
-                                                                    <i class="fas fa-check"></i>
-                                                                </span>
-                                                            @endif
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div class="text-center py-4">
-                                            <p class="mb-0 text-body-emphasis">No organisations found</p>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
                     </li>
-
+                    @endif
                     <li class="nav-item">
                         <div class="theme-control-toggle fa-icon-wait px-2">
                             <input class="form-check-input ms-0 theme-control-toggle-input" type="checkbox"

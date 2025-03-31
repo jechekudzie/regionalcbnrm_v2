@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 
-use App\Models\ConflictOutCome;
-use App\Models\ConflictType;
+use App\Models\Admin\ConflictOutCome;
+use App\Models\Admin\ConflictType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

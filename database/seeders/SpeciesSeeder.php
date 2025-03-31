@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Species;
+use App\Models\Organisation\Species;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

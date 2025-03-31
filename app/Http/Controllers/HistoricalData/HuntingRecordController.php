@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
-use App\Models\Organisation;
-use App\Models\Species;
+use App\Models\Admin\Organisation;
+use App\Models\Organisation\Species;
 use App\Models\HistoricalData\HuntingRecord;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

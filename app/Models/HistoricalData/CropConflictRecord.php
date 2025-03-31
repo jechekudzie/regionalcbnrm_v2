@@ -2,9 +2,6 @@
 
 namespace App\Models\HistoricalData;
 
-use App\Models\CropType;
-use App\Models\Organisation;
-use App\Models\Species;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -30,7 +27,7 @@ class CropConflictRecord extends Model
      */
     public function organisation()
     {
-        return $this->belongsTo(Organisation::class);
+        return $this->belongsTo(\App\Models\Admin\Organisation::class);
     }
 
     /**
@@ -38,7 +35,7 @@ class CropConflictRecord extends Model
      */
     public function species()
     {
-        return $this->belongsTo(Species::class);
+        return $this->belongsTo(\App\Models\Organisation\Species::class);
     }
 
     /**
@@ -46,6 +43,6 @@ class CropConflictRecord extends Model
      */
     public function cropType()
     {
-        return $this->belongsTo(CropType::class);
+        return $this->belongsTo(\App\Models\Admin\CropType::class);
     }
 }

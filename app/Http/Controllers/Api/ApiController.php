@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Hunter;
 use App\Models\HuntingDetailOutCome;
 use App\Models\Organisation;
-use App\Models\OrganisationType;
+use App\Models\Admin\OrganisationType;
 use App\Models\QuotaRequest;
 use App\Models\Species;
 use App\Models\User;

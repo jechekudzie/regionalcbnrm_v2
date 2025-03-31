@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 use App\Models\HistoricalData\IncomeRecord;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;

@@ -2,8 +2,6 @@
 
 namespace App\Models\HistoricalData;
 
-use App\Models\Organisation;
-use App\Models\Species;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,11 +12,11 @@ class ConflictRecord extends Model
 
     public function organisation()
     {
-        return $this->belongsTo(Organisation::class);
+        return $this->belongsTo(\App\Models\Admin\Organisation::class);
     }
 
     public function species()
     {
-        return $this->belongsTo(Species::class);
+        return $this->belongsTo(\App\Models\Organisation\Species::class);
     }
 }

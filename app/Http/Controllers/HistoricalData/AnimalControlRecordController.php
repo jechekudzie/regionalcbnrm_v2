@@ -4,8 +4,8 @@ namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
 use App\Models\HistoricalData\AnimalControlRecord;
-use App\Models\Organisation;
-use App\Models\Species;
+use App\Models\Admin\Organisation;
+use App\Models\Organisation\Species;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

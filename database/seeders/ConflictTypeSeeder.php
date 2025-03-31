@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ConflictType;
+use App\Models\Admin\ConflictType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

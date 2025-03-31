@@ -44,6 +44,21 @@
                                 </div>
                             </div>
 
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="safari_id" class="form-label">Safari Operator</label>
+                                    <select class="form-control @error('safari_id') is-invalid @enderror" id="safari_id" name="safari_id">
+                                        <option value="">Select Safari Operator</option>
+                                        @foreach ($safaris as $safari)
+                                            <option value="{{ $safari->id }}" {{ old('safari_id', $huntingConcession->safari_id) == $safari->id ? 'selected' : '' }}>{{ $safari->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('safari_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <!-- Location Information -->
                             <div class="col-md-6">
                                 <div class="mb-3">

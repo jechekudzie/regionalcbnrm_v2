@@ -63,6 +63,9 @@
     <link href="{{ asset('/backend/vendors/leaflet.markercluster/MarkerCluster.css') }}" rel="stylesheet">
     <link href="{{ asset('/backend/vendors/leaflet.markercluster/MarkerCluster.Default.css') }}" rel="stylesheet">
 
+    <link href="{{ asset('vendors/flatpickr/flatpickr.min.css') }}" rel="stylesheet">
+
+
     <!-- Gijgo config file -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://unpkg.com/gijgo@1.9.14/js/gijgo.min.js" type="text/javascript"></script>
@@ -146,6 +149,20 @@
                                             <a class="nav-link {{ Request::routeIs('organisation.hunting-concessions.*') ? 'active' : '' }}" href="{{ route('organisation.hunting-concessions.index', $organisation->slug) }}">
                                                 <div class="d-flex align-items-center">
                                                     <span class="nav-link-text">Hunting Concessions</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.hunting-activities.*') ? 'active' : '' }}" href="{{ route('organisation.hunting-activities.index', $organisation->slug) }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Hunting Activities</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.quota-allocations.*') ? 'active' : '' }}" href="{{ route('organisation.quota-allocations.index', $organisation->slug) }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Quota Allocations</span>
                                                 </div>
                                             </a>
                                         </li>
@@ -454,6 +471,16 @@
                         </div>
                     </li>
 
+
+                    @if(auth()->user()->hasRole('super-admin'))
+                    <li class="nav-item">
+                        <a href="{{route('admin.organisations.manage')}}" class="nav-link" title="Admin Dashboard">
+                            <span class="d-none d-sm-inline-block me-1">Admin</span>
+                            <i class="fas fa-user-shield"></i>
+                        </a>
+                    </li>
+                    @endif
+
                     <li class="nav-item">
                         <div class="theme-control-toggle fa-icon-wait px-2">
                             <input class="form-check-input ms-0 theme-control-toggle-input" type="checkbox"
@@ -660,7 +687,19 @@
     <script src="{{ asset('/backend/vendors/leaflet.markercluster/leaflet.markercluster.js') }}"></script>
     <script src="{{ asset('/backend/vendors/leaflet.tilelayer.colorfilter/leaflet-tilelayer-colorfilter.min.js') }}">
     </script>
+      <!-- Scripts -->
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+   
+    <!-- Add Flatpickr JS -->
+    <script src="{{ asset('vendors/flatpickr/flatpickr.min.js') }}"></script>
+
+    <!-- jQuery (if not already included) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+     
     <script src="{{ asset('backend/assets/js/ecommerce-dashboard.js') }}"></script>
+    
+   
 
     <script>
         $(document).ready(function() {

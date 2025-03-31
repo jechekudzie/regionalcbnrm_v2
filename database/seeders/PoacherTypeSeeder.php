@@ -22,7 +22,7 @@ class PoacherTypeSeeder extends Seeder
             'Other',
         ];
         foreach ($poacherTypes as $poacherType) {
-            \App\Models\PoacherType::create([
+            \App\Models\Admin\PoacherType::create([
                 'name' => $poacherType,
             ]);
         }

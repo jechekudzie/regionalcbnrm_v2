@@ -4,7 +4,7 @@ namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
 use App\Models\HistoricalData\IncomeUseRecord;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\ControlMeasure;
+use App\Models\Admin\ControlMeasure;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 

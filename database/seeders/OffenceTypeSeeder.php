@@ -18,7 +18,7 @@ class OffenceTypeSeeder extends Seeder
             'Habitual offender',
         ];
         foreach ($offenceTypes as $offenceType) {
-            \App\Models\OffenceType::create([
+            \App\Models\Admin\OffenceType::create([
                 'name' => $offenceType,
             ]);
         }

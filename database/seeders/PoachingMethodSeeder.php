@@ -25,7 +25,7 @@ class PoachingMethodSeeder extends Seeder
             'Spears'
         ];
         foreach ($methods as $method) {
-            \App\Models\PoachingMethod::create([
+            \App\Models\Admin\PoachingMethod::create([
                 'name' => $method,
             ]);
         }

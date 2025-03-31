@@ -4,9 +4,9 @@ namespace App\Http\Controllers\HistoricalData;
 
 use App\Http\Controllers\Controller;
 use App\Models\HistoricalData\LiveStockConflictRecord;
-use App\Models\LiveStockType;
-use App\Models\Organisation;
-use App\Models\Species;
+use App\Models\Admin\LiveStockType;
+use App\Models\Admin\Organisation;
+use App\Models\Organisation\Species;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

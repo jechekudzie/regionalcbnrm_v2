@@ -32,6 +32,7 @@ use App\Http\Controllers\TransactionPayableController;
 use App\Http\Controllers\Organisation\QuotaAllocationController;
 use App\Models\Admin\Organisation;
 use App\Http\Controllers\Organisation\HuntingActivityController;
+use App\Http\Controllers\Organisation\WildlifeConflictIncidentController;
 
 
 Route::get('/', function () {
@@ -331,6 +332,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/{organisation}/quota-allocations/{quotaAllocation}', [QuotaAllocationController::class, 'update'])->name('organisation.quota-allocations.update');
     Route::delete('/{organisation}/quota-allocations/{quotaAllocation}', [QuotaAllocationController::class, 'destroy'])->name('organisation.quota-allocations.destroy');
 
+    // Wildlife Conflict Incidents Routes
+    Route::get('/{organisation}/wildlife-conflicts', [WildlifeConflictIncidentController::class, 'index'])->name('organisation.wildlife-conflicts.index');
+    Route::get('/{organisation}/wildlife-conflicts/create', [WildlifeConflictIncidentController::class, 'create'])->name('organisation.wildlife-conflicts.create');
+    Route::post('/{organisation}/wildlife-conflicts', [WildlifeConflictIncidentController::class, 'store'])->name('organisation.wildlife-conflicts.store');
+    Route::get('/{organisation}/wildlife-conflicts/{wildlifeConflictIncident}', [WildlifeConflictIncidentController::class, 'show'])->name('organisation.wildlife-conflicts.show');
+    Route::get('/{organisation}/wildlife-conflicts/{wildlifeConflictIncident}/edit', [WildlifeConflictIncidentController::class, 'edit'])->name('organisation.wildlife-conflicts.edit');
+    Route::patch('/{organisation}/wildlife-conflicts/{wildlifeConflictIncident}', [WildlifeConflictIncidentController::class, 'update'])->name('organisation.wildlife-conflicts.update');
+    Route::delete('/{organisation}/wildlife-conflicts/{wildlifeConflictIncident}', [WildlifeConflictIncidentController::class, 'destroy'])->name('organisation.wildlife-conflicts.destroy');
+    
     //organisation create
     Route::get('/{organisation}/organisations/{organisationType}/{parentOrganisation}/index', [OrganisationChildrenController::class, 'index'])->name('organisation.organisations.index');
     Route::post('/{organisation}/organisations/{organisationType}/{parentOrganisation}/store', [OrganisationChildrenController::class, 'store'])->name('organisation.organisations.store');
@@ -368,6 +378,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/{organisation}/transactions/{transaction}/payables/{transactionPayable}/edit', [\App\Http\Controllers\TransactionPayableController::class, 'edit'])->name('organisation.transaction-payables.edit');
     Route::patch('/{organisation}/transactions/{transaction}/payables/{transactionPayable}/update', [\App\Http\Controllers\TransactionPayableController::class, 'update'])->name('organisation.transaction-payables.update');
     Route::delete('/{organisation}/transactions/{transaction}/payables/{transactionPayable}', [\App\Http\Controllers\TransactionPayableController::class, 'destroy'])->name('organisation.transaction-payables.destroy');
+
+   
 });
 
 Route::middleware('auth')->group(function () {

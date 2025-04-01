@@ -166,6 +166,13 @@
                                                 </div>
                                             </a>
                                         </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.wildlife-conflicts.*') ? 'active' : '' }}" href="{{ route('organisation.wildlife-conflicts.index', $organisation->slug) }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Wildlife Conflicts</span>
+                                                </div>
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

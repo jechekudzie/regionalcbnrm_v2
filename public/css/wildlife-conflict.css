@@ -1,0 +1,150 @@
+:root {
+    --nature-green: #2e7d32;
+    --light-bg: #f8f9fa;
+    --border-radius: 0.5rem;
+}
+
+.page-header {
+    padding: 1.5rem 0;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.page-title {
+    color: var(--nature-green);
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.badge-period {
+    background-color: var(--nature-green);
+    color: white;
+    padding: 0.35rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 500;
+}
+
+.action-buttons .btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+.btn-primary-soft {
+    background-color: rgba(46, 125, 50, 0.1);
+    color: var(--nature-green);
+    border: none;
+}
+
+.btn-primary-soft:hover {
+    background-color: rgba(46, 125, 50, 0.15);
+    color: var(--nature-green);
+}
+
+.btn-outline-primary-soft {
+    background-color: transparent;
+    color: var(--nature-green);
+    border: 1px solid var(--nature-green);
+}
+
+.btn-outline-primary-soft:hover {
+    background-color: rgba(46, 125, 50, 0.1);
+}
+
+.info-card {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    height: 100%;
+}
+
+.info-card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.info-card-title {
+    color: var(--nature-green);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.info-card-body {
+    padding: 1.25rem;
+}
+
+.info-section {
+    margin-bottom: 1.5rem;
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.info-value {
+    background: var(--light-bg);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+.icon-box {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 125, 50, 0.1);
+    color: var(--nature-green);
+    margin-right: 1rem;
+}
+
+.map-container {
+    height: 500px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.no-location-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    background: var(--light-bg);
+    border-radius: var(--border-radius);
+}
+
+.no-location-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1rem 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .map-container {
+        height: 400px;
+    }
+}

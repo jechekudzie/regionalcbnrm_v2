@@ -45,9 +45,6 @@ class DatabaseSeeder extends Seeder
             LiveStockTypeSeeder::class,
            
         ]);
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+    
     }
 }

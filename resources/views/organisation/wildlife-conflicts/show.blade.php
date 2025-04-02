@@ -103,6 +103,155 @@
             animation: pulse 2s infinite;
             pointer-events: none;
         }
+        
+        /* Problem Animal Control card styling */
+        .pac-card {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            border-left: 4px solid #2E7D32;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .pac-card:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+            transform: translateY(-3px);
+        }
+        
+        .pac-card:hover::before {
+            opacity: 1;
+        }
+        
+        .pac-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(46,125,50,0) 0%, rgba(46,125,50,0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .pac-card .card-body {
+            padding: 18px;
+            background-color: #fcfcfc;
+        }
+        
+        .pac-date {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+        
+        .pac-date::before {
+            content: '\f073';
+            font-family: 'Font Awesome 5 Free';
+            margin-right: 8px;
+            color: #2E7D32;
+            font-size: 0.9rem;
+        }
+        
+        .pac-location {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            padding-left: 24px;
+        }
+        
+        .pac-badge-animals {
+            background: linear-gradient(135deg, #2E7D32, #43A047);
+            font-weight: 500;
+            font-size: 0.85rem;
+            padding: 0.35em 0.75em;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(46,125,50,0.2);
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .pac-badge-animals::before {
+            content: '\f1b0';
+            font-family: 'Font Awesome 5 Free';
+            margin-right: 6px;
+            font-weight: 900;
+        }
+        
+        .pac-badge-animals:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 7px rgba(46,125,50,0.3);
+        }
+        
+        .pac-measures {
+            margin-top: 14px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #e9ecef;
+        }
+        
+        .pac-measures-title {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+        }
+        
+        .pac-measures-title::before {
+            content: '\f0e7';
+            font-family: 'Font Awesome 5 Free';
+            margin-right: 6px;
+            font-weight: 900;
+            color: #ffc107;
+            font-size: 0.85rem;
+        }
+        
+        .pac-measure-badge {
+            background-color: white;
+            color: #333;
+            font-size: 0.8rem;
+            padding: 0.35em 0.75em;
+            border-radius: 15px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            display: inline-block;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.2s ease;
+        }
+        
+        .pac-measure-badge:hover {
+            background-color: #f8f9fa;
+            border-color: #dee2e6;
+            transform: translateY(-1px);
+        }
+        
+        .pac-details-btn {
+            font-size: 0.85rem;
+            border-radius: 20px;
+            padding: 0.35em 1.2em;
+            background-color: white;
+            color: #2E7D32;
+            border: 1px solid #2E7D32;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        .pac-details-btn:hover {
+            background-color: #2E7D32;
+            color: white;
+            box-shadow: 0 3px 6px rgba(46,125,50,0.2);
+        }
     </style>
 @endpush
 
@@ -203,6 +352,97 @@
                             <p>No location data available for this incident</p>
                             <a href="{{ route('organisation.wildlife-conflicts.edit', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-success">
                                 <i class="fas fa-plus me-1"></i> Add Location Data
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            
+            <!-- Problem Animal Control Card -->
+            <div class="card mb-4 border">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-shield-alt me-2"></i>Problem Animal Control</h5>
+                    <a href="{{ route('organisation.problem-animal-controls.create', [$organisation->slug, 'wildlife_conflict_incident_id' => $wildlifeConflictIncident->id]) }}" 
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-plus me-1"></i> Add New Record
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if($wildlifeConflictIncident->problemAnimalControls->count() > 0)
+                        <div class="px-2">
+                            @foreach($wildlifeConflictIncident->problemAnimalControls as $control)
+                                <div class="card border-0 shadow mb-4" style="border-radius: 15px; overflow: hidden;">
+                                    <div class="row g-0">
+                                        <!-- Left side date and animals count -->
+                                        <div class="col-md-3 bg-success text-white p-3 d-flex flex-column justify-content-center align-items-center" style="background: linear-gradient(45deg, #1b5e20, #2e7d32);">
+                                            <h3 class="fw-bold mb-0">{{ $control->control_date->format('d') }}</h3>
+                                            <div class="mb-2">{{ $control->control_date->format('M Y') }}</div>
+                                            <div class="border-top border-bottom border-white-50 w-100 my-2 py-2 text-center">
+                                                <span class="badge bg-white text-success p-2 rounded-pill">
+                                                    <i class="fas fa-paw me-1"></i> {{ $control->estimated_number }} Animals
+                                                </span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Right side details -->
+                                        <div class="col-md-9">
+                                            <div class="card-body">
+                                                <!-- Location with icon -->
+                                                <div class="d-flex align-items-center mb-3">
+                                                    <div class="bg-light p-2 rounded-circle me-3">
+                                                        <i class="fas fa-map-marker-alt text-success"></i>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0 text-muted small">LOCATION</h6>
+                                                        <p class="mb-0 fw-medium">{{ $control->location }}</p>
+                                                    </div>
+                                                </div>
+                                                
+                                                @if($control->controlMeasures->count() > 0)
+                                                    <!-- Control measures -->
+                                                    <div class="d-flex align-items-start mb-3">
+                                                        <div class="bg-light p-2 rounded-circle me-3">
+                                                            <i class="fas fa-bolt text-warning"></i>
+                                                        </div>
+                                                        <div class="w-100">
+                                                            <h6 class="mb-2 text-muted small">CONTROL MEASURES</h6>
+                                                            <div>
+                                                                @foreach($control->controlMeasures->take(3) as $measure)
+                                                                    <span class="badge bg-light text-dark me-1 mb-1 px-3 py-2 shadow-sm" style="border-radius: 15px;">
+                                                                        {{ $measure->name }}
+                                                                    </span>
+                                                                @endforeach
+                                                                @if($control->controlMeasures->count() > 3)
+                                                                    <span class="badge bg-secondary px-3 py-2" style="border-radius: 15px;">
+                                                                        +{{ $control->controlMeasures->count() - 3 }} more
+                                                                    </span>
+                                                                @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endif
+                                                
+                                                <!-- View details button -->
+                                                <div class="text-end mt-3">
+                                                    <a href="{{ route('organisation.problem-animal-controls.show', [$organisation->slug, $control]) }}" 
+                                                       class="btn btn-sm px-4 py-2" 
+                                                       style="background-color: #2e7d32; color: white; border-radius: 50px; box-shadow: 0 3px 6px rgba(0,0,0,0.16);">
+                                                        <i class="fas fa-eye me-1"></i> View Details
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-4 bg-light rounded">
+                            <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                            <p>No problem animal control records have been created for this incident yet.</p>
+                            <a href="{{ route('organisation.problem-animal-controls.create', [$organisation->slug, 'wildlife_conflict_incident_id' => $wildlifeConflictIncident->id]) }}" 
+                               class="btn btn-success px-4 py-2" style="border-radius: 50px;">
+                                <i class="fas fa-plus me-1"></i> Add Problem Animal Control Record
                             </a>
                         </div>
                     @endif

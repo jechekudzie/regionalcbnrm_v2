@@ -26,6 +26,14 @@ class ControlMeasure extends Model
             ->withPivot(['male_count', 'female_count', 'location', 'latitude', 'longitude', 'remarks']);
     }
 
+    /**
+     * Get the problem animal controls using this control measure.
+     */
+    public function problemAnimalControls()
+    {
+        return $this->belongsToMany(\App\Models\Organisation\ProblemAnimalControl::class, 'pac_control_measures')
+            ->withTimestamps();
+    }
 
     public function getSlugOptions(): SlugOptions
     {

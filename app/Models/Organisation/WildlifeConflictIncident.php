@@ -81,4 +81,12 @@ class WildlifeConflictIncident extends Model
     {
         return $this->hasMany(DynamicFieldValue::class);
     }
+
+    /**
+     * Get the problem animal control records related to this incident.
+     */
+    public function problemAnimalControls()
+    {
+        return $this->hasMany(ProblemAnimalControl::class);
+    }
 } 

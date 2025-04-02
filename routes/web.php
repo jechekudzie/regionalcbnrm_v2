@@ -35,6 +35,7 @@ use App\Http\Controllers\Organisation\HuntingActivityController;
 use App\Http\Controllers\Organisation\WildlifeConflictIncidentController;
 use App\Http\Controllers\Organisation\DynamicFieldController;
 use App\Http\Controllers\Organisation\WildlifeConflictOutcomeController;
+use App\Http\Controllers\Organisation\ProblemAnimalControlController;
 
 
 Route::get('/', function () {
@@ -408,6 +409,15 @@ Route::middleware('auth')->group(function () {
         Route::get('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}/edit', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'edit'])->name('wildlife-conflicts.outcomes.edit');
         Route::patch('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'update'])->name('wildlife-conflicts.outcomes.update');
         Route::delete('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'destroy'])->name('wildlife-conflicts.outcomes.destroy');
+        
+        // Problem Animal Control Routes
+        Route::get('problem-animal-controls', [ProblemAnimalControlController::class, 'index'])->name('problem-animal-controls.index');
+        Route::get('problem-animal-controls/create', [ProblemAnimalControlController::class, 'create'])->name('problem-animal-controls.create');
+        Route::post('problem-animal-controls', [ProblemAnimalControlController::class, 'store'])->name('problem-animal-controls.store');
+        Route::get('problem-animal-controls/{problemAnimalControl}', [ProblemAnimalControlController::class, 'show'])->name('problem-animal-controls.show');
+        Route::get('problem-animal-controls/{problemAnimalControl}/edit', [ProblemAnimalControlController::class, 'edit'])->name('problem-animal-controls.edit');
+        Route::patch('problem-animal-controls/{problemAnimalControl}', [ProblemAnimalControlController::class, 'update'])->name('problem-animal-controls.update');
+        Route::delete('problem-animal-controls/{problemAnimalControl}', [ProblemAnimalControlController::class, 'destroy'])->name('problem-animal-controls.destroy');
     });
 });
 

@@ -88,7 +88,8 @@ class WildlifeConflictIncidentController extends Controller
             'species', 
             'conflictType',
             'outcomes.conflictOutCome',
-            'outcomes.dynamicValues.dynamicField'
+            'outcomes.dynamicValues.dynamicField',
+            'problemAnimalControls.controlMeasures'
         ]);
         
         return view('organisation.wildlife-conflicts.show', [

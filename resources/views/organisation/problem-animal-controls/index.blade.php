@@ -1,5 +1,7 @@
 @extends('layouts.organisation')
 
+@section('title', 'Problem Animal Control')
+
 @push('head')
 <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css">
@@ -28,10 +30,6 @@
     .badge-success {
         background-color: #2d5a27 !important;
         color: white !important;
-    }
-    .badge-warning {
-        background-color: #ffc107 !important;
-        color: #000 !important;
     }
     .badge {
         font-size: 0.75em;
@@ -127,7 +125,6 @@
         margin-left: auto;
         margin-right: auto;
     }
-
     /* DataTables Custom styling */
     div.dataTables_wrapper div.dataTables_length select {
         width: auto;
@@ -173,18 +170,18 @@
     <div class="page-header">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                <h1 class="h3 mb-0">Wildlife Conflict Incidents</h1>
+                <h1 class="h3 mb-0">Problem Animal Control</h1>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="{{ route('organisation.dashboard.index', $organisation->slug) }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Wildlife Conflicts</li>
+                        <li class="breadcrumb-item active" aria-current="page">Problem Animal Control</li>
                     </ol>
                 </nav>
             </div>
             <div>
-                <a href="{{ route('organisation.wildlife-conflicts.create', $organisation->slug) }}" 
+                <a href="{{ route('organisation.problem-animal-controls.create', $organisation->slug) }}" 
                    class="btn btn-success">
-                    <i class="fas fa-plus me-1"></i> Record New Incident
+                    <i class="fas fa-plus me-1"></i> Add New Record
                 </a>
             </div>
         </div>
@@ -200,78 +197,91 @@
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <div>
-                <i class="fas fa-paw me-1"></i>
-                Wildlife Conflict Incidents
+                <i class="fas fa-shield-alt me-1"></i>
+                Problem Animal Control Records
             </div>
         </div>
         <div class="card-body">
             <div class="datatables-info-box">
                 <i class="fas fa-info-circle me-1"></i>
-                This table displays all wildlife conflict incidents. Use the search and filters to narrow down results.
+                This table displays all problem animal control records. Use the search and filters to narrow down results.
             </div>
 
             <div class="table-responsive">
-                <table class="table table-striped table-hover" id="wildlifeConflictsTable">
+                <table class="table table-striped table-hover" id="problemAnimalControlTable">
                     <thead>
                         <tr>
-                            <th>Date & Time</th>
-                            <th>Title</th>
+                            <th>Date</th>
                             <th>Location</th>
-                            <th>Conflict Type</th>
+                            <th>Related Conflict</th>
                             <th>Species</th>
+                            <th>Control Measures</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($wildlifeConflictIncidents as $wildlifeConflictIncident)
+                        @forelse($problemAnimalControls as $control)
                             <tr>
                                 <td>
-                                    <div class="fw-medium">{{ $wildlifeConflictIncident->incident_date->format('d M Y') }}</div>
-                                    <div class="text-muted small">{{ $wildlifeConflictIncident->incident_time->format('H:i') }}</div>
+                                    <div class="fw-medium">{{ $control->control_date->format('d M Y') }}</div>
+                                    <div class="text-muted small">{{ $control->period }}</div>
                                 </td>
                                 <td>
-                                    <div class="fw-medium">{{ $wildlifeConflictIncident->title }}</div>
-                                </td>
-                                <td>
-                                    <div>{{ $wildlifeConflictIncident->location_description }}</div>
-                                    @if($wildlifeConflictIncident->latitude && $wildlifeConflictIncident->longitude)
+                                    <div>{{ $control->location }}</div>
+                                    @if($control->latitude && $control->longitude)
                                         <div class="text-muted small">
                                             <i class="fas fa-map-marker-alt"></i>
-                                            {{ number_format($wildlifeConflictIncident->latitude, 6) }}, 
-                                            {{ number_format($wildlifeConflictIncident->longitude, 6) }}
+                                            {{ number_format($control->latitude, 6) }}, 
+                                            {{ number_format($control->longitude, 6) }}
                                         </div>
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="badge bg-warning text-dark">
-                                        {{ $wildlifeConflictIncident->conflictType->name }}
-                                    </span>
+                                    <a href="{{ route('organisation.wildlife-conflicts.show', [$organisation->slug, $control->wildlifeConflictIncident]) }}" 
+                                       class="text-decoration-none">
+                                        {{ Str::limit($control->wildlifeConflictIncident->title, 30) }}
+                                    </a>
                                 </td>
                                 <td>
-                                    @foreach($wildlifeConflictIncident->species->take(2) as $species)
-                                        <span class="badge bg-success">{{ $species->name }}</span>
-                                    @endforeach
-                                    @if($wildlifeConflictIncident->species->count() > 2)
-                                        <span class="badge bg-secondary">+{{ $wildlifeConflictIncident->species->count() - 2 }}</span>
+                                    @if($control->wildlifeConflictIncident->species->count() > 0)
+                                        <div>
+                                            @foreach($control->wildlifeConflictIncident->species as $species)
+                                                <span class="badge bg-success mb-1">{{ $species->name }}</span>
+                                            @endforeach
+                                        </div>
+                                        <div class="text-muted small">
+                                            Est. {{ $control->estimated_number }} affected
+                                        </div>
+                                    @else
+                                        <span class="text-muted">Not specified</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if($control->controlMeasures->count() > 0)
+                                        @foreach($control->controlMeasures as $measure)
+                                            <span class="badge bg-secondary mb-1">{{ $measure->name }}</span>
+                                        @endforeach
+                                    @else
+                                        <span class="text-muted">None specified</span>
                                     @endif
                                 </td>
                                 <td class="text-end table-actions">
-                                    <a href="{{ route('organisation.wildlife-conflicts.show', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
+                                    <a href="{{ route('organisation.problem-animal-controls.show', [$organisation->slug, $control]) }}" 
                                        class="btn btn-sm btn-outline-primary btn-action" title="View Details">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('organisation.wildlife-conflicts.edit', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
+                                    <a href="{{ route('organisation.problem-animal-controls.edit', [$organisation->slug, $control]) }}" 
                                        class="btn btn-sm btn-outline-warning btn-action" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form action="{{ route('organisation.wildlife-conflicts.destroy', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
+                                    <form action="{{ route('organisation.problem-animal-controls.destroy', [$organisation->slug, $control]) }}" 
                                           method="POST" 
                                           class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
                                                 class="btn btn-sm btn-outline-danger btn-action" 
-                                                onclick="return confirm('Are you sure you want to delete this incident?')"
+                                                onclick="return confirm('Are you sure you want to delete this record?')"
                                                 title="Delete">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -282,12 +292,12 @@
                             <tr>
                                 <td colspan="6">
                                     <div class="empty-state">
-                                        <i class="fas fa-paw"></i>
-                                        <h5>No Wildlife Conflict Incidents</h5>
-                                        <p>No wildlife conflict incidents have been recorded yet. Start by adding your first incident.</p>
-                                        <a href="{{ route('organisation.wildlife-conflicts.create', $organisation->slug) }}" 
+                                        <i class="fas fa-shield-alt"></i>
+                                        <h5>No Problem Animal Control Records</h5>
+                                        <p>No problem animal control records have been added yet. Start by adding your first record.</p>
+                                        <a href="{{ route('organisation.problem-animal-controls.create', $organisation->slug) }}" 
                                            class="btn btn-primary">
-                                            <i class="fas fa-plus me-1"></i> Record First Incident
+                                            <i class="fas fa-plus me-1"></i> Add First Record
                                         </a>
                                     </div>
                                 </td>
@@ -296,6 +306,26 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header">
+            <div>
+                <i class="fas fa-info-circle me-1"></i>
+                About Problem Animal Control
+            </div>
+        </div>
+        <div class="card-body">
+            <p>
+                Problem Animal Control records document actions taken after wildlife conflict incidents to manage 
+                problem animals. These records help track control measures used, locations, and estimated numbers 
+                of affected animals.
+            </p>
+            <p>
+                Each record is linked to a specific wildlife conflict incident and includes information about the 
+                control measures applied, such as deterrents, translocation, or other management strategies.
+            </p>
         </div>
     </div>
 </div>
@@ -315,7 +345,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
 <script>
     $(document).ready(function() {
-        $('#wildlifeConflictsTable').DataTable({
+        $('#problemAnimalControlTable').DataTable({
             responsive: true,
             autoWidth: false,
             dom: 'Bfrtip',

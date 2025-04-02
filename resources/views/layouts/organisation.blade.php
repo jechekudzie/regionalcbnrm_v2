@@ -194,6 +194,13 @@
                                             </a>
                                         </li>
                                         <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.problem-animal-controls.*') ? 'active' : '' }}" href="{{ route('organisation.problem-animal-controls.index', $organisation->slug) }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Problem Animal Control</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
                                             <a class="nav-link {{ Request::routeIs('organisation.dynamic-fields.*') ? 'active' : '' }}" href="{{ route('organisation.dynamic-fields.index', $organisation->slug) }}">
                                                 <div class="d-flex align-items-center">
                                                     <span class="nav-link-text">Dynamic Fields</span>

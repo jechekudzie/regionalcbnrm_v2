@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin\HuntingOutcome;
+
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -24,7 +24,7 @@ class HuntingOutComeSeeder extends Seeder
         ];
 
         foreach ($outcomes as $outcome) {
-            HuntingOutcome::create($outcome);
+         \App\Models\Admin\HuntingOutCome::create($outcome);
         }
     }
 }

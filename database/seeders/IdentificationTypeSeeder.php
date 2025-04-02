@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Admin\IdentificationType;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -24,7 +23,7 @@ class IdentificationTypeSeeder extends Seeder
         ];
 
         foreach ($identificationTypes as $type) {
-            IdentificationType::create($type);
+            \App\Models\Admin\IdentificationType::create($type);
         }
     }
 }

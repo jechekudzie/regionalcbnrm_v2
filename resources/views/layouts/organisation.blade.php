@@ -200,6 +200,20 @@
                                                 </div>
                                             </a>
                                         </li>
+
+                                        <!-- Poaching Management -->
+                                        <li class="nav-item">
+                                            <div class="nav-category-header mt-3">
+                                                <span class="nav-category-text">Poaching Management</span>
+                                            </div>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.poaching-incidents.*') ? 'active' : '' }}" href="{{ route('organisation.poaching-incidents.index', $organisation->slug) }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Poaching Incidents</span>
+                                                </div>
+                                            </a>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>

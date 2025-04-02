@@ -343,6 +343,15 @@ Route::middleware('auth')->group(function () {
     Route::patch('/{organisation}/wildlife-conflicts/{wildlifeConflictIncident}', [WildlifeConflictIncidentController::class, 'update'])->name('organisation.wildlife-conflicts.update');
     Route::delete('/{organisation}/wildlife-conflicts/{wildlifeConflictIncident}', [WildlifeConflictIncidentController::class, 'destroy'])->name('organisation.wildlife-conflicts.destroy');
     
+    // Poaching Incidents Routes
+    Route::get('/{organisation}/poaching-incidents', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'index'])->name('organisation.poaching-incidents.index');
+    Route::get('/{organisation}/poaching-incidents/create', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'create'])->name('organisation.poaching-incidents.create');
+    Route::post('/{organisation}/poaching-incidents', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'store'])->name('organisation.poaching-incidents.store');
+    Route::get('/{organisation}/poaching-incidents/{poachingIncident}', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'show'])->name('organisation.poaching-incidents.show');
+    Route::get('/{organisation}/poaching-incidents/{poachingIncident}/edit', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'edit'])->name('organisation.poaching-incidents.edit');
+    Route::patch('/{organisation}/poaching-incidents/{poachingIncident}', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'update'])->name('organisation.poaching-incidents.update');
+    Route::delete('/{organisation}/poaching-incidents/{poachingIncident}', [\App\Http\Controllers\Organisation\PoachingIncidentController::class, 'destroy'])->name('organisation.poaching-incidents.destroy');
+    
     //organisation create
     Route::get('/{organisation}/organisations/{organisationType}/{parentOrganisation}/index', [OrganisationChildrenController::class, 'index'])->name('organisation.organisations.index');
     Route::post('/{organisation}/organisations/{organisationType}/{parentOrganisation}/store', [OrganisationChildrenController::class, 'store'])->name('organisation.organisations.store');

@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\SpeciesGender;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\SpeciesGender;
 use Illuminate\Http\Request;
 
 class SpeciesGenderController extends Controller

@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\CountingMethod;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\CountingMethod;
 use Illuminate\Http\Request;
 
 class CountingMethodController extends Controller

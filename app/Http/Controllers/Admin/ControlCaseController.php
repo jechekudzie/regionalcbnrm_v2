@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\ControlCase;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\ControlCase;
 use App\Models\Admin\OrganisationType;
 use App\Models\Species;
 use App\Models\Organisation;

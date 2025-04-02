@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\PayableItem;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+use App\Models\Organisation\PayableItem;
 
 class PayableItemController extends Controller
 {

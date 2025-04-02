@@ -1,11 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\Organisation;
-use App\Models\Species;
-use App\Models\Transaction;
-use App\Models\TransactionPayable;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\Organisation;
+use App\Models\Organisation\Species;
+use App\Models\Organisation\Transaction;
+use App\Models\Organisation\TransactionPayable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 

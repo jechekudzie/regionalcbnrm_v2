@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\ConflictType;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\ConflictType;
 use Illuminate\Http\Request;
 
 class ConflictTypeController extends Controller

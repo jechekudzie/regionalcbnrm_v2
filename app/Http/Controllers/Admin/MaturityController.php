@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin ;
 
-use App\Models\Maturity;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\Maturity;
 use Illuminate\Http\Request;
 
 class MaturityController extends Controller

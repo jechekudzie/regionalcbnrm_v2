@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
-use App\Models\ConflictOutCome;
-use App\Models\ConflictType;
+use App\Http\Controllers\Controller;
+
+use App\Models\Admin\ConflictOutCome;
+use App\Models\Admin\ConflictType;
 use Illuminate\Http\Request;
 
 class ConflictOutComeController extends Controller

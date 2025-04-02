@@ -13,10 +13,17 @@ class DynamicField extends Model
 
     protected $guarded = [];
 
-    //ConflictOutCome
-    public function conflictOutCome()
+
+    //organisation
+    public function organisation()
     {
-        return $this->belongsTo(\App\Models\Admin\ConflictOutCome::class);
+        return $this->belongsTo(\App\Models\Admin\Organisation::class);
+    }
+
+    //WildlifeConflict
+    public function wildlifeConflict()
+    {
+        return $this->belongsTo(\App\Models\Organisation\WildlifeConflictIncident::class);
     }
 
     //dynamicFieldOptions

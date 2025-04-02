@@ -33,6 +33,8 @@ use App\Http\Controllers\Organisation\QuotaAllocationController;
 use App\Models\Admin\Organisation;
 use App\Http\Controllers\Organisation\HuntingActivityController;
 use App\Http\Controllers\Organisation\WildlifeConflictIncidentController;
+use App\Http\Controllers\Organisation\DynamicFieldController;
+use App\Http\Controllers\Organisation\WildlifeConflictOutcomeController;
 
 
 Route::get('/', function () {
@@ -379,13 +381,37 @@ Route::middleware('auth')->group(function () {
     Route::patch('/{organisation}/transactions/{transaction}/payables/{transactionPayable}/update', [\App\Http\Controllers\TransactionPayableController::class, 'update'])->name('organisation.transaction-payables.update');
     Route::delete('/{organisation}/transactions/{transaction}/payables/{transactionPayable}', [\App\Http\Controllers\TransactionPayableController::class, 'destroy'])->name('organisation.transaction-payables.destroy');
 
-   
+    // Organisation Wildlife Conflicts Routes
+    Route::prefix('organisation/{organisation:slug}')->name('organisation.')->group(function () {
+        // Dynamic Fields Management
+        Route::get('dynamic-fields', [DynamicFieldController::class, 'index'])->name('dynamic-fields.index');
+        Route::get('dynamic-fields/create', [DynamicFieldController::class, 'create'])->name('dynamic-fields.create');
+        Route::post('dynamic-fields', [DynamicFieldController::class, 'store'])->name('dynamic-fields.store');
+        Route::get('dynamic-fields/{dynamicField}', [DynamicFieldController::class, 'show'])->name('dynamic-fields.show');
+        Route::get('dynamic-fields/{dynamicField}/edit', [DynamicFieldController::class, 'edit'])->name('dynamic-fields.edit');
+        Route::put('dynamic-fields/{dynamicField}', [DynamicFieldController::class, 'update'])->name('dynamic-fields.update');
+        Route::delete('dynamic-fields/{dynamicField}', [DynamicFieldController::class, 'destroy'])->name('dynamic-fields.destroy');
+        
+        // Wildlife Conflict Outcomes
+        Route::get('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/create', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'create'])->name('wildlife-conflicts.outcomes.create');
+        Route::post('wildlife-conflicts/{wildlifeConflictIncident}/outcomes', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'store'])->name('wildlife-conflicts.outcomes.store');
+        Route::get('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'show'])->name('wildlife-conflicts.outcomes.show');
+        Route::get('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}/edit', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'edit'])->name('wildlife-conflicts.outcomes.edit');
+        Route::patch('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'update'])->name('wildlife-conflicts.outcomes.update');
+        Route::delete('wildlife-conflicts/{wildlifeConflictIncident}/outcomes/{outcome}', [\App\Http\Controllers\Organisation\WildlifeConflictOutcomeController::class, 'destroy'])->name('wildlife-conflicts.outcomes.destroy');
+    });
 });
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Temporary debug route
+    Route::get('/debug/dynamic-fields/{outcomeId}', function($outcomeId) {
+        $controller = new \App\Http\Controllers\Api\ConflictOutcomeController();
+        return $controller->getDynamicFields($outcomeId);
+    });
 });
 
 

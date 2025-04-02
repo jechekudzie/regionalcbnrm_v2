@@ -6,6 +6,7 @@ use App\Models\Admin\ConflictType;
 use App\Models\Admin\Organisation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DynamicFieldValue;
 
 class WildlifeConflictIncident extends Model
 {
@@ -49,11 +50,35 @@ class WildlifeConflictIncident extends Model
     }
 
     /**
+     * Get the dynamic fields associated with the incident.
+     */
+    public function dynamicFields()
+    {
+        return $this->hasMany(DynamicField::class);
+    }
+
+    /**
      * Get the species involved in the incident.
      */
     public function species()
     {
         return $this->belongsToMany(Species::class, 'wildlife_conflict_incident_species')
                     ->withTimestamps();
+    }
+
+    /**
+     * Get the conflict outcomes for this incident.
+     */
+    public function outcomes()
+    {
+        return $this->hasMany(WildlifeConflictOutcome::class);
+    }
+
+    /**
+     * Get the dynamic field values for this incident.
+     */
+    public function dynamicFieldValues()
+    {
+        return $this->hasMany(DynamicFieldValue::class);
     }
 } 

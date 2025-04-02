@@ -19,11 +19,9 @@ class HuntingActivityController extends Controller
      */
     public function index(Organisation $organisation)
     {
-        $activities = $organisation->huntingActivities()
-            ->with(['huntingConcession', 'safariOperator', 'species'])
-            ->latest()
-            ->paginate(10);
 
+        $activities = $organisation->huntingActivities;
+          
         return view('organisation.hunting-activities.index', compact('organisation', 'activities'));
     }
 

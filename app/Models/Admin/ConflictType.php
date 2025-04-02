@@ -13,11 +13,6 @@ class ConflictType extends Model
 
     protected $guarded = [];
 
-    public function incidents()
-    {
-        // Custom pivot table and column names
-        return $this->belongsToMany(Incident::class, 'incident_conflict_type', 'conflict_type_id', 'incident_id');
-    }
 
     public function ConflictOutComes()
     {

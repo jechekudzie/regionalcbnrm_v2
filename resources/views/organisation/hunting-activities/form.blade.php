@@ -87,8 +87,8 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="start_date" class="form-label">Start Date</label>
-                                    <input type="date" 
-                                           class="form-control @error('start_date') is-invalid @enderror" 
+                                    <input type="text" 
+                                           class="form-control datetimepicker @error('start_date') is-invalid @enderror" 
                                            id="start_date" 
                                            name="start_date" 
                                            value="{{ old('start_date', isset($huntingActivity) ? $huntingActivity->start_date->format('Y-m-d') : '') }}"
@@ -102,8 +102,8 @@
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     <label for="end_date" class="form-label">End Date</label>
-                                    <input type="date" 
-                                           class="form-control @error('end_date') is-invalid @enderror" 
+                                    <input type="text" 
+                                           class="form-control datetimepicker @error('end_date') is-invalid @enderror" 
                                            id="end_date" 
                                            name="end_date" 
                                            value="{{ old('end_date', isset($huntingActivity) ? $huntingActivity->end_date->format('Y-m-d') : '') }}"

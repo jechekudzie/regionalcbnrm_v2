@@ -2,116 +2,298 @@
 
 @section('title', $wildlifeConflictIncident->title)
 
+@push('styles')
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <style>
+        /* Modern styling for outcome cards */
+        .list-group-item {
+            transition: all 0.3s ease;
+            border-width: 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+        
+        .badge.bg-success {
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,128,0,0.2);
+        }
+        
+        .btn-group .btn {
+            border-radius: 4px;
+            margin: 0 2px;
+            transition: all 0.2s;
+        }
+        
+        .btn-group .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .card {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header.bg-success {
+            background: linear-gradient(45deg, #2E7D32, #43A047) !important;
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #2E7D32, #43A047);
+            border-color: #2E7D32;
+        }
+        
+        .text-success {
+            color: #2E7D32 !important;
+        }
+        
+        /* Animations for field values */
+        .col .d-flex {
+            transition: all 0.2s ease;
+        }
+        
+        .col .d-flex:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            background-color: rgba(46, 125, 50, 0.05);
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin: -0.5rem;
+        }
+        
+        /* Map marker pulse animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        .custom-div-icon {
+            background-color: #2E7D32;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+        }
+        
+        .pulse-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            margin-left: -20px;
+            margin-top: -20px;
+            border-radius: 50%;
+            background: rgba(46, 125, 50, 0.2);
+            animation: pulse 2s infinite;
+            pointer-events: none;
+        }
+    </style>
+@endpush
+
 @section('content')
-<div class="container-fluid px-4 py-3">
-    <!-- Title Section -->
-    <div class="row mb-3">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-2">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('organisation.dashboard', $organisation->slug) }}" class="text-decoration-none">
-                            <i class="fas fa-home"></i>
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('organisation.wildlife-conflicts.index', $organisation->slug) }}" class="text-decoration-none">
-                            Wildlife Conflicts
-                        </a>
-                    </li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ $wildlifeConflictIncident->title }}</li>
-                </ol>
-            </nav>
-            <h1 class="h3 mb-2">{{ $wildlifeConflictIncident->title }}</h1>
-            <p class="text-muted">View detailed information about this wildlife conflict incident.</p>
+<div class="container-fluid py-4">
+    <div class="mb-4 border-bottom pb-2">
+        <div class="row">
+            <div class="col-md-8">
+                <h1>{{ $wildlifeConflictIncident->title }}</h1>
+                <p class="text-muted">
+                    <i class="fas fa-calendar-alt"></i> {{ $wildlifeConflictIncident->incident_date->format('d M Y') }} at {{ $wildlifeConflictIncident->incident_time->format('H:i') }}
+                    <span class="ms-3"><i class="fas fa-clock"></i> {{ $wildlifeConflictIncident->period }}</span>
+                    <span class="ms-3 badge bg-success">{{ $wildlifeConflictIncident->conflictType->name }}</span>
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <a href="{{ route('organisation.wildlife-conflicts.edit', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-success">
+                    <i class="fas fa-edit"></i> Edit Incident
+                </a>
+                <a href="{{ route('organisation.wildlife-conflicts.index', $organisation->slug) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to List
+                </a>
+            </div>
         </div>
     </div>
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-        <div>
-            <h2 class="fw-bold text-dark">{{ $wildlifeConflictIncident->title }}</h2>
-            <p class="text-muted mb-1">
-                <i class="fas fa-calendar-alt me-1"></i> 
-                {{ $wildlifeConflictIncident->incident_date->format('d M Y') }} at {{ $wildlifeConflictIncident->incident_time->format('H:i') }}
-            </p>
-            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold">
-                <i class="fas fa-clock me-1"></i> {{ $wildlifeConflictIncident->period }}
-            </span>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('organisation.wildlife-conflicts.edit', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-primary">
-                <i class="fas fa-edit me-1"></i> Edit Incident
-            </a>
-            <a href="{{ route('organisation.wildlife-conflicts.index', $organisation->slug) }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left me-1"></i> Back to List
-            </a>
-        </div>
-    </div>
-
-    <!-- Grid Layout -->
-    <div class="row g-4">
-        <!-- Info Card -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Incident Details</h5>
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Incident Details -->
+            <div class="card mb-4 border">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2"></i>Incident Details</h5>
                 </div>
-                <div class="card-body px-4 pb-4">
-                    <dl class="row mb-0">
-                        <dt class="col-sm-5 text-muted">Conflict Type:</dt>
-                        <dd class="col-sm-7">{{ $wildlifeConflictIncident->conflictType->name }}</dd>
-
-                        <dt class="col-sm-5 text-muted mt-3">Species Involved:</dt>
-                        <dd class="col-sm-7">
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach($wildlifeConflictIncident->species as $species)
-                                    <span class="badge bg-success bg-opacity-10 text-success fw-semibold">
-                                        <i class="fas fa-paw me-1"></i>{{ $species->name }}
-                                    </span>
-                                @endforeach
-                            </div>
+                <div class="card-body">
+                    <dl>
+                        <dt class="fw-bold text-muted">Conflict Type:</dt>
+                        <dd class="mb-3">{{ $wildlifeConflictIncident->conflictType->name }}</dd>
+                        
+                        <dt class="fw-bold text-muted">Date & Time:</dt>
+                        <dd class="mb-3">{{ $wildlifeConflictIncident->incident_date->format('d M Y') }} at {{ $wildlifeConflictIncident->incident_time->format('H:i') }}</dd>
+                        
+                        <dt class="fw-bold text-muted">Period:</dt>
+                        <dd class="mb-3">{{ $wildlifeConflictIncident->period }}</dd>
+                        
+                        <dt class="fw-bold text-muted">Species Involved:</dt>
+                        <dd class="mb-3">
+                            @forelse($wildlifeConflictIncident->species as $species)
+                                <span class="badge bg-success me-1">{{ $species->name }}</span>
+                            @empty
+                                <span class="text-muted">No species recorded</span>
+                            @endforelse
                         </dd>
-
+                        
+                        <dt class="fw-bold text-muted">Location Description:</dt>
+                        <dd class="mb-3">{{ $wildlifeConflictIncident->location_description }}</dd>
+                        
                         @if($wildlifeConflictIncident->latitude && $wildlifeConflictIncident->longitude)
-                            <dt class="col-sm-5 text-muted mt-3">Coordinates:</dt>
-                            <dd class="col-sm-7 font-monospace">
-                                {{ number_format($wildlifeConflictIncident->latitude, 6) }},
-                                {{ number_format($wildlifeConflictIncident->longitude, 6) }}
-                            </dd>
+                        <dt class="fw-bold text-muted">Coordinates:</dt>
+                        <dd class="mb-3">
+                            <span class="bg-light px-2 py-1 rounded font-monospace">
+                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                {{ number_format($wildlifeConflictIncident->latitude, 6) }}, {{ number_format($wildlifeConflictIncident->longitude, 6) }}
+                            </span>
+                        </dd>
                         @endif
-
-                        <dt class="col-sm-5 text-muted mt-3">Location Description:</dt>
-                        <dd class="col-sm-7">{{ $wildlifeConflictIncident->location_description }}</dd>
-
-                        <dt class="col-sm-5 text-muted mt-3">Incident Description:</dt>
-                        <dd class="col-sm-7">{{ $wildlifeConflictIncident->description }}</dd>
                     </dl>
                 </div>
             </div>
+            
+            <!-- Incident Description -->
+            <div class="card mb-4 border">
+                <div class="card-header bg-light">
+                    <h5 class="card-title mb-0"><i class="fas fa-align-left me-2"></i>Incident Description</h5>
+                </div>
+                <div class="card-body">
+                    <p>{{ $wildlifeConflictIncident->description }}</p>
+                </div>
+            </div>
         </div>
-
-        <!-- Map Card -->
-        <div class="col-lg-6">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
-                    <h5 class="fw-bold mb-0"><i class="fas fa-map-marker-alt me-2 text-primary"></i>Location Map</h5>
+        
+        <div class="col-md-6">
+            <!-- Location Map -->
+            <div class="card mb-4 border">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0"><i class="fas fa-map-marked-alt me-2"></i>Location Map</h5>
                 </div>
                 <div class="card-body p-0">
                     @if($wildlifeConflictIncident->latitude && $wildlifeConflictIncident->longitude)
-                        <div id="map" class="rounded-bottom" 
-                             style="height: 500px;"
+                        <div id="map" 
                              data-lat="{{ $wildlifeConflictIncident->latitude }}"
                              data-lng="{{ $wildlifeConflictIncident->longitude }}"
-                             data-title="Wildlife Conflict Incident"
-                             data-description="{{ $wildlifeConflictIncident->location_description }}">
+                             data-title="{{ $wildlifeConflictIncident->title }}"
+                             data-description="{{ $wildlifeConflictIncident->location_description }}"
+                             style="height: 500px; width: 100%; border-radius: 0 0 4px 4px;"></div>
+                    @else
+                        <div class="text-center py-5">
+                            <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                            <p>No location data available for this incident</p>
+                            <a href="{{ route('organisation.wildlife-conflicts.edit', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i> Add Location Data
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conflict Outcomes Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card mb-4 border">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0"><i class="fas fa-clipboard-list me-2"></i>Conflict Outcomes</h5>
+                    <a href="{{ route('organisation.wildlife-conflicts.outcomes.create', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-plus me-1"></i> Add Outcome
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    @if($wildlifeConflictIncident->outcomes->count() > 0)
+                        <div class="list-group list-group-flush">
+                            @foreach($wildlifeConflictIncident->outcomes as $outcome)
+                                <div class="list-group-item p-0">
+                                    <div class="row g-0 {{ $loop->even ? 'bg-light' : '' }}">
+                                        <!-- Outcome Type Column -->
+                                        <div class="col-md-2 p-3 border-end">
+                                            <div class="d-flex flex-column align-items-center text-center">
+                                                <span class="badge bg-success mb-2 px-3 py-2">{{ $outcome->conflictOutCome->name }}</span>
+                                                <div class="btn-group btn-group-sm mt-2">
+                                                    <a href="{{ route('organisation.wildlife-conflicts.outcomes.show', [$organisation->slug, $wildlifeConflictIncident->id, $outcome->id]) }}" 
+                                                       class="btn btn-outline-primary" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ route('organisation.wildlife-conflicts.outcomes.edit', [$organisation->slug, $wildlifeConflictIncident->id, $outcome->id]) }}" 
+                                                       class="btn btn-outline-warning" title="Edit Outcome">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-outline-danger" title="Delete Outcome" 
+                                                            onclick="if(confirm('Are you sure you want to delete this outcome?')) { document.getElementById('delete-form-{{ $outcome->id }}').submit(); }">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                    <form id="delete-form-{{ $outcome->id }}" 
+                                                          action="{{ route('organisation.wildlife-conflicts.outcomes.destroy', [$organisation->slug, $wildlifeConflictIncident->id, $outcome->id]) }}" 
+                                                          method="POST" class="d-none">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Details Column -->
+                                        <div class="col-md-10 p-3">
+                                            @php
+                                                $dynamicValues = $outcome->dynamicValues;
+                                            @endphp
+                                            
+                                            @if($dynamicValues->count() > 0)
+                                                <div class="row row-cols-1 row-cols-md-3 g-3">
+                                                    @foreach($dynamicValues as $value)
+                                                        <div class="col">
+                                                            <div class="d-flex flex-column">
+                                                                <span class="text-muted small">{{ $value->dynamicField->label }}:</span>
+                                                                <span class="fw-semibold">{{ Str::limit($value->field_value, 50) }}</span>
+                                                            </div>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+
+                                                @if($dynamicValues->count() > 6)
+                                                    <div class="mt-2 text-center">
+                                                        <a href="{{ route('organisation.wildlife-conflicts.outcomes.show', [$organisation->slug, $wildlifeConflictIncident->id, $outcome->id]) }}" 
+                                                           class="btn btn-sm btn-outline-success">
+                                                            <i class="fas fa-list me-1"></i> View All Details
+                                                        </a>
+                                                    </div>
+                                                @endif
+                                            @else
+                                                <div class="text-muted fst-italic">No details recorded for this outcome</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     @else
-                        <div class="p-5 text-center text-muted">
-                            <p class="mb-2"><i class="fas fa-map-marked-alt fa-2x"></i></p>
-                            <p class="mb-2">No location data provided.</p>
-                            <a href="{{ route('organisation.wildlife-conflicts.edit', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-plus me-1"></i> Add Location
+                        <div class="text-center py-5">
+                            <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+                            <p>No outcomes have been recorded for this incident yet</p>
+                            <a href="{{ route('organisation.wildlife-conflicts.outcomes.create', [$organisation->slug, $wildlifeConflictIncident->id]) }}" class="btn btn-success">
+                                <i class="fas fa-plus me-1"></i> Add First Outcome
                             </a>
                         </div>
                     @endif
@@ -122,73 +304,141 @@
 </div>
 @endsection
 
-@push('styles')
-<style>
-    .breadcrumb-item a {
-        color: var(--bs-primary);
-    }
-    
-    .breadcrumb-item a:hover {
-        color: var(--bs-primary);
-    }
-    
-    .breadcrumb-item.active {
-        color: #6c757d;
-    }
-
-    .badge {
-        border-radius: 0.5rem;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.75rem;
-    }
-
-    #map {
-        width: 100%;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-    }
-
-    .card h5 {
-        font-weight: 600;
-    }
-
-    dt {
-        font-size: 0.9rem;
-    }
-
-    dd {
-        font-size: 0.95rem;
-        margin-bottom: 0.5rem;
-    }
-</style>
-@endpush
-
-@section('scripts')
+@if($wildlifeConflictIncident->latitude && $wildlifeConflictIncident->longitude)
+@push('scripts')
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Map initialization if the map exists
         const mapElement = document.getElementById('map');
         if (mapElement) {
+            // Map configuration - read from data attributes
             const lat = parseFloat(mapElement.dataset.lat);
             const lng = parseFloat(mapElement.dataset.lng);
             const title = mapElement.dataset.title;
             const description = mapElement.dataset.description;
+            
+            // Initialize the map
+            const map = L.map('map').setView([lat, lng], 13);
 
-            const map = L.map('map').setView([lat, lng], 14);
+            // Add the tile layer (map background)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors',
-                maxZoom: 18,
+                maxZoom: 19
             }).addTo(map);
 
-            const marker = L.marker([lat, lng]).addTo(map);
-            marker.bindPopup(`<strong>${title}</strong><br>${description}`).openPopup();
-
+            // Add zoom control to the top right
+            L.control.zoom({
+                position: 'topright'
+            }).addTo(map);
+            
+            // Add a scale bar
+            L.control.scale({
+                imperial: false,
+                position: 'bottomleft'
+            }).addTo(map);
+            
+            // Create a custom marker icon
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: '<div style="background-color: rgba(220, 53, 69, 0.8); width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.3);"></div>',
+                iconSize: [22, 22],
+                iconAnchor: [11, 11],
+                popupAnchor: [0, -11]
+            });
+            
+            // Add a marker with a popup
+            const marker = L.marker([lat, lng], {
+                icon: customIcon
+            }).addTo(map);
+            
+            // Create a nicer popup
+            const popupContent = 
+                '<div style="font-family: Arial, sans-serif; padding: 8px;">' +
+                '<h5 style="margin: 0 0 8px 0; color: #2E7D33; font-weight: bold;">' + title + '</h5>' +
+                '<p style="margin: 0 0 5px 0; color: #555;">' + description + '</p>' +
+                '<div style="background-color: #f8f9fa; padding: 5px; border-radius: 4px; margin-top: 8px;">' +
+                '<p style="margin: 0; font-size: 12px; color: #666; font-family: monospace; text-align: center;">' +
+                '<i class="fas fa-map-marker-alt" style="color: #dc3545;"></i> ' +
+                lat.toFixed(6) + ', ' + lng.toFixed(6) +
+                '</p>' +
+                '</div>' +
+                '</div>';
+            
+            marker.bindPopup(popupContent, {
+                maxWidth: 300
+            }).openPopup();
+            
+            // Add a pulsing effect to highlight the location
+            const pulsingIcon = L.divIcon({
+                className: 'pulse-marker',
+                html: '<div class="pulse-marker"></div>',
+                iconSize: [0, 0]
+            });
+            
+            // Add the pulsing marker
+            L.marker([lat, lng], {
+                icon: pulsingIcon,
+                zIndexOffset: -1000
+            }).addTo(map);
+            
+            // Add a circle to highlight the area
             L.circle([lat, lng], {
-                color: '#2563eb',
-                fillColor: '#2563eb',
-                fillOpacity: 0.15,
+                color: '#2E7D33',
+                fillColor: '#2E7D33',
+                fillOpacity: 0.1,
+                weight: 2,
+                dashArray: '5, 5',
                 radius: 1000
             }).addTo(map);
         }
+        
+        // Outcomes section enhancements
+        const outcomeItems = document.querySelectorAll('.list-group-item');
+        outcomeItems.forEach(item => {
+            // Add hover effect
+            item.addEventListener('mouseenter', function() {
+                this.style.transition = 'all 0.3s ease';
+                this.style.boxShadow = '0 0.5rem 1rem rgba(0, 0, 0, 0.15)';
+                this.style.zIndex = '1';
+                
+                // Highlight the badge
+                const badge = this.querySelector('.badge.bg-success');
+                if (badge) {
+                    badge.style.transition = 'all 0.3s ease';
+                    badge.style.transform = 'scale(1.1)';
+                }
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.boxShadow = 'none';
+                this.style.zIndex = '0';
+                
+                // Reset badge
+                const badge = this.querySelector('.badge.bg-success');
+                if (badge) {
+                    badge.style.transform = 'scale(1)';
+                }
+            });
+            
+            // Make the entire row clickable to view details
+            const detailsLink = item.querySelector('a[title="View Details"]');
+            if (detailsLink) {
+                const detailsUrl = detailsLink.getAttribute('href');
+                const detailsColumn = item.querySelector('.col-md-10');
+                
+                if (detailsColumn) {
+                    detailsColumn.style.cursor = 'pointer';
+                    detailsColumn.addEventListener('click', function(e) {
+                        // Don't trigger when clicking on buttons
+                        if (!e.target.closest('.btn')) {
+                            window.location.href = detailsUrl;
+                        }
+                    });
+                }
+            }
+        });
     });
 </script>
-@endsection
+@endpush
+@endif

@@ -5,6 +5,7 @@
 @section('head')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jquery-datetimepicker@2.5.20/jquery.datetimepicker.css">
 @endsection
 
 @section('content')
@@ -70,14 +71,22 @@
 
                     <div class="col-md-6">
                         <label for="start_date" class="form-label">Start Date</label>
-                        <input type="date" class="form-control" id="start_date" name="start_date" 
-                               value="{{ old('start_date', $huntingActivity->start_date->format('Y-m-d')) }}" required>
+                        <input type="text" 
+                               class="form-control datetimepicker" 
+                               id="start_date" 
+                               name="start_date" 
+                               value="{{ old('start_date', $huntingActivity->start_date->format('Y-m-d')) }}" 
+                               required>
                     </div>
 
                     <div class="col-md-6">
                         <label for="end_date" class="form-label">End Date</label>
-                        <input type="date" class="form-control" id="end_date" name="end_date" 
-                               value="{{ old('end_date', $huntingActivity->end_date?->format('Y-m-d')) }}">
+                        <input type="text" 
+                               class="form-control datetimepicker" 
+                               id="end_date" 
+                               name="end_date" 
+                               value="{{ old('end_date', $huntingActivity->end_date?->format('Y-m-d')) }}"
+                               required>
                     </div>
 
                     <div class="col-12">
@@ -204,8 +213,17 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-datetimepicker@2.5.20/build/jquery.datetimepicker.full.min.js"></script>
 <script>
 $(document).ready(function() {
+    // Initialize datetimepickers
+    $('.datetimepicker').datetimepicker({
+        format: 'Y-m-d',
+        timepicker: false,
+        datepicker: true,
+        scrollInput: false
+    });
+    
     // Initialize Select2
     $('.species-select').select2({
         theme: 'bootstrap-5'

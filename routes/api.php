@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Organisation\QuotaAllocationController;
+use App\Http\Controllers\Api\ConflictOutcomeController;
+
 //organisation types
 Route::get('/admin/organisation-types', [ApiController::class, 'fetchTemplate'])->name('admin.organisation-types.index');
 //organisations
@@ -25,3 +27,6 @@ Route::get('/user', function (Request $request) {
 // Quota allocation routes
 
 Route::get('/organisations/{organisation}/quota-allocations', [QuotaAllocationController::class, 'getQuotaAllocation']);
+
+// Conflict Outcome Dynamic Fields
+Route::get('/conflict-outcomes/{conflictOutcome}/dynamic-fields', [ConflictOutcomeController::class, 'getDynamicFields']);

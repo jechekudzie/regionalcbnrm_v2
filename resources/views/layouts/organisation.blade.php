@@ -138,12 +138,25 @@
                                 <div class="parent-wrapper label-1">
                                     <ul class="nav collapse parent" data-bs-parent="#navbarVerticalCollapse"
                                         id="admin">
+                                        <!-- Species Management -->
+                                        <li class="nav-item">
+                                            <div class="nav-category-header">
+                                                <span class="nav-category-text">Species Management</span>
+                                            </div>
+                                        </li>
                                         <li class="nav-item">
                                             <a class="nav-link {{ Request::routeIs('species.*') ? 'active' : '' }}" href="{{ route('species.index', $organisation->slug ?? '') }}">
                                                 <div class="d-flex align-items-center">
                                                     <span class="nav-link-text">Species</span>
                                                 </div>
                                             </a>
+                                        </li>
+
+                                        <!-- Hunting Management -->
+                                        <li class="nav-item">
+                                            <div class="nav-category-header mt-3">
+                                                <span class="nav-category-text">Hunting Management</span>
+                                            </div>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link {{ Request::routeIs('organisation.hunting-concessions.*') ? 'active' : '' }}" href="{{ route('organisation.hunting-concessions.index', $organisation->slug) }}">
@@ -166,10 +179,24 @@
                                                 </div>
                                             </a>
                                         </li>
+
+                                        <!-- Wildlife Conflicts -->
+                                        <li class="nav-item">
+                                            <div class="nav-category-header mt-3">
+                                                <span class="nav-category-text">Wildlife Conflicts</span>
+                                            </div>
+                                        </li>
                                         <li class="nav-item">
                                             <a class="nav-link {{ Request::routeIs('organisation.wildlife-conflicts.*') ? 'active' : '' }}" href="{{ route('organisation.wildlife-conflicts.index', $organisation->slug) }}">
                                                 <div class="d-flex align-items-center">
-                                                    <span class="nav-link-text">Wildlife Conflicts</span>
+                                                    <span class="nav-link-text">Conflict Incidents</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.dynamic-fields.*') ? 'active' : '' }}" href="{{ route('organisation.dynamic-fields.index', $organisation->slug) }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Dynamic Fields</span>
                                                 </div>
                                             </a>
                                         </li>

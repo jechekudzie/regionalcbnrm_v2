@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use App\Models\Organisation;
+use App\Models\DynamicField;
+
 class RouteServiceProvider extends ServiceProvider
 {
     /**
@@ -24,11 +26,13 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-
         parent::boot();
 
         // Specify the model to be injected for the 'organisation' route parameter
         Route::model('organisation', Organisation::class);
+
+        // Explicit binding for dynamic fields
+        Route::model('dynamicField', DynamicField::class);
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

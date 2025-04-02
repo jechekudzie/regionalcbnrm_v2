@@ -92,6 +92,7 @@
                                            id="start_date" 
                                            name="start_date" 
                                            value="{{ old('start_date', isset($huntingActivity) ? $huntingActivity->start_date->format('Y-m-d') : '') }}"
+                                           data-options='{"enableTime":false,"dateFormat":"Y-m-d","disableMobile":true}'
                                            required>
                                     @error('start_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -107,6 +108,7 @@
                                            id="end_date" 
                                            name="end_date" 
                                            value="{{ old('end_date', isset($huntingActivity) ? $huntingActivity->end_date->format('Y-m-d') : '') }}"
+                                           data-options='{"enableTime":false,"dateFormat":"Y-m-d","disableMobile":true}'
                                            required>
                                     @error('end_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -316,6 +318,8 @@
 
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jquery-datetimepicker@2.5.20/jquery.datetimepicker.css">
 <style>
     .quota-available.error {
         color: #dc3545;
@@ -354,8 +358,17 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-datetimepicker@2.5.20/build/jquery.datetimepicker.full.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Initialize datetimepickers
+        $('.datetimepicker').datetimepicker({
+            format: 'Y-m-d',
+            timepicker: false,
+            datepicker: true,
+            scrollInput: false
+        });
+        
         // Initialize Select2 for better dropdown experience
         $('.species-select').select2();
 

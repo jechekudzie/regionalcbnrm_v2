@@ -84,7 +84,13 @@ class WildlifeConflictIncidentController extends Controller
      */
     public function show(Organisation $organisation, WildlifeConflictIncident $wildlifeConflictIncident)
     {
-        $wildlifeConflictIncident->load(['species', 'conflictType']);
+        $wildlifeConflictIncident->load([
+            'species', 
+            'conflictType',
+            'outcomes.conflictOutCome',
+            'outcomes.dynamicValues.dynamicField'
+        ]);
+        
         return view('organisation.wildlife-conflicts.show', [
             'organisation' => $organisation,
             'wildlifeConflictIncident' => $wildlifeConflictIncident
@@ -111,7 +117,7 @@ class WildlifeConflictIncidentController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'period' => 'required|integer|min:1900|max:' . date('Y'),
-            'incident_date' => 'required|date_format:Y-m-d H:i',
+            'incident_date' => 'required|date_format:Y-m-d',
             'incident_time' => 'required|date_format:H:i',
             'longitude' => 'nullable|numeric|between:-180,180',
             'latitude' => 'nullable|numeric|between:-90,90',

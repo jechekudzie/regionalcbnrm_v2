@@ -19,8 +19,9 @@ class HuntingActivityController extends Controller
      */
     public function index(Organisation $organisation)
     {
-
-        $activities = $organisation->huntingActivities;
+        $activities = $organisation->huntingActivities()
+            ->with(['huntingConcession', 'species', 'professionalHunterLicenses'])
+            ->get();
           
         return view('organisation.hunting-activities.index', compact('organisation', 'activities'));
     }

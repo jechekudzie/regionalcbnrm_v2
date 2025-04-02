@@ -1,16 +1,27 @@
 @extends('layouts.organisation')
 
-@section('styles')
+@push('head')
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css">
 <style>
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border: none;
+        margin-bottom: 1.5rem;
+    }
     .card-header {
         background-color: #2d5a27 !important;
         color: white !important;
+        border-radius: 0.5rem 0.5rem 0 0 !important;
+        padding: 1rem 1.25rem;
     }
-    .btn-primary {
+    .btn-primary, .btn-success {
         background-color: #2d5a27 !important;
         border-color: #2d5a27 !important;
     }
-    .btn-primary:hover {
+    .btn-primary:hover, .btn-success:hover {
         background-color: #1e3d1a !important;
         border-color: #1e3d1a !important;
     }
@@ -22,191 +33,302 @@
         background-color: #ffc107 !important;
         color: #000 !important;
     }
+    .badge {
+        font-size: 0.75em;
+        padding: 0.35em 0.65em;
+        font-weight: normal;
+    }
     .table > :not(caption) > * > * {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem;
+        vertical-align: middle;
     }
-    .table > tbody > tr:hover {
+    .dataTables_wrapper .row {
+        margin: 0;
+        align-items: center;
+    }
+    .dataTables_filter, .dataTables_length {
+        margin-bottom: 1rem;
+    }
+    .dataTables_length select, .dataTables_filter input {
+        padding: 0.375rem 0.75rem;
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+    }
+    .dataTables_info {
+        margin-top: 0.5rem;
+    }
+    .table-actions {
+        white-space: nowrap;
+    }
+    .btn-action {
+        padding: 0.25rem 0.5rem;
+        margin-right: 0.25rem;
+    }
+    .btn-action i {
+        font-size: 0.875rem;
+    }
+    .dt-buttons {
+        margin-bottom: 1rem;
+    }
+    .page-header {
         background-color: #f8f9fa;
+        border-radius: 0.5rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
     }
-    .incident-title {
+    .page-header h1 {
+        margin-bottom: 0.5rem;
         color: #2d5a27;
+    }
+    .page-header .breadcrumb {
+        margin-bottom: 0;
+        background: transparent;
+        padding: 0;
+    }
+    .page-header .breadcrumb-item a {
+        color: #2d5a27;
+    }
+    .datatables-info-box {
+        background-color: #f8f9fa;
+        border-radius: 0.25rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #2d5a27;
+    }
+    .dt-buttons .btn {
+        background-color: #f8f9fa;
+        border-color: #dee2e6;
+        color: #212529;
+    }
+    .dt-buttons .btn:hover {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+    }
+    .dataTables_length label, .dataTables_filter label {
         font-weight: 500;
     }
-    .incident-title:hover {
-        color: #1e3d1a;
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
     }
-    .btn-group .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
-    }
-    .btn-group .btn i {
-        font-size: 0.875rem;
-    }
-    .table-icon {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        margin-right: 0.75rem;
-    }
-    .icon-warning {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    .breadcrumb {
+    .empty-state i {
+        font-size: 3rem;
+        color: #adb5bd;
         margin-bottom: 1rem;
     }
-    .breadcrumb-item a {
-        color: #2d5a27;
-        text-decoration: none;
+    .empty-state h5 {
+        color: #495057;
+        margin-bottom: 1rem;
     }
-    .breadcrumb-item.active {
+    .empty-state p {
         color: #6c757d;
+        margin-bottom: 1.5rem;
+        max-width: 30rem;
+        margin-left: auto;
+        margin-right: auto;
     }
-    .export-buttons {
-        background: #f8f9fa;
-        padding: 0.5rem;
-        border-radius: 0.375rem;
-        margin-bottom: 1rem;
+
+    /* DataTables Custom styling */
+    div.dataTables_wrapper div.dataTables_length select {
+        width: auto;
+        display: inline-block;
     }
-    .export-buttons .btn {
-        margin-right: 0.5rem;
-        font-size: 0.875rem;
+    div.dataTables_wrapper div.dataTables_filter {
+        text-align: right;
     }
-    .search-box {
-        margin-bottom: 1rem;
+    div.dataTables_wrapper div.dataTables_filter input {
+        margin-left: 0.5em;
+        display: inline-block;
+        width: auto;
     }
-    .refresh-btn {
-        color: #2d5a27;
+    div.dataTables_wrapper div.dataTables_info {
+        padding-top: 0.85em;
+    }
+    div.dataTables_wrapper div.dataTables_paginate {
+        margin: 0;
+        white-space: nowrap;
+        text-align: right;
+    }
+    div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+        margin: 2px 0;
+        white-space: nowrap;
+        justify-content: flex-end;
+    }
+    .page-item.active .page-link {
+        background-color: #2d5a27;
         border-color: #2d5a27;
     }
-    .refresh-btn:hover {
-        background-color: #2d5a27;
-        color: white;
+    .page-link {
+        color: #2d5a27;
+    }
+    .page-link:hover {
+        color: #1e3d1a;
     }
 </style>
-@endsection
+@endpush
 
 @section('content')
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
                 <h1 class="h3 mb-0">Wildlife Conflict Incidents</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ route('organisation.dashboard.index', $organisation->slug) }}">Dashboard</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Wildlife Conflicts</li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
                 <a href="{{ route('organisation.wildlife-conflicts.create', $organisation->slug) }}" 
                    class="btn btn-success">
-                    <i class="fas fa-plus"></i> Record New Incident
+                    <i class="fas fa-plus me-1"></i> Record New Incident
                 </a>
             </div>
+        </div>
+    </div>
 
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-            <div class="card">
-                <div class="card-body">
-                    <div class="mb-3">
-                        <a href="#" class="btn btn-sm btn-outline-secondary me-2">
-                            <i class="fas fa-file-excel"></i> Excel
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-secondary me-2">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </a>
-                        <a href="#" class="btn btn-sm btn-outline-secondary">
-                            <i class="fas fa-print"></i> Print
-                        </a>
-                    </div>
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <i class="fas fa-paw me-1"></i>
+                Wildlife Conflict Incidents
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="datatables-info-box">
+                <i class="fas fa-info-circle me-1"></i>
+                This table displays all wildlife conflict incidents. Use the search and filters to narrow down results.
+            </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Date & Time</th>
-                                    <th>Location</th>
-                                    <th>Conflict Type</th>
-                                    <th>Species</th>
-                                    <th class="text-end">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($wildlifeConflictIncidents as $wildlifeConflictIncident)
-                                    <tr>
-                                        <td>
-                                            <div class="fw-medium">{{ $wildlifeConflictIncident->incident_date->format('d M Y') }}</div>
-                                            <div class="text-muted small">{{ $wildlifeConflictIncident->incident_time->format('H:i') }}</div>
-                                        </td>
-                                        <td>
-                                            <div>{{ $wildlifeConflictIncident->location_description }}</div>
-                                            @if($wildlifeConflictIncident->latitude && $wildlifeConflictIncident->longitude)
-                                                <div class="text-muted small">
-                                                    <i class="fas fa-map-marker-alt"></i>
-                                                    {{ number_format($wildlifeConflictIncident->latitude, 6) }}, 
-                                                    {{ number_format($wildlifeConflictIncident->longitude, 6) }}
-                                                </div>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning text-dark">
-                                                {{ $wildlifeConflictIncident->conflictType->name }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @foreach($wildlifeConflictIncident->species as $species)
-                                                <span class="badge bg-success">{{ $species->name }}</span>
-                                            @endforeach
-                                        </td>
-                                        <td class="text-end">
-                                            <a href="{{ route('organisation.wildlife-conflicts.show', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('organisation.wildlife-conflicts.edit', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
-                                               class="btn btn-sm btn-outline-warning">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('organisation.wildlife-conflicts.destroy', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
-                                                  method="POST" 
-                                                  class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" 
-                                                        class="btn btn-sm btn-outline-danger" 
-                                                        onclick="return confirm('Are you sure you want to delete this incident?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <i class="fas fa-info-circle text-muted fa-2x mb-3"></i>
-                                            <h5 class="text-muted">No Wildlife Conflict Incidents</h5>
-                                            <p class="text-muted mb-3">No wildlife conflict incidents have been recorded yet.</p>
-                                            <a href="{{ route('organisation.wildlife-conflicts.create', $organisation->slug) }}" 
-                                               class="btn btn-primary">
-                                                Record First Incident
-                                            </a>
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    @if($wildlifeConflictIncidents->hasPages())
-                        <div class="mt-4">
-                            {{ $wildlifeConflictIncidents->links() }}
-                        </div>
-                    @endif
-                </div>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="wildlifeConflictsTable">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Location</th>
+                            <th>Conflict Type</th>
+                            <th>Species</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($wildlifeConflictIncidents as $wildlifeConflictIncident)
+                            <tr>
+                                <td>
+                                    <div class="fw-medium">{{ $wildlifeConflictIncident->incident_date->format('d M Y') }}</div>
+                                    <div class="text-muted small">{{ $wildlifeConflictIncident->incident_time->format('H:i') }}</div>
+                                </td>
+                                <td>
+                                    <div>{{ $wildlifeConflictIncident->location_description }}</div>
+                                    @if($wildlifeConflictIncident->latitude && $wildlifeConflictIncident->longitude)
+                                        <div class="text-muted small">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            {{ number_format($wildlifeConflictIncident->latitude, 6) }}, 
+                                            {{ number_format($wildlifeConflictIncident->longitude, 6) }}
+                                        </div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning text-dark">
+                                        {{ $wildlifeConflictIncident->conflictType->name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @foreach($wildlifeConflictIncident->species->take(2) as $species)
+                                        <span class="badge bg-success">{{ $species->name }}</span>
+                                    @endforeach
+                                    @if($wildlifeConflictIncident->species->count() > 2)
+                                        <span class="badge bg-secondary">+{{ $wildlifeConflictIncident->species->count() - 2 }}</span>
+                                    @endif
+                                </td>
+                                <td class="text-end table-actions">
+                                    <a href="{{ route('organisation.wildlife-conflicts.show', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
+                                       class="btn btn-sm btn-outline-primary btn-action" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('organisation.wildlife-conflicts.edit', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
+                                       class="btn btn-sm btn-outline-warning btn-action" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ route('organisation.wildlife-conflicts.destroy', ['organisation' => $organisation->slug, 'wildlifeConflictIncident' => $wildlifeConflictIncident]) }}" 
+                                          method="POST" 
+                                          class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="btn btn-sm btn-outline-danger btn-action" 
+                                                onclick="return confirm('Are you sure you want to delete this incident?')"
+                                                title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <i class="fas fa-paw"></i>
+                                        <h5>No Wildlife Conflict Incidents</h5>
+                                        <p>No wildlife conflict incidents have been recorded yet. Start by adding your first incident.</p>
+                                        <a href="{{ route('organisation.wildlife-conflicts.create', $organisation->slug) }}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-plus me-1"></i> Record First Incident
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-@endsection 
+@endsection
+
+@push('scripts')
+<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#wildlifeConflictsTable').DataTable({
+            responsive: true,
+            autoWidth: false,
+            dom: 'Bfrtip',
+            buttons: [
+                'copy', 'excel', 'pdf', 'print'
+            ],
+            "paging": true,
+            "ordering": true,
+            "info": true,
+            "searching": true,
+            "lengthChange": true,
+            "pageLength": 10,
+            "order": [[0, 'desc']],
+            "columnDefs": [
+                { "orderable": false, "targets": 4 }
+            ]
+        });
+    });
+</script>
+@endpush 

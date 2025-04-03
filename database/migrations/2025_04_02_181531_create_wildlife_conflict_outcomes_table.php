@@ -29,17 +29,7 @@ return new class extends Migration
                     ->references('id')
                     ->on('conflict_out_comes')
                     ->onDelete('cascade');
-                
-                // Add a unique constraint
-                $table->unique(['wildlife_conflict_incident_id', 'conflict_out_come_id'], 'wci_outcome_unique');
             });
-        } else {
-            // If the table exists but doesn't have the unique constraint, add it
-            if (!$this->hasIndex('wildlife_conflict_outcomes', 'wci_outcome_unique')) {
-                Schema::table('wildlife_conflict_outcomes', function (Blueprint $table) {
-                    $table->unique(['wildlife_conflict_incident_id', 'conflict_out_come_id'], 'wci_outcome_unique');
-                });
-            }
         }
     }
 

@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\DynamicField;
-use App\Models\Admin\ConflictOutCome;
+use App\Models\ConflictOutCome;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 

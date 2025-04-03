@@ -2,7 +2,7 @@
 
 namespace App\Models\Organisation;
 
-use App\Models\Admin\ConflictOutCome;
+use App\Models\ConflictOutCome;
 use App\Models\DynamicField;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Organisation;
 
 use App\Http\Controllers\Controller;
-use App\Models\Admin\ConflictOutCome;
+use App\Models\ConflictOutCome;
 use App\Models\Admin\Organisation;
 use App\Models\DynamicField;
 use App\Models\Organisation\WildlifeConflictIncident;
@@ -21,14 +21,14 @@ class WildlifeConflictOutcomeController extends Controller
         // Get all available conflict outcomes
         $conflictOutcomes = ConflictOutCome::all();
         
-        // Get existing outcomes for this incident to exclude them
-        $existingOutcomeIds = $wildlifeConflictIncident->outcomes->pluck('conflict_out_come_id')->toArray();
+        // Remove the filtering of existing outcomes
+        // $existingOutcomeIds = $wildlifeConflictIncident->outcomes->pluck('conflict_out_come_id')->toArray();
         
         return view('organisation.wildlife-conflicts.outcomes.create', [
             'organisation' => $organisation,
             'wildlifeConflictIncident' => $wildlifeConflictIncident,
             'conflictOutcomes' => $conflictOutcomes,
-            'existingOutcomeIds' => $existingOutcomeIds
+            // Remove the existingOutcomeIds from the view data
         ]);
     }
 

@@ -35,11 +35,9 @@
                             <select class="form-select @error('conflict_out_come_id') is-invalid @enderror" id="conflict_out_come_id" name="conflict_out_come_id" required>
                                 <option value="">-- Select Outcome Type --</option>
                                 @foreach($conflictOutcomes as $outcome)
-                                    @if(!in_array($outcome->id, $existingOutcomeIds))
-                                        <option value="{{ $outcome->id }}" {{ old('conflict_out_come_id') == $outcome->id ? 'selected' : '' }}>
-                                            {{ $outcome->name }}
-                                        </option>
-                                    @endif
+                                    <option value="{{ $outcome->id }}" {{ old('conflict_out_come_id') == $outcome->id ? 'selected' : '' }}>
+                                        {{ $outcome->name }}
+                                    </option>
                                 @endforeach
                             </select>
                             @error('conflict_out_come_id')

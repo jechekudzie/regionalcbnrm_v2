@@ -170,7 +170,21 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = _formKey.currentState?.value['email'];
       final password = _formKey.currentState?.value['password'];
       
-      final success = await _authService.login(email, password);
+      bool success = false;
+      try {
+        success = await _authService.login(email, password);
+      } catch (e) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
       
       setState(() {
         _isLoading = false;

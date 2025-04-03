@@ -188,7 +188,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               style: AppTheme.headingStyle,
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'What would you like to manage today?',
               style: AppTheme.captionStyle,
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dio/dio.dart';
+import 'package:resource_africa/utils/app_constants.dart';
 import 'package:resource_africa/core/database_helper.dart';
 import 'package:resource_africa/services/auth_service.dart';
 import 'package:resource_africa/services/connectivity_service.dart';
@@ -107,8 +109,8 @@ class DebugConsole extends StatelessWidget {
       length: 3,
       child: Column(
         children: [
-          TabBar(
-            tabs: const [
+          const TabBar(
+            tabs: [
               Tab(text: 'Auth'),
               Tab(text: 'Network'),
               Tab(text: 'Database'),
@@ -127,10 +129,10 @@ class DebugConsole extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildInfoItem('Is Logged In:', '${authService.isLoggedIn}'),
-                      _buildInfoItem('Current User:', '${authService.currentUser?.name ?? "None"}'),
-                      _buildInfoItem('User Roles:', '${authService.currentUser?.roles.map((r) => r.name).join(", ") ?? "None"}'),
+                      _buildInfoItem('Current User:', authService.currentUser?.name ?? "None"),
+                      _buildInfoItem('User Roles:', authService.currentUser?.roles.map((r) => r.name).join(", ") ?? "None"),
                       FutureBuilder<bool>(
-                        future: authService.isAuthenticated(),
+                        future: Future.value(authService.isAuthenticated),
                         builder: (context, snapshot) {
                           return _buildInfoItem(
                             'Token Valid:',
@@ -313,15 +315,18 @@ class DebugConsole extends StatelessWidget {
     try {
       _logger.d('Debug console: Testing API connection');
       
+      final String baseUrl = AppConstants.baseUrl;
+      final dio = Get.find<Dio>();
+      
+      final response = await dio.get(baseUrl);
+      
       Get.snackbar(
-        'Debug',
-        'API connection test not implemented yet',
-        backgroundColor: Colors.blue,
+        'API Connection',
+        'API connection successful. Status code: ${response.statusCode}',
+        backgroundColor: Colors.green,
         colorText: Colors.white,
         snackPosition: SnackPosition.BOTTOM,
       );
-      
-      // TODO: Implement API connection test
     } catch (e) {
       _logger.e('Debug console: Error testing API connection', e);
       

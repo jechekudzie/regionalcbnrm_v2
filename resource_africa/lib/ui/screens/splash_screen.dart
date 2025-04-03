@@ -70,12 +70,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       // Simulate splash screen delay and check authentication
       await Future.delayed(const Duration(seconds: 2));
       
-      final bool isAuthenticated = await _authService.isAuthenticated();
+      final bool isAuthenticated = _authService.isAuthenticated;
       _logger.d('Splash screen: User is authenticated: $isAuthenticated');
       
       if (isAuthenticated) {
-        final user = await _authService.refreshCurrentUser();
-        _logger.d('Splash screen: User refreshed: ${user?.name}');
+        final success = await _authService.refreshUser();
+        if (success) {
+          _logger.d('Splash screen: User refreshed: ${_authService.currentUser?.name}');
+        } else {
+          _logger.w('Splash screen: User refresh failed');
+        }
         Get.offAllNamed(AppRoutes.dashboard);
       } else {
         _logger.d('Splash screen: Navigating to login screen');
@@ -236,9 +240,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               // Version info
               FadeTransition(
                 opacity: _fadeAnimation,
-                child: Text(
+                child: const Text(
                   'Version ${AppConstants.appVersion}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.white54,
                     fontSize: 12,
                   ),

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:resource_africa/models/user_model.dart';
 import 'package:resource_africa/repositories/organisation_repository.dart';
-import 'package:resource_africa/services/auth_service.dart';
-import 'package:resource_africa/ui/theme/app_theme.dart';
 
 class OrganisationSelector extends StatefulWidget {
   final Organisation? selectedOrganisation;
@@ -21,7 +18,6 @@ class OrganisationSelector extends StatefulWidget {
 
 class _OrganisationSelectorState extends State<OrganisationSelector> {
   final OrganisationRepository _organisationRepository = OrganisationRepository();
-  final AuthService _authService = Get.find<AuthService>();
   
   List<Organisation> _organisations = [];
   bool _isLoading = true;

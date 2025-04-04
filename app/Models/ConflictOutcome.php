@@ -47,7 +47,7 @@ class ConflictOutcome extends Model
 
     // In ConflictOutCome model
 
-    public function getDynamicFieldValuesForIncident($incidentId)
+    /* public function getDynamicFieldValuesForIncident($incidentId)
     {
         return DB::table('conflict_outcome_dynamic_field_values as pivot')
             ->join('dynamic_fields as fields', 'pivot.dynamic_field_id', '=', 'fields.id')
@@ -55,7 +55,7 @@ class ConflictOutcome extends Model
             ->where('pivot.incident_id', $incidentId)
             ->select('fields.label as fieldName', 'pivot.value as fieldValue', 'fields.id as fieldId')
             ->get();
-    }
+    } */
 
     public function getSlugOptions(): SlugOptions
     {

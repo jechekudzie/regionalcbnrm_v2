@@ -21,11 +21,11 @@ class WildlifeConflictCreateScreen extends StatefulWidget {
 
 class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
-
+  
   final WildlifeConflictRepository _repository = WildlifeConflictRepository();
   final OrganisationRepository _organisationRepository = OrganisationRepository();
   final NotificationService _notificationService = Get.find<NotificationService>();
-
+  
   final RxBool _isLoading = false.obs;
   final RxBool _isLoadingData = true.obs;
   final RxList<ConflictType> _conflictTypes = RxList<ConflictType>([]);
@@ -33,23 +33,23 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
   final RxDouble _latitude = 0.0.obs;
   final RxDouble _longitude = 0.0.obs;
   final RxInt _organisationId = 0.obs;
-
+  
   @override
   void initState() {
     super.initState();
     _initForm();
   }
-
+  
   Future<void> _initForm() async {
     _isLoadingData.value = true;
-
+    
     try {
       // Load organisation
       final organisation = await _organisationRepository.getSelectedOrganisation();
       if (organisation != null) {
         _organisationId.value = organisation.id;
       }
-
+      
       // Load conflict types and species in parallel
       await Future.wait([
         _loadConflictTypes(),
@@ -64,7 +64,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
       _isLoadingData.value = false;
     }
   }
-
+  
   Future<void> _loadConflictTypes() async {
     try {
       final conflictTypes = await _repository.getConflictTypes();
@@ -73,19 +73,19 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
       // Handle error
     }
   }
-
+  
   Future<void> _loadSpecies() async {
     try {
       _notificationService.showSnackBar(
         'Loading species data...',
         type: SnackBarType.info,
       );
-
+      
       // Fetch species from the repository using organisation ID when available
       final species = await _repository.getSpecies(
         organisationId: _organisationId.value > 0 ? _organisationId.value : null
       );
-
+      
       if (species.isEmpty) {
         _notificationService.showSnackBar(
           'No species found. Please check your connection.',
@@ -95,14 +95,14 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
         // Sort the species alphabetically for better usability
         species.sort((a, b) => a.name.compareTo(b.name));
         _species.value = species;
-
+        
         _notificationService.showSnackBar(
           'Loaded ${species.length} species',
           type: SnackBarType.success,
         );
 
         _notificationService.closeSnackbar();
-
+        
         print('Species loaded: ${species.length} species');
         // Log first few species for debugging
         if (species.length > 0) {
@@ -117,34 +117,34 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
       );
     }
   }
-
+  
   Future<void> _submitForm() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
-
+      
       _isLoading.value = true;
-
+      
       try {
         // Extract the primary species ID
         final int primarySpeciesId = formData['species_id'];
-
+        
         // Collect all selected species IDs from checkboxes
         final List<Species> selectedSpecies = [];
-
+        
         // Always add the primary species first
         final primarySpecies = _species.firstWhere((s) => s.id == primarySpeciesId);
         selectedSpecies.add(primarySpecies);
-
+        
         // Add additional selected species
         for (int i = 0; i < _species.length; i++) {
           if (formData['species_id_$i'] == true && _species[i].id != primarySpeciesId) {
             selectedSpecies.add(_species[i]);
           }
         }
-
+        
         // For debugging
         print('Selected species (${selectedSpecies.length}): ${selectedSpecies.map((s) => s.name).join(', ')}');
-
+        
         // Create the incident with all the data
         final incident = WildlifeConflictIncident(
           organisationId: _organisationId.value,
@@ -157,10 +157,10 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
           conflictTypeId: formData['conflict_type_id'] as int,
           speciesId: primarySpeciesId,
           // Add the species list - this will be handled in the API call
-          species: primarySpecies,
+          species: primarySpecies,  
           speciesList: selectedSpecies,
         );
-
+        
         // Convert to API format with all the needed data
         final Map<String, dynamic> apiData = {
           'organisation_id': _organisationId.value,
@@ -173,23 +173,23 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
           'conflict_type_id': formData['conflict_type_id'] as int,
           'species_id': primarySpeciesId,
         };
-
+        
         // Add array of species IDs if more than just the primary species
         if (selectedSpecies.length > 1) {
           apiData['species_ids'] = selectedSpecies.map((s) => s.id).toList();
-
+          
           // Log for debugging
           print('Sending species_ids to API: ${apiData['species_ids']}');
         }
-
+        
         // Send to the repository with the API format
         final createdIncident = await _repository.createIncident(incident);
-
+        
         _notificationService.showSnackBar(
           'Wildlife conflict incident reported successfully',
           type: SnackBarType.success,
         );
-
+        
         Get.back(result: createdIncident);
       } catch (e) {
         print('Error submitting form: $e');
@@ -236,7 +236,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
         if (_isLoadingData.value) {
           return const Center(child: CircularProgressIndicator());
         }
-
+        
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: FormBuilder(
@@ -260,7 +260,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ]),
                 ),
                 const SizedBox(height: 16),
-
+                
                 // Date and time fields
                 Row(
                   children: [
@@ -300,7 +300,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ],
                 ),
                 const SizedBox(height: 16),
-
+                
                 // Conflict type dropdown
                 FormBuilderDropdown<int>(
                   name: 'conflict_type_id',
@@ -355,7 +355,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                     ],
                   ),
                 ),
-
+                
                 // Display message if no species are available
                 if (_species.isEmpty)
                   Container(
@@ -392,7 +392,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                       ],
                     ),
                   ),
-
+                
                 // Primary species dropdown with enhanced UI
                 Card(
                   elevation: 1,
@@ -453,7 +453,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                               if (index >= 0) {
                                 // Mark the checkbox for this species as checked
                                 _formKey.currentState?.fields['species_id_$index']?.didChange(true);
-
+                                
                                 // Force UI refresh for checkboxes
                                 setState(() {});
                               }
@@ -465,7 +465,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ),
                 ),
                 const SizedBox(height: 16),
-
+                
                 // Species checkboxes for multiple selection
                 Card(
                   elevation: 1,
@@ -502,7 +502,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                         const SizedBox(height: 12),
                         Divider(color: Colors.grey.shade300),
                         const SizedBox(height: 8),
-
+                        
                         // Enhanced grid layout with scrollable content
                         GridView.builder(
                           shrinkWrap: true,
@@ -518,7 +518,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                             final species = _species[index];
                             // Create a unique key for the FormBuilderCheckbox
                             final String checkboxName = 'species_id_$index';
-
+                            
                             // Function to determine if this is the primary species
                             bool isPrimarySpecies() {
                               if (_formKey.currentState?.fields['species_id'] != null) {
@@ -527,7 +527,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                               }
                               return false;
                             }
-
+                            
                             return Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
@@ -563,7 +563,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                                 onChanged: (value) {
                                   // Make sure the form is updated (required for Obx to work correctly)
                                   _formKey.currentState?.fields[checkboxName]?.didChange(value);
-
+                                  
                                   // If this is the primary species, auto-check it
                                   if (isPrimarySpecies() && value == false) {
                                     // If they try to uncheck primary species, prevent it
@@ -579,7 +579,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ),
                 ),
                 const SizedBox(height: 16),
-
+                
                 // Location fields
                 const Text(
                   'Location',
@@ -589,7 +589,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ),
                 ),
                 const SizedBox(height: 8),
-
+                
                 LocationPicker(
                   initialLatitude: _latitude.value,
                   initialLongitude: _longitude.value,
@@ -601,7 +601,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   },
                 ),
                 const SizedBox(height: 8),
-
+                
                 Row(
                   children: [
                     Expanded(
@@ -638,7 +638,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ],
                 ),
                 const SizedBox(height: 16),
-
+                
                 // Description field
                 FormBuilderTextField(
                   name: 'description',
@@ -656,7 +656,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                   ]),
                 ),
                 const SizedBox(height: 24),
-
+                
                 // Submit button
                 Center(
                   child: SizedBox(

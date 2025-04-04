@@ -277,16 +277,13 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                           ),
                         ),
                         const SizedBox(height: 8),
-                        if (incident.longitude != null)
-                          SizedBox(
-                            height: 200,
-                            child: LocationMapView(
-                              latitude: incident.latitude,
-                              longitude: incident.longitude,
-                            ),
-                          )
-                        else
-                          const Text('Location data not available for map view.'),
+                        SizedBox(
+                          height: 200,
+                          child: LocationMapView(
+                            latitude: incident.latitude,
+                            longitude: incident.longitude,
+                          ),
+                        ),
                       ],
                     ),
                   ),

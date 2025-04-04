@@ -16,7 +16,7 @@ class HuntingActivity {
   final DateTime? updatedAt;
   final String? syncStatus;
   final int? remoteId;
-
+  
   // Relations
   final HuntingConcession? huntingConcession;
   final Organisation? safariOperator;
@@ -165,7 +165,7 @@ class HuntingActivitySpecies {
   final int? quotaAllocationBalanceId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-
+  
   // Relations
   final Species? species;
   final QuotaAllocationBalance? quotaAllocationBalance;
@@ -278,7 +278,7 @@ class HuntingConcession {
   final double? longitude;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-
+  
   // Relations
   final Organisation? safariOperator;
 
@@ -346,7 +346,7 @@ class QuotaAllocation {
   final DateTime endDate;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-
+  
   // Relations
   final Species? species;
   final QuotaAllocationBalance? quotaAllocationBalance;
@@ -401,7 +401,7 @@ class QuotaAllocation {
           : null,
     );
   }
-
+  
   QuotaAllocation copyWith({
     int? id,
     int? organisationId,

@@ -4,13 +4,11 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
 
-import 'package:resource_africa/models/hunting_model.dart';
 import 'package:resource_africa/models/wildlife_conflict_model.dart';
 import 'package:resource_africa/repositories/hunting_activity_repository.dart';
 import 'package:resource_africa/repositories/organisation_repository.dart';
 import 'package:resource_africa/repositories/wildlife_conflict_repository.dart';
 import 'package:resource_africa/services/notification_service.dart';
-import 'package:resource_africa/utils/app_constants.dart';
 
 class QuotaAllocationCreateScreen extends StatefulWidget {
   const QuotaAllocationCreateScreen({super.key});

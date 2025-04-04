@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:resource_africa/repositories/organisation_repository.dart';
-import 'package:resource_africa/repositories/wildlife_conflict_repository.dart';
 import 'package:resource_africa/services/auth_service.dart';
 import 'package:resource_africa/services/connectivity_service.dart';
 import 'package:resource_africa/services/error_handler_service.dart';

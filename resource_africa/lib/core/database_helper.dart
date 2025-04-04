@@ -115,7 +115,6 @@ class DatabaseHelper {
         await txn.execute('''
           CREATE TABLE problem_animal_controls (
             id INTEGER PRIMARY KEY,
-            organisation_id INTEGER NOT NULL,
             wildlife_conflict_incident_id INTEGER,
             control_measure_id INTEGER,
             date TEXT,
@@ -128,7 +127,6 @@ class DatabaseHelper {
             updated_at TEXT,
             sync_status TEXT DEFAULT 'pending',
             remote_id INTEGER,
-            FOREIGN KEY (organisation_id) REFERENCES organisations(id) ON DELETE CASCADE,
             FOREIGN KEY (wildlife_conflict_incident_id) REFERENCES wildlife_conflict_incidents(id) ON DELETE CASCADE
           )
         ''');
@@ -384,42 +382,7 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       // Version 1 to 2 upgrades
       _logger.d('Performing upgrade from version 1 to 2');
-
-      try {
-        // Check if problem_animal_controls table exists
-        final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='problem_animal_controls'");
-
-        if (tables.isNotEmpty) {
-          // Drop and recreate problem_animal_controls table with the correct schema
-          await db.execute('DROP TABLE IF EXISTS problem_animal_controls');
-
-          await db.execute('''
-            CREATE TABLE problem_animal_controls (
-              id INTEGER PRIMARY KEY,
-              organisation_id INTEGER NOT NULL,
-              wildlife_conflict_incident_id INTEGER,
-              control_measure_id INTEGER,
-              date TEXT,
-              time TEXT,
-              description TEXT,
-              latitude REAL,
-              longitude REAL,
-              number_of_animals INTEGER,
-              created_at TEXT,
-              updated_at TEXT,
-              sync_status TEXT DEFAULT 'pending',
-              remote_id INTEGER,
-              FOREIGN KEY (organisation_id) REFERENCES organisations(id) ON DELETE CASCADE,
-              FOREIGN KEY (wildlife_conflict_incident_id) REFERENCES wildlife_conflict_incidents(id) ON DELETE CASCADE
-            )
-          ''');
-
-          _logger.d('Recreated problem_animal_controls table');
-        }
-      } catch (e, stackTrace) {
-        _logger.e('Error during database upgrade', e, stackTrace);
-        rethrow;
-      }
+      // Add migration scripts here when needed
     }
 
     if (oldVersion < 3) {

@@ -7,7 +7,6 @@ import 'package:resource_africa/repositories/hunting_activity_repository.dart';
 import 'package:resource_africa/repositories/organisation_repository.dart';
 import 'package:resource_africa/services/notification_service.dart';
 import 'package:resource_africa/ui/screens/quota_allocation/quota_allocation_create_screen.dart';
-import 'package:resource_africa/utils/app_constants.dart';
 
 class QuotaAllocationListScreen extends StatefulWidget {
   const QuotaAllocationListScreen({super.key});

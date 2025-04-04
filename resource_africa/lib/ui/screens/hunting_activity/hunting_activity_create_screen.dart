@@ -11,7 +11,6 @@ import 'package:resource_africa/repositories/hunting_activity_repository.dart';
 import 'package:resource_africa/repositories/organisation_repository.dart';
 import 'package:resource_africa/repositories/wildlife_conflict_repository.dart';
 import 'package:resource_africa/services/notification_service.dart';
-import 'package:resource_africa/utils/app_constants.dart';
 
 class HuntingActivityCreateScreen extends StatefulWidget {
   const HuntingActivityCreateScreen({super.key});

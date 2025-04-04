@@ -251,8 +251,8 @@
                                     @if($concession->latitude && $concession->longitude)
                                         <div class="text-muted small">
                                             <i class="fas fa-map-marker-alt"></i>
-                                            {{ number_format($concession->latitude, 6) }}, 
-                                            {{ number_format($concession->longitude, 6) }}
+                                            {{ is_numeric($concession->latitude) ? number_format($concession->latitude, 6) : 'N/A' }}, 
+                                            {{ is_numeric($concession->longitude) ? number_format($concession->longitude, 6) : 'N/A' }}
                                         </div>
                                     @else
                                         <span class="text-muted">Not specified</span>

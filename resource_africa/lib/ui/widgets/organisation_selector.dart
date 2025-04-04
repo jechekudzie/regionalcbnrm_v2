@@ -18,26 +18,27 @@ class OrganisationSelector extends StatefulWidget {
 
 class _OrganisationSelectorState extends State<OrganisationSelector> {
   final OrganisationRepository _organisationRepository = OrganisationRepository();
-  
+
   List<Organisation> _organisations = [];
   bool _isLoading = true;
   String? _error;
-  
+
   @override
   void initState() {
     super.initState();
     _loadOrganisations();
   }
-  
+
   Future<void> _loadOrganisations() async {
     setState(() {
       _isLoading = true;
       _error = null;
     });
-    
+
     try {
       final organisations = await _organisationRepository.getUserOrganisations();
       setState(() {
+        // The repository should now return unique organizations
         _organisations = organisations;
         _isLoading = false;
       });
@@ -48,7 +49,7 @@ class _OrganisationSelectorState extends State<OrganisationSelector> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -104,7 +105,7 @@ class _OrganisationSelectorState extends State<OrganisationSelector> {
       ),
     );
   }
-  
+
   Widget _buildDropdown() {
     return Container(
       height: 48,

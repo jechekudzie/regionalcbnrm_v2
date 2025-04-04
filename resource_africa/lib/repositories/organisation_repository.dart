@@ -14,16 +14,17 @@ class OrganisationRepository {
     try {
       // Try to fetch from API first
       final response = await _apiService.get('/organisations');
-      
+
       if (response['status'] == 'success') {
         final organisations = (response['data']['organisations'] as List)
             .map((org) => Organisation.fromJson(org))
             .toList();
-        
+
         // Cache organisations in local database
         await _saveOrganisationsToDb(organisations);
-        
-        return organisations;
+
+        // Use a Set to ensure unique organizations by ID
+        return _uniqueOrganisations(organisations);
       } else {
         throw AppException(response['message'] ?? 'Failed to fetch organisations');
       }
@@ -31,7 +32,10 @@ class OrganisationRepository {
       // If API call fails, try to get from local database
       try {
         final organisationsData = await _dbHelper.query('organisations');
-        return organisationsData.map((org) => Organisation.fromJson(org)).toList();
+        final localOrganisations = organisationsData.map((org) => Organisation.fromJson(org)).toList();
+
+        // Use a Set to ensure unique organizations by ID
+        return _uniqueOrganisations(localOrganisations);
       } catch (dbException) {
         // If both API and DB fail, rethrow the original exception
         if (e is AppException) rethrow;
@@ -40,10 +44,20 @@ class OrganisationRepository {
     }
   }
 
+  // Helper method to ensure unique organisations by ID
+  List<Organisation> _uniqueOrganisations(List<Organisation> organisations) {
+    // Use a map to ensure unique organizations by ID
+    final Map<int, Organisation> uniqueMap = {};
+    for (var org in organisations) {
+      uniqueMap[org.id] = org;
+    }
+    return uniqueMap.values.toList();
+  }
+
   Future<void> _saveOrganisationsToDb(List<Organisation> organisations) async {
     // Clear existing organisations
     await _dbHelper.delete('organisations');
-    
+
     // Insert new organisations
     for (var org in organisations) {
       await _dbHelper.insert('organisations', {
@@ -61,7 +75,7 @@ class OrganisationRepository {
   Future<OrganisationDetail> getOrganisationDetail(int organisationId) async {
     try {
       final response = await _apiService.get('/organisations/$organisationId');
-      
+
       if (response['status'] == 'success') {
         return OrganisationDetail.fromJson(response['data']['organisation']);
       } else {
@@ -76,7 +90,7 @@ class OrganisationRepository {
   Future<List<Organisation>> getChildOrganisations(int organisationId) async {
     try {
       final response = await _apiService.get('/organisations/$organisationId/children');
-      
+
       if (response['status'] == 'success') {
         return (response['data']['children'] as List)
             .map((org) => Organisation.fromJson(org))
@@ -93,7 +107,7 @@ class OrganisationRepository {
   Future<List<Role>> getOrganisationRoles(int organisationId) async {
     try {
       final response = await _apiService.get('/organisations/$organisationId/roles');
-      
+
       if (response['status'] == 'success') {
         return (response['data']['roles'] as List)
             .map((role) => Role.fromJson(role))

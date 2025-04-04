@@ -78,6 +78,81 @@ flutter pub get
 flutter run
 ```
 
+## Mobile App Implementation
+
+### Key Components
+
+#### Authentication Flow
+1. User logs in with email and password
+2. API returns user data and OAuth token
+3. Token is stored securely in shared preferences
+4. User selects an organization to work with
+5. All subsequent API requests include the token
+
+#### Data Models
+The app includes comprehensive data models for all entities:
+- `User` - User information and roles
+- `Organisation` - Organization structure
+- `WildlifeConflictIncident` - Wildlife conflict data
+- `ProblemAnimalControl` - Animal control measures
+- `PoachingIncident` - Poaching incident details
+- `HuntingActivity` - Hunting activity records
+
+#### Repository Pattern
+Each module has a dedicated repository that handles:
+- API data fetching
+- Local database operations
+- Data synchronization logic
+- Error handling
+
+#### Services
+- `AuthService` - Handles authentication logic
+- `ConnectivityService` - Monitors network connectivity
+- `SyncService` - Manages data synchronization
+- `NotificationService` - Handles local notifications
+
+#### Offline Capabilities
+The app implements robust offline data handling:
+- SQLite database mirrors the server structure
+- Changes are tracked in a sync queue
+- Background sync when connectivity is restored
+- Conflict resolution based on timestamps
+
+#### UI Features
+- Material Design with custom styling
+- Responsive layouts for different device sizes 
+- Location picking with map integration
+- File attachments (images) with offline storage
+- Form validation for data integrity
+
+### Database Schema
+
+The SQLite database includes tables for all major entities:
+
+```
+- user
+- organisations
+- wildlife_conflict_incidents
+- wildlife_conflict_outcomes
+- problem_animal_controls
+- poaching_incidents
+- poaching_incident_species
+- poaching_incident_methods
+- poachers
+- hunting_activities
+- hunting_activity_species
+- professional_hunter_licenses
+- sync_queue
+```
+
+### Utility Scripts
+
+The repository includes several helper scripts:
+- `build_check.sh` - Verify build configuration
+- `check_build.sh` - Run pre-build checks
+- `final_fixes.sh` - Apply final fixes before build
+- `run_app.sh` - Run the app with clean environment
+
 ## Troubleshooting
 
 If you encounter build issues:
@@ -126,6 +201,16 @@ The app implements a robust offline data management system:
   - `/screens`: Application screens
   - `/widgets`: Reusable UI components
 - `/lib/utils`: Utility classes and constants
+
+## Adding New Features
+
+To extend the application with new features:
+
+1. Create model class in `/lib/models/`
+2. Create repository in `/lib/repositories/`
+3. Add screens in `/lib/ui/screens/`
+4. Update routes in `/lib/utils/app_routes.dart`
+5. Add to dashboard in `/lib/ui/screens/dashboard/dashboard_screen.dart`
 
 ## License
 

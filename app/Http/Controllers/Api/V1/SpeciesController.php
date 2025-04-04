@@ -15,7 +15,7 @@ class SpeciesController extends Controller
      */
     public function index()
     {
-        $species = Species::with(['speciesGender', 'maturity'])->orderBy('name')->get();
+        $species = Species::orderBy('name')->get();
 
         return response()->json([
             'status' => 'success',
@@ -52,7 +52,7 @@ class SpeciesController extends Controller
     public function search(Request $request)
     {
         $query = $request->input('query', '');
-        
+
         $species = Species::with(['speciesGender', 'maturity'])
             ->where('name', 'like', "%{$query}%")
             ->orderBy('name')

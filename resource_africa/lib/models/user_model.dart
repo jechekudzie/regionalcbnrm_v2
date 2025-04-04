@@ -1,3 +1,4 @@
+import 'organisation_model.dart';
 
 class User {
   final int id;
@@ -5,7 +6,7 @@ class User {
   final String email;
   final List<Role> roles;
   final List<Organisation> organisations;
-  
+
   User({
     required this.id,
     required this.name,
@@ -13,6 +14,22 @@ class User {
     required this.roles,
     required this.organisations,
   });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+      roles: json['roles'] != null
+          ? (json['roles'] as List).map((role) => Role.fromJson(role)).toList()
+          : [],
+      organisations: json['organisations'] != null
+          ? (json['organisations'] as List)
+              .map((org) => Organisation.fromJson(org))
+              .toList()
+          : [],
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -23,146 +40,112 @@ class User {
       'organisations': organisations.map((org) => org.toJson()).toList(),
     };
   }
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      email: json['email'],
-      roles: (json['roles'] as List).map((role) => Role.fromJson(role)).toList(),
-      organisations: (json['organisations'] as List).map((org) => Organisation.fromJson(org)).toList(),
-    );
-  }
-
-  @override
-  String toString() {
-    return 'User{id: $id, name: $name, email: $email}';
-  }
 }
 
 class Role {
   final int id;
   final String name;
-  final int? organisationId;
+  final String slug;
 
   Role({
     required this.id,
     required this.name,
-    this.organisationId,
+    required this.slug,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'organisation_id': organisationId,
-    };
-  }
 
   factory Role.fromJson(Map<String, dynamic> json) {
     return Role(
       id: json['id'],
       name: json['name'],
-      organisationId: json['pivot'] != null ? json['pivot']['organisation_id'] : null,
+      slug: json['slug'] ?? json['name'].toString().toLowerCase().replaceAll(' ', '-'),
     );
   }
 
-  @override
-  String toString() {
-    return 'Role{id: $id, name: $name}';
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'slug': slug,
+    };
   }
 }
 
 class Organisation {
   final int id;
   final String name;
-  final int organisationTypeId;
-  final String? slug;
+  final String slug;
+  final int? organisationTypeId;
   final int? parentId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final List<Role>? userRoles;
+  final List<String>? userPermissions;
   final OrganisationType? organisationType;
 
   Organisation({
     required this.id,
     required this.name,
-    required this.organisationTypeId,
-    this.slug,
+    required this.slug,
+    this.organisationTypeId,
     this.parentId,
     this.createdAt,
     this.updatedAt,
+    this.userRoles,
+    this.userPermissions,
     this.organisationType,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'organisation_type_id': organisationTypeId,
-      'slug': slug,
-      'organisation_id': parentId,
-      'created_at': createdAt?.toIso8601String(),
-      'updated_at': updatedAt?.toIso8601String(),
-      'organisation_type': organisationType?.toJson(),
-    };
-  }
 
   factory Organisation.fromJson(Map<String, dynamic> json) {
     return Organisation(
       id: json['id'],
       name: json['name'],
-      organisationTypeId: json['organisation_type_id'],
-      slug: json['slug'],
-      parentId: json['organisation_id'],
+      slug: json['slug'] ?? json['name'].toString().toLowerCase().replaceAll(' ', '-'),
+      organisationTypeId: json['organisation_type_id'] ?? json['type_id'],
+      parentId: json['parent_id'] ?? json['organisation_id'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      userRoles: json['user_roles'] != null
+          ? (json['user_roles'] as List).map((role) => Role.fromJson(role)).toList()
+          : null,
+      userPermissions: json['user_permissions'] != null
+          ? (json['user_permissions'] as List).map((permission) => permission.toString()).toList()
+          : null,
       organisationType: json['organisation_type'] != null ? OrganisationType.fromJson(json['organisation_type']) : null,
     );
   }
 
-  @override
-  String toString() {
-    return 'Organisation{id: $id, name: $name}';
-  }
-}
-
-class OrganisationType {
-  final int id;
-  final String name;
-  final String? slug;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-
-  OrganisationType({
-    required this.id,
-    required this.name,
-    this.slug,
-    this.createdAt,
-    this.updatedAt,
-  });
-
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'id': id,
       'name': name,
       'slug': slug,
+      'organisation_type_id': organisationTypeId,
+      'parent_id': parentId,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
-  }
 
-  factory OrganisationType.fromJson(Map<String, dynamic> json) {
-    return OrganisationType(
-      id: json['id'],
-      name: json['name'],
-      slug: json['slug'],
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
-      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-    );
+    if (userRoles != null) {
+      data['user_roles'] = userRoles!.map((role) => role.toJson()).toList();
+    }
+
+    if (userPermissions != null) {
+      data['user_permissions'] = userPermissions;
+    }
+
+    if (organisationType != null) {
+      data['organisation_type'] = organisationType?.toJson();
+    }
+
+    return data;
   }
 
   @override
-  String toString() {
-    return 'OrganisationType{id: $id, name: $name}';
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Organisation && other.id == id;
   }
+
+  @override
+  int get hashCode => id.hashCode;
 }

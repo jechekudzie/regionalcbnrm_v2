@@ -195,7 +195,7 @@ class _ProblemAnimalControlDetailsScreenState extends State<ProblemAnimalControl
                               const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                               const SizedBox(width: 4),
                               Text(
-                                control.wildlifeConflictIncident?.date != null ? DateFormat('dd MMM yyyy').format(control.wildlifeConflictIncident!.date!) : 'Unknown Date',
+                                control.wildlifeConflictIncident?.date != null ? DateFormat('dd MMM yyyy').format(control.wildlifeConflictIncident!.date) : 'Unknown Date',
                                 style: const TextStyle(color: Colors.grey),
                               ),
                             ],

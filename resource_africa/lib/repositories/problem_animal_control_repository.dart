@@ -14,15 +14,15 @@ class ProblemAnimalControlRepository {
     try {
       // Try to fetch from API first
       final response = await _apiService.get('/organisations/$organisationId/problem-animal-controls');
-      
+
       if (response['status'] == 'success') {
         final controls = (response['data']['data'] as List)
             .map((control) => ProblemAnimalControl.fromJson(control))
             .toList();
-        
+
         // Cache controls in local database
         await _saveControlsToDb(controls);
-        
+
         return controls;
       } else {
         throw AppException(response['message'] ?? 'Failed to fetch controls');
@@ -36,40 +36,40 @@ class ProblemAnimalControlRepository {
           whereArgs: [organisationId],
           orderBy: 'date DESC',
         );
-        
+
         List<ProblemAnimalControl> controls = await Future.wait(
           controlsData.map((controlData) async {
             ProblemAnimalControl control = ProblemAnimalControl.fromJson(controlData);
-            
+
             // Fetch related data
             final controlMeasureData = await _dbHelper.query(
               'control_measures',
               where: 'id = ?',
               whereArgs: [control.controlMeasureId],
             );
-            
+
             final incidentData = await _dbHelper.query(
               'wildlife_conflict_incidents',
               where: 'id = ?',
               whereArgs: [control.wildlifeConflictIncidentId],
             );
-            
+
             if (controlMeasureData.isNotEmpty) {
               control = control.copyWith(
                 controlMeasure: ControlMeasure.fromJson(controlMeasureData.first)
               );
             }
-            
+
             if (incidentData.isNotEmpty) {
               control = control.copyWith(
                 wildlifeConflictIncident: WildlifeConflictIncident.fromJson(incidentData.first)
               );
             }
-            
+
             return control;
           }).toList(),
         );
-        
+
         return controls;
       } catch (dbException) {
         // If both API and DB fail, rethrow the original exception
@@ -78,7 +78,7 @@ class ProblemAnimalControlRepository {
       }
     }
   }
-  
+
   // Save controls to local database
   Future<void> _saveControlsToDb(List<ProblemAnimalControl> controls) async {
     for (var control in controls) {
@@ -86,6 +86,7 @@ class ProblemAnimalControlRepository {
         'id': control.id,
         'wildlife_conflict_incident_id': control.wildlifeConflictIncidentId,
         'control_measure_id': control.controlMeasureId,
+        'organisation_id': control.organisationId,
         'date': control.date.toIso8601String(),
         'time': control.time,
         'description': control.description,
@@ -97,7 +98,7 @@ class ProblemAnimalControlRepository {
         'sync_status': 'synced',
         'remote_id': control.id,
       });
-      
+
       // Save control measure if available
       if (control.controlMeasure != null) {
         await _dbHelper.insert('control_measures', {
@@ -107,14 +108,14 @@ class ProblemAnimalControlRepository {
           'updated_at': control.controlMeasure!.updatedAt?.toIso8601String(),
         }, where: 'id = ?', whereArgs: [control.controlMeasure!.id]);
       }
-      
+
       // Save incident if available
       if (control.wildlifeConflictIncident != null) {
         await _dbHelper.insert('wildlife_conflict_incidents', {
           'id': control.wildlifeConflictIncident!.id,
           'organisation_id': control.wildlifeConflictIncident!.organisationId,
           'title': control.wildlifeConflictIncident!.title,
-          'date': control.wildlifeConflictIncident!.date?.toIso8601String(),
+          'date': control.wildlifeConflictIncident!.date.toIso8601String(),
           'time': control.wildlifeConflictIncident!.time,
           'latitude': control.wildlifeConflictIncident!.latitude,
           'longitude': control.wildlifeConflictIncident!.longitude,
@@ -133,7 +134,7 @@ class ProblemAnimalControlRepository {
   Future<ProblemAnimalControl> getControl(int controlId) async {
     try {
       final response = await _apiService.get('/problem-animal-controls/$controlId');
-      
+
       if (response['status'] == 'success') {
         return ProblemAnimalControl.fromJson(response['data']['control']);
       } else {
@@ -147,38 +148,38 @@ class ProblemAnimalControlRepository {
           where: 'id = ? OR remote_id = ?',
           whereArgs: [controlId, controlId],
         );
-        
+
         if (controlData.isEmpty) {
           throw NotFoundException('Control not found');
         }
-        
+
         ProblemAnimalControl control = ProblemAnimalControl.fromJson(controlData.first);
-        
+
         // Fetch related data
         final controlMeasureData = await _dbHelper.query(
           'control_measures',
           where: 'id = ?',
           whereArgs: [control.controlMeasureId],
         );
-        
+
         final incidentData = await _dbHelper.query(
           'wildlife_conflict_incidents',
           where: 'id = ?',
           whereArgs: [control.wildlifeConflictIncidentId],
         );
-        
+
         if (controlMeasureData.isNotEmpty) {
           control = control.copyWith(
             controlMeasure: ControlMeasure.fromJson(controlMeasureData.first)
           );
         }
-        
+
         if (incidentData.isNotEmpty) {
           control = control.copyWith(
             wildlifeConflictIncident: WildlifeConflictIncident.fromJson(incidentData.first)
           );
         }
-        
+
         return control;
       } catch (dbException) {
         // If both API and DB fail, rethrow the original exception
@@ -195,15 +196,16 @@ class ProblemAnimalControlRepository {
         '/problem-animal-controls',
         data: control.toApiJson(),
       );
-      
+
       if (response['status'] == 'success') {
         final createdControl = ProblemAnimalControl.fromJson(response['data']['control']);
-        
+
         // Save to local database
         await _dbHelper.insert('problem_animal_controls', {
           'id': createdControl.id,
           'wildlife_conflict_incident_id': createdControl.wildlifeConflictIncidentId,
           'control_measure_id': createdControl.controlMeasureId,
+          'organisation_id': createdControl.organisationId,
           'date': createdControl.date.toIso8601String(),
           'time': createdControl.time,
           'description': createdControl.description,
@@ -215,7 +217,7 @@ class ProblemAnimalControlRepository {
           'sync_status': 'synced',
           'remote_id': createdControl.id,
         });
-        
+
         return createdControl;
       } else {
         throw AppException(response['message'] ?? 'Failed to create control');
@@ -223,12 +225,13 @@ class ProblemAnimalControlRepository {
     } catch (e) {
       // If API call fails, save to local database with pending sync status
       if (e is AppException && !(e is NoInternetException || e is TimeoutException)) rethrow;
-      
+
       // Save to local database with pending sync status
       final currentDateTime = DateTime.now().toIso8601String();
       final localId = await _dbHelper.insert('problem_animal_controls', {
         'wildlife_conflict_incident_id': control.wildlifeConflictIncidentId,
         'control_measure_id': control.controlMeasureId,
+        'organisation_id': control.organisationId,
         'date': control.date.toIso8601String(),
         'time': control.time,
         'description': control.description,
@@ -240,7 +243,7 @@ class ProblemAnimalControlRepository {
         'sync_status': 'pending',
         'remote_id': null,
       });
-      
+
       // Add to sync queue
       await _dbHelper.addToSyncQueue(
         'problem_animal_controls',
@@ -248,14 +251,14 @@ class ProblemAnimalControlRepository {
         'create',
         jsonEncode(control.toApiJson()),
       );
-      
+
       // Return the locally created control
       final controlData = await _dbHelper.query(
         'problem_animal_controls',
         where: 'id = ?',
         whereArgs: [localId],
       );
-      
+
       return ProblemAnimalControl.fromJson(controlData.first);
     }
   }
@@ -265,12 +268,12 @@ class ProblemAnimalControlRepository {
     try {
       // Try to fetch from API first
       final response = await _apiService.get('/control-measures');
-      
+
       if (response['status'] == 'success') {
         final measures = (response['data']['control_measures'] as List)
             .map((measure) => ControlMeasure.fromJson(measure))
             .toList();
-        
+
         // Cache measures in local database
         for (var measure in measures) {
           await _dbHelper.insert('control_measures', {
@@ -280,7 +283,7 @@ class ProblemAnimalControlRepository {
             'updated_at': measure.updatedAt?.toIso8601String(),
           }, where: 'id = ?', whereArgs: [measure.id]);
         }
-        
+
         return measures;
       } else {
         throw AppException(response['message'] ?? 'Failed to fetch control measures');

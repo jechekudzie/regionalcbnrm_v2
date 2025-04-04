@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Admin\ConflictOutCome;
 use App\Models\Admin\ConflictType;
 use App\Models\Admin\Organisation;
-use App\Models\Admin\Species;
 use App\Models\Organisation\WildlifeConflictIncident;
 use App\Models\Organisation\WildlifeConflictOutcome;
 use Illuminate\Http\Request;
@@ -22,11 +21,11 @@ class WildlifeConflictController extends Controller
      * @param Organisation $organisation
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getIncidents(Request $request, Organisation $organisation)
+    public function getIncidents(Request $request, $organisation)
     {
         // Check if user has access to this organisation
         $user = $request->user();
-        $hasAccess = $user->organisations()->where('organisations.id', $organisation->id)->exists();
+        $hasAccess = $user->organisations()->where('organisations.id', $organisation)->exists();
 
         if (!$hasAccess) {
             return response()->json([
@@ -36,7 +35,7 @@ class WildlifeConflictController extends Controller
         }
 
         $incidents = WildlifeConflictIncident::with(['conflictType', 'species'])
-            ->where('organisation_id', $organisation->id)
+            ->where('organisation_id', $organisation)
             ->orderBy('created_at', 'desc')
             ->paginate(15);
 
@@ -66,7 +65,7 @@ class WildlifeConflictController extends Controller
             ], 403);
         }
 
-        $incident->load(['conflictType', 'species', 'outcomes', 'dynamicValues']);
+        $incident->load(['conflictType', 'species', 'outcomes']);
 
         return response()->json([
             'status' => 'success',

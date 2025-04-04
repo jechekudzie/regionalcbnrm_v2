@@ -16,7 +16,7 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    
+
     _logger.i('Initializing database');
     _database = await _initDatabase();
     return _database!;
@@ -27,7 +27,7 @@ class DatabaseHelper {
       final documentsDirectory = await getApplicationDocumentsDirectory();
       final path = join(documentsDirectory.path, AppConstants.databaseName);
       _logger.d('Database path: $path');
-      
+
       return await openDatabase(
         path,
         version: AppConstants.databaseVersion,
@@ -48,7 +48,7 @@ class DatabaseHelper {
 
   Future<void> _onCreate(Database db, int version) async {
     _logger.i('Creating database tables for version $version');
-    
+
     // Wrap in transaction for better performance and atomicity
     await db.transaction((txn) async {
       try {
@@ -115,6 +115,7 @@ class DatabaseHelper {
         await txn.execute('''
           CREATE TABLE problem_animal_controls (
             id INTEGER PRIMARY KEY,
+            organisation_id INTEGER NOT NULL,
             wildlife_conflict_incident_id INTEGER,
             control_measure_id INTEGER,
             date TEXT,
@@ -127,6 +128,7 @@ class DatabaseHelper {
             updated_at TEXT,
             sync_status TEXT DEFAULT 'pending',
             remote_id INTEGER,
+            FOREIGN KEY (organisation_id) REFERENCES organisations(id) ON DELETE CASCADE,
             FOREIGN KEY (wildlife_conflict_incident_id) REFERENCES wildlife_conflict_incidents(id) ON DELETE CASCADE
           )
         ''');
@@ -366,7 +368,7 @@ class DatabaseHelper {
           )
         ''');
         _logger.d('Created sync_queue table');
-        
+
         _logger.i('All tables created successfully');
       } catch (e, stackTrace) {
         _logger.e('Error creating database tables', e, stackTrace);
@@ -377,14 +379,49 @@ class DatabaseHelper {
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     _logger.i('Upgrading database from $oldVersion to $newVersion');
-    
+
     // Handle incremental upgrades
     if (oldVersion < 2) {
       // Version 1 to 2 upgrades
       _logger.d('Performing upgrade from version 1 to 2');
-      // Add migration scripts here when needed
+
+      try {
+        // Check if problem_animal_controls table exists
+        final tables = await db.rawQuery("SELECT name FROM sqlite_master WHERE type='table' AND name='problem_animal_controls'");
+
+        if (tables.isNotEmpty) {
+          // Drop and recreate problem_animal_controls table with the correct schema
+          await db.execute('DROP TABLE IF EXISTS problem_animal_controls');
+
+          await db.execute('''
+            CREATE TABLE problem_animal_controls (
+              id INTEGER PRIMARY KEY,
+              organisation_id INTEGER NOT NULL,
+              wildlife_conflict_incident_id INTEGER,
+              control_measure_id INTEGER,
+              date TEXT,
+              time TEXT,
+              description TEXT,
+              latitude REAL,
+              longitude REAL,
+              number_of_animals INTEGER,
+              created_at TEXT,
+              updated_at TEXT,
+              sync_status TEXT DEFAULT 'pending',
+              remote_id INTEGER,
+              FOREIGN KEY (organisation_id) REFERENCES organisations(id) ON DELETE CASCADE,
+              FOREIGN KEY (wildlife_conflict_incident_id) REFERENCES wildlife_conflict_incidents(id) ON DELETE CASCADE
+            )
+          ''');
+
+          _logger.d('Recreated problem_animal_controls table');
+        }
+      } catch (e, stackTrace) {
+        _logger.e('Error during database upgrade', e, stackTrace);
+        rethrow;
+      }
     }
-    
+
     if (oldVersion < 3) {
       // Version 2 to 3 upgrades (when needed in future)
       // ...
@@ -396,7 +433,7 @@ class DatabaseHelper {
     try {
       _logger.d('Inserting into $table: $values');
       final db = await database;
-      
+
       // Check if record exists when where clause is provided
       if (where != null && whereArgs != null) {
         final existing = await db.query(
@@ -405,16 +442,16 @@ class DatabaseHelper {
           whereArgs: whereArgs,
           limit: 1,
         );
-        
+
         if (existing.isNotEmpty) {
           // Update instead of insert
           _logger.d('Record already exists in $table, updating instead');
           return await update(table, values, where: where, whereArgs: whereArgs);
         }
       }
-      
+
       final id = await db.insert(
-        table, 
+        table,
         values,
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
@@ -558,7 +595,7 @@ class DatabaseHelper {
     try {
       _logger.d('Updating sync item $id status to $status');
       final db = await database;
-      
+
       // Get current attempt count
       final item = await db.query(
         'sync_queue',
@@ -566,9 +603,9 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [id],
       );
-      
+
       final currentAttemptCount = item.isNotEmpty ? item.first['attempt_count'] as int : 0;
-      
+
       final affected = await db.update(
         'sync_queue',
         {
@@ -579,7 +616,7 @@ class DatabaseHelper {
         where: 'id = ?',
         whereArgs: [id],
       );
-      
+
       _logger.d('Updated sync item status for ID $id to $status (attempt ${currentAttemptCount + 1})');
       return affected;
     } catch (e, stackTrace) {
@@ -593,7 +630,7 @@ class DatabaseHelper {
     try {
       _logger.w('Clearing entire database');
       final db = await database;
-      
+
       final tables = [
         'user',
         'organisations',
@@ -623,22 +660,22 @@ class DatabaseHelper {
       await db.transaction((txn) async {
         // First disable foreign keys to avoid constraint errors
         await txn.execute('PRAGMA foreign_keys = OFF');
-        
+
         for (String table in tables) {
           await txn.delete(table);
         }
-        
+
         // Re-enable foreign keys
         await txn.execute('PRAGMA foreign_keys = ON');
       });
-      
+
       _logger.i('Database cleared successfully');
     } catch (e, stackTrace) {
       _logger.e('Error clearing database', e, stackTrace);
       rethrow;
     }
   }
-  
+
   // Check if database exists
   Future<bool> databaseExists() async {
     try {
@@ -650,7 +687,7 @@ class DatabaseHelper {
       return false;
     }
   }
-  
+
   // Get database path
   Future<String> getDatabasePath() async {
     try {
@@ -662,20 +699,20 @@ class DatabaseHelper {
       rethrow;
     }
   }
-  
+
   // Delete database file
   Future<void> deleteDatabase() async {
     try {
       _logger.w('Deleting database file');
       final documentsDirectory = await getApplicationDocumentsDirectory();
       final path = join(documentsDirectory.path, AppConstants.databaseName);
-      
+
       // Close database if open
       if (_database != null) {
         await _database!.close();
         _database = null;
       }
-      
+
       // Delete the file
       await databaseFactory.deleteDatabase(path);
       _logger.i('Database file deleted');
@@ -684,7 +721,7 @@ class DatabaseHelper {
       rethrow;
     }
   }
-  
+
   // Reset database (delete and recreate)
   Future<void> resetDatabase() async {
     try {

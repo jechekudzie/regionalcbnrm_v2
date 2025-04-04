@@ -54,7 +54,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/species/{species}', [SpeciesController::class, 'show']);
 
         // Wildlife Conflict routes
-        Route::get('/organisations/{organisation}/wildlife-conflicts', [WildlifeConflictController::class, 'getIncidents']);
+        Route::get('/organisations/{id}/wildlife-conflicts', [WildlifeConflictController::class, 'getIncidents']);
         Route::get('/wildlife-conflicts/{incident}', [WildlifeConflictController::class, 'getIncident']);
         Route::post('/wildlife-conflicts', [WildlifeConflictController::class, 'createIncident']);
         Route::put('/wildlife-conflicts/{incident}', [WildlifeConflictController::class, 'updateIncident']);
@@ -63,7 +63,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/wildlife-conflicts/{incident}/outcomes', [WildlifeConflictController::class, 'addOutcome']);
 
         // Problem Animal Control routes
-        Route::get('/organisations/{organisation}/problem-animal-controls', [ProblemAnimalControlController::class, 'getRecords']);
+        Route::get('/organisations/{id}/problem-animal-controls', [ProblemAnimalControlController::class, 'getRecords']);
         Route::get('/problem-animal-controls/{record}', [ProblemAnimalControlController::class, 'getRecord']);
         Route::post('/problem-animal-controls', [ProblemAnimalControlController::class, 'createRecord']);
         Route::put('/problem-animal-controls/{record}', [ProblemAnimalControlController::class, 'updateRecord']);

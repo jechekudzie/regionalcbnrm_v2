@@ -30,9 +30,18 @@ class _ProblemAnimalControlListScreenState extends State<ProblemAnimalControlLis
   Future<void> _loadOrganisationId() async {
     try {
       // Get the current organisation ID from shared preferences
-      final repository = Get.find<OrganisationRepository>();
+      OrganisationRepository repository;
+
+      try {
+        repository = Get.find<OrganisationRepository>();
+      } catch (e) {
+        // If repository is not registered, register it now
+        repository = OrganisationRepository();
+        Get.put(repository, permanent: true);
+      }
+
       final organisation = await repository.getSelectedOrganisation();
-      
+
       if (organisation != null) {
         _organisationId.value = organisation.id;
         await _loadControls();
@@ -41,6 +50,7 @@ class _ProblemAnimalControlListScreenState extends State<ProblemAnimalControlLis
         _hasError.value = true;
       }
     } catch (e) {
+      print('Error loading organisation ID: $e');
       _isLoading.value = false;
       _hasError.value = true;
     }
@@ -48,10 +58,10 @@ class _ProblemAnimalControlListScreenState extends State<ProblemAnimalControlLis
 
   Future<void> _loadControls() async {
     if (_organisationId.value == 0) return;
-    
+
     _isLoading.value = true;
     _hasError.value = false;
-    
+
     try {
       final controls = await _repository.getControls(_organisationId.value);
       _controls.value = controls;
@@ -133,7 +143,7 @@ class _ProblemAnimalControlListScreenState extends State<ProblemAnimalControlLis
 
   Widget _buildControlCard(ProblemAnimalControl control) {
     final formattedDate = DateFormat('dd MMM yyyy').format(control.date);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       shape: RoundedRectangleBorder(

@@ -8,9 +8,10 @@ import 'package:resource_africa/ui/widgets/location_map_view.dart';
 import 'package:resource_africa/utils/app_routes.dart';
 
 class WildlifeConflictDetailsScreen extends StatefulWidget {
-  const WildlifeConflictDetailsScreen({Key? key, required this.repository}) : super(key: key);
+  WildlifeConflictDetailsScreen({Key? key}) : super(key: key);
 
-  final WildlifeConflictRepository repository;
+  // Creating repository instance here to avoid passing it in constructor
+  final WildlifeConflictRepository repository = WildlifeConflictRepository();
 
   @override
   State<WildlifeConflictDetailsScreen> createState() => _WildlifeConflictDetailsScreenState();
@@ -24,6 +25,48 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
   final RxBool _hasError = false.obs;
   final Rx<WildlifeConflictIncident?> _incident = Rx<WildlifeConflictIncident?>(null);
   late int _incidentId;
+
+  // Helper method to safely format time strings
+  String _formatTimeString(String timeString) {
+    try {
+      // For debugging
+      print('Trying to format time string: $timeString');
+
+      // Handle date-time formats that might include the date
+      if (timeString.contains('T')) {
+        // ISO format like "2025-04-03T15:30:00.000000Z"
+        final dateTime = DateTime.parse(timeString);
+        return DateFormat('h:mm a').format(dateTime);
+      }
+      // Handle time-only formats with colons
+      else if (timeString.contains(':')) {
+        try {
+          // Try to parse as HH:mm
+          return DateFormat('h:mm a').format(DateFormat('HH:mm').parse(timeString));
+        } catch (e) {
+          // If that fails, try other common formats
+          try {
+            // Try with seconds: HH:mm:ss
+            return DateFormat('h:mm a').format(DateFormat('HH:mm:ss').parse(timeString));
+          } catch (e2) {
+            // Just return the original if all parsing attempts fail
+            return timeString;
+          }
+        }
+      }
+      // Handle date strings like "03/04/2025"
+      else if (timeString.contains('/')) {
+        // This is likely a date, not a time - return as is
+        return timeString;
+      }
+      // Any other format, return as is
+      return timeString;
+    } catch (e) {
+      print('Error formatting time string: $timeString - $e');
+      // Return the original string if parsing fails
+      return timeString;
+    }
+  }
 
   @override
   void initState() {
@@ -40,9 +83,8 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
       // Optionally show an error message or navigate back
       Get.back();
       _notificationService.showSnackBar(
-        'Error',
         'Invalid incident ID provided.',
-        SnackBarType.error,
+        type: SnackBarType.error,
       );
     }
   }
@@ -62,9 +104,8 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
         _isLoading.value = false;
         _hasError.value = true;
         _notificationService.showSnackBar(
-          'Error',
           'Failed to load incident details: ${e.toString()}',
-          SnackBarType.error,
+          type: SnackBarType.error,
         );
       }
     }
@@ -79,9 +120,8 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
     if (result == true && mounted) { // Check if mounted after async gap
       await _loadIncident(); // Reload to show the new outcome
       _notificationService.showSnackBar(
-        'Success',
         'Conflict outcome added successfully',
-        SnackBarType.success,
+        type: SnackBarType.success,
       );
     }
   }
@@ -182,7 +222,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                       children: [
                         _buildInfoRow(
                           'Date',
-                          incident.date != null ? DateFormat('dd/MM/yyyy').format(incident.date!) : 'N/A',
+                          incident.date != null ? DateFormat('dd/MM/yyyy').format(incident.date) : 'N/A',
                           Icons.calendar_today,
                         ),
                         const Divider(),
@@ -194,7 +234,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                         const Divider(),
                         _buildSpeciesInfoRow(
                           'Species Involved',
-                          incident.species ?? [],
+                          incident.species,
                           Icons.pets,
                         ),
                         const Divider(),
@@ -215,7 +255,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                   elevation: 2,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(incident.description?.isNotEmpty ?? false ? incident.description! : 'No Description Provided'),
+                    child: Text(incident.description.isNotEmpty ?? false ? incident.description : 'No Description Provided'),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -230,19 +270,19 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Lat: ${incident.latitude?.toStringAsFixed(6) ?? 'N/A'}, Lng: ${incident.longitude?.toStringAsFixed(6) ?? 'N/A'}',
+                          'Lat: ${incident.latitude.toStringAsFixed(6) ?? 'N/A'}, Lng: ${incident.longitude.toStringAsFixed(6) ?? 'N/A'}',
                           style: const TextStyle(
                             fontSize: 14,
                             fontFamily: 'monospace',
                           ),
                         ),
                         const SizedBox(height: 8),
-                        if (incident.latitude != null && incident.longitude != null)
+                        if (incident.longitude != null)
                           SizedBox(
                             height: 200,
                             child: LocationMapView(
-                              latitude: incident.latitude!,
-                              longitude: incident.longitude!,
+                              latitude: incident.latitude,
+                              longitude: incident.longitude,
                             ),
                           )
                         else
@@ -309,7 +349,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
           Expanded(
             child: Text(
               value != null
-                  ? DateFormat('h:mm a').format(DateFormat('HH:mm').parse(value))
+                  ? (label == 'Time' ? _formatTimeString(value) : value)
                   : 'N/A',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -319,11 +359,43 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
     );
   }
 
-  Widget _buildSpeciesInfoRow(String label, List<Species> species, IconData icon) {
+  Widget _buildSpeciesInfoRow(String label, Species? species, IconData icon) {
+    final incident = _incident.value;
+
+    // Use speciesList if available and not empty
+    if (incident?.speciesList != null && incident!.speciesList!.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, size: 18, color: Colors.grey[600]),
+                const SizedBox(width: 12),
+                Text(
+                  '$label:',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...incident.speciesList!.map((s) => Padding(
+              padding: const EdgeInsets.only(left: 30, bottom: 4),
+              child: Text(
+                '• ${s.name ?? 'Unknown Species'}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            )).toList(),
+          ],
+        ),
+      );
+    }
+
+    // Fallback to single species display
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, size: 18, color: Colors.grey[600]),
           const SizedBox(width: 12),
@@ -333,18 +405,10 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: species.isEmpty
-                ? Text('N/A', style: Theme.of(context).textTheme.bodyMedium)
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: species.map((s) => Padding(
-                      padding: const EdgeInsets.only(bottom: 4.0),
-                      child: Text(
-                        s.name ?? 'Unknown Species',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    )).toList(),
-                  ),
+            child: Text(
+              species?.name ?? 'N/A',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
         ],
       ),
@@ -468,9 +532,8 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
       });
       await widget.repository.deleteIncident(_incidentId, deleteFromServer);
       _notificationService.showSnackBar(
-        'Success',
         'Incident deleted successfully',
-        SnackBarType.success,
+        type: SnackBarType.success,
       );
       Get.back(); // Navigate back after successful deletion
     } catch (e) {
@@ -481,9 +544,8 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
           _hasError.value = true; // Optionally show an error state on the main screen
         });
         _notificationService.showSnackBar(
-          'Error',
           'Failed to delete incident: ${e.toString()}',
-          SnackBarType.error,
+          type: SnackBarType.error,
         );
       }
     } finally {

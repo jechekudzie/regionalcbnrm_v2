@@ -4,6 +4,7 @@ class ProblemAnimalControl {
   final int? id;
   final int wildlifeConflictIncidentId;
   final int controlMeasureId;
+  final int organisationId;
   final DateTime date;
   final String time;
   final String description;
@@ -14,7 +15,7 @@ class ProblemAnimalControl {
   final DateTime? updatedAt;
   final String? syncStatus;
   final int? remoteId;
-  
+
   // Relations
   final ControlMeasure? controlMeasure;
   final WildlifeConflictIncident? wildlifeConflictIncident;
@@ -23,6 +24,7 @@ class ProblemAnimalControl {
     this.id,
     required this.wildlifeConflictIncidentId,
     required this.controlMeasureId,
+    required this.organisationId,
     required this.date,
     required this.time,
     required this.description,
@@ -42,6 +44,7 @@ class ProblemAnimalControl {
       'id': id,
       'wildlife_conflict_incident_id': wildlifeConflictIncidentId,
       'control_measure_id': controlMeasureId,
+      'organisation_id': organisationId,
       'date': date.toIso8601String().split('T')[0],
       'time': time,
       'description': description,
@@ -62,6 +65,7 @@ class ProblemAnimalControl {
       id: json['id'],
       wildlifeConflictIncidentId: json['wildlife_conflict_incident_id'],
       controlMeasureId: json['control_measure_id'],
+      organisationId: json['organisation_id'],
       date: DateTime.parse(json['date']),
       time: json['time'],
       description: json['description'],
@@ -83,6 +87,7 @@ class ProblemAnimalControl {
     return {
       'wildlife_conflict_incident_id': wildlifeConflictIncidentId,
       'control_measure_id': controlMeasureId,
+      'organisation_id': organisationId,
       'date': date.toIso8601String().split('T')[0],
       'time': time,
       'description': description,
@@ -96,6 +101,7 @@ class ProblemAnimalControl {
     int? id,
     int? wildlifeConflictIncidentId,
     int? controlMeasureId,
+    int? organisationId,
     DateTime? date,
     String? time,
     String? description,
@@ -113,6 +119,7 @@ class ProblemAnimalControl {
       id: id ?? this.id,
       wildlifeConflictIncidentId: wildlifeConflictIncidentId ?? this.wildlifeConflictIncidentId,
       controlMeasureId: controlMeasureId ?? this.controlMeasureId,
+      organisationId: organisationId ?? this.organisationId,
       date: date ?? this.date,
       time: time ?? this.time,
       description: description ?? this.description,

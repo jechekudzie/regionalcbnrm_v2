@@ -30,8 +30,8 @@ class LocationMapView extends StatelessWidget {
           zoom: zoom,
           maxZoom: 18,
           minZoom: 4,
-          interactiveFlags: interactive 
-              ? InteractiveFlag.all 
+          interactiveFlags: interactive
+              ? InteractiveFlag.all
               : InteractiveFlag.none,
         ),
         children: [
@@ -45,7 +45,7 @@ class LocationMapView extends StatelessWidget {
                 point: LatLng(latitude, longitude),
                 width: 40,
                 height: 40,
-                builder: (context) => const Icon(
+                child: const Icon(
                   Icons.location_on,
                   color: Colors.red,
                   size: 40,

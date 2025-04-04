@@ -21,7 +21,7 @@ class SimpleLocationPicker extends StatefulWidget {
 class _SimpleLocationPickerState extends State<SimpleLocationPicker> {
   late MapController _mapController;
   late LatLng _currentPosition;
-  
+
   @override
   void initState() {
     super.initState();
@@ -31,7 +31,7 @@ class _SimpleLocationPickerState extends State<SimpleLocationPicker> {
       widget.initialLongitude != 0 ? widget.initialLongitude : 30.0000,
     );
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -65,7 +65,7 @@ class _SimpleLocationPickerState extends State<SimpleLocationPicker> {
                       point: _currentPosition,
                       width: 40,
                       height: 40,
-                      builder: (context) => const Icon(
+                      child: const Icon(
                         Icons.location_on,
                         color: Colors.red,
                         size: 40,

@@ -20,12 +20,12 @@ class ProblemAnimalControlCreateScreen extends StatefulWidget {
 
 class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlCreateScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
-  
+
   final ProblemAnimalControlRepository _repository = ProblemAnimalControlRepository();
   final WildlifeConflictRepository _conflictRepository = WildlifeConflictRepository();
   final OrganisationRepository _organisationRepository = OrganisationRepository();
   final NotificationService _notificationService = Get.find<NotificationService>();
-  
+
   final RxBool _isLoading = false.obs;
   final RxBool _isLoadingData = true.obs;
   final RxList<ControlMeasure> _controlMeasures = RxList<ControlMeasure>([]);
@@ -33,56 +33,55 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
   final RxDouble _latitude = 0.0.obs;
   final RxDouble _longitude = 0.0.obs;
   final RxInt _organisationId = 0.obs;
-  
+
   // For linked wildlife conflict incident
   final RxBool _isRelatedToIncident = false.obs;
   final Rx<WildlifeConflictIncident?> _selectedIncident = Rx<WildlifeConflictIncident?>(null);
   int? _relatedIncidentId;
-  
+
   @override
   void initState() {
     super.initState();
-    
+
     // Check if we have a pre-selected wildlife conflict incident ID from the arguments
     if (Get.arguments != null && Get.arguments['wildlifeConflictIncidentId'] != null) {
       _relatedIncidentId = Get.arguments['wildlifeConflictIncidentId'];
       _isRelatedToIncident.value = true;
     }
-    
+
     _initForm();
   }
-  
+
   Future<void> _initForm() async {
     _isLoadingData.value = true;
-    
+
     try {
       // Load organisation
       final organisation = await _organisationRepository.getSelectedOrganisation();
       if (organisation != null) {
         _organisationId.value = organisation.id;
       }
-      
+
       // Load control measures and incidents in parallel
       await Future.wait([
         _loadControlMeasures(),
         _loadIncidents(),
       ]);
-      
+
       // If we have a related incident ID, load the incident details and set location
       if (_relatedIncidentId != null) {
         await _loadRelatedIncident();
       }
     } catch (e) {
       _notificationService.showSnackBar(
-        'Error',
         'Failed to load form data. Please try again.',
-        SnackBarType.error,
+        type: SnackBarType.error,
       );
     } finally {
       _isLoadingData.value = false;
     }
   }
-  
+
   Future<void> _loadControlMeasures() async {
     try {
       final measures = await _repository.getControlMeasures();
@@ -91,10 +90,10 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
       // Handle error
     }
   }
-  
+
   Future<void> _loadIncidents() async {
     if (_organisationId.value == 0) return;
-    
+
     try {
       final incidents = await _conflictRepository.getIncidents(_organisationId.value);
       _incidents.value = incidents;
@@ -102,16 +101,16 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
       // Handle error
     }
   }
-  
+
   Future<void> _loadRelatedIncident() async {
     if (_relatedIncidentId == null) return;
-    
+
     try {
       final incident = await _conflictRepository.getIncident(_relatedIncidentId!);
       _selectedIncident.value = incident;
       _latitude.value = incident.latitude ?? 0.0;
       _longitude.value = incident.longitude ?? 0.0;
-      
+
       // Update the form values
       _formKey.currentState?.fields['latitude']?.didChange(_latitude.value.toString());
       _formKey.currentState?.fields['longitude']?.didChange(_longitude.value.toString());
@@ -119,20 +118,21 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
       // If there's an error loading the related incident, fallback to getting user location
     }
   }
-  
-  
+
+
   Future<void> _submitForm() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
-      
+
       _isLoading.value = true;
-      
+
       try {
         final control = ProblemAnimalControl(
           wildlifeConflictIncidentId: _isRelatedToIncident.value && _selectedIncident.value != null
               ? _selectedIncident.value!.id!
               : 0, // Use 0 as a placeholder if no incident is selected
           controlMeasureId: formData['control_measure_id'],
+          organisationId: _organisationId.value,
           date: formData['date'],
           time: DateFormat('HH:mm').format(formData['time']),
           description: formData['description'],
@@ -140,21 +140,19 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
           longitude: double.parse(formData['longitude']),
           numberOfAnimals: int.parse(formData['number_of_animals']),
         );
-        
+
         final createdControl = await _repository.createControl(control);
-        
+
         _notificationService.showSnackBar(
-          'Success',
           'Problem animal control measure recorded successfully',
-          SnackBarType.success,
+          type: SnackBarType.success,
         );
-        
+
         Get.back(result: createdControl);
       } catch (e) {
         _notificationService.showSnackBar(
-          'Error',
           'Failed to record control measure. Please try again.',
-          SnackBarType.error,
+          type: SnackBarType.error,
         );
       } finally {
         _isLoading.value = false;
@@ -172,7 +170,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
         if (_isLoadingData.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
           child: FormBuilder(
@@ -203,7 +201,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Date: ${_selectedIncident.value?.date != null ? DateFormat('dd MMM yyyy').format(_selectedIncident.value!.date!) : 'Unknown Date'}',
+                            'Date: ${_selectedIncident.value?.date != null ? DateFormat('dd MMM yyyy').format(_selectedIncident.value!.date) : 'Unknown Date'}',
                             style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
@@ -224,7 +222,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                       _isRelatedToIncident.value = value ?? false;
                     },
                   ),
-                  
+
                   if (_isRelatedToIncident.value) ...[
                     FormBuilderDropdown(
                       name: 'incident_id',
@@ -235,7 +233,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                         prefixIcon: Icon(Icons.warning_amber_rounded),
                       ),
                       items: _incidents.map((incident) {
-                        final formattedDate = incident.date != null ? DateFormat('dd MMM yyyy').format(incident.date!) : 'Unknown Date';
+                        final formattedDate = incident.date != null ? DateFormat('dd MMM yyyy').format(incident.date) : 'Unknown Date';
                         return DropdownMenuItem(
                           value: incident.id,
                           child: Text('${incident.title} ($formattedDate)'),
@@ -258,7 +256,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                     const SizedBox(height: 16),
                   ],
                 ],
-                
+
                 // Control measure dropdown
                 FormBuilderDropdown(
                   name: 'control_measure_id',
@@ -279,7 +277,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   ]),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Date and time fields
                 Row(
                   children: [
@@ -319,7 +317,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Number of animals field
                 FormBuilderTextField(
                   name: 'number_of_animals',
@@ -337,7 +335,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   ]),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Location fields
                 const Text(
                   'Location',
@@ -347,7 +345,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   ),
                 ),
                 const SizedBox(height: 8),
-                
+
                 LocationPicker(
                   initialLatitude: _latitude.value,
                   initialLongitude: _longitude.value,
@@ -359,7 +357,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   },
                 ),
                 const SizedBox(height: 8),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -398,7 +396,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Description field
                 FormBuilderTextField(
                   name: 'description',
@@ -415,7 +413,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                   ]),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // Submit button
                 SizedBox(
                   width: double.infinity,

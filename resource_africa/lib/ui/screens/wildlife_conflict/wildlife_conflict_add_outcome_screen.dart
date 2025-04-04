@@ -16,15 +16,15 @@ class WildlifeConflictAddOutcomeScreen extends StatefulWidget {
 
 class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOutcomeScreen> {
   final _formKey = GlobalKey<FormBuilderState>();
-  
+
   final WildlifeConflictRepository _repository = WildlifeConflictRepository();
   final NotificationService _notificationService = Get.find<NotificationService>();
-  
+
   final RxBool _isLoading = false.obs;
   final RxBool _isLoadingData = true.obs;
   final RxList<ConflictOutcome> _conflictOutcomes = RxList<ConflictOutcome>([]);
   final RxList<DynamicValue> _dynamicValues = RxList<DynamicValue>([]);
-  
+
   late int _incidentId;
 
   @override
@@ -36,15 +36,14 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
 
   Future<void> _loadConflictOutcomes() async {
     _isLoadingData.value = true;
-    
+
     try {
       final outcomes = await _repository.getConflictOutcomes();
       _conflictOutcomes.value = outcomes;
     } catch (e) {
       _notificationService.showSnackBar(
-        'Error',
         'Failed to load conflict outcomes',
-        SnackBarType.error,
+        type: SnackBarType.error,
       );
     } finally {
       _isLoadingData.value = false;
@@ -53,16 +52,16 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
 
   void _onConflictOutcomeChanged(int? outcomeId) {
     if (outcomeId == null) return;
-    
+
     // Find the selected conflict outcome
     final selectedOutcome = _conflictOutcomes.firstWhere(
       (outcome) => outcome.id == outcomeId,
       orElse: () => ConflictOutcome(id: 0, name: ''),
     );
-    
+
     // Clear previous dynamic values
     _dynamicValues.clear();
-    
+
     // Create new dynamic value fields if the outcome has dynamic fields
     if (selectedOutcome.dynamicFields != null && selectedOutcome.dynamicFields!.isNotEmpty) {
       for (final field in selectedOutcome.dynamicFields!) {
@@ -80,9 +79,9 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
   Future<void> _submitForm() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
-      
+
       _isLoading.value = true;
-      
+
       try {
         // Collect dynamic values if any
         final List<DynamicValue> dynamicValues = [];
@@ -97,7 +96,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
             );
           }
         }
-        
+
         // Create and submit the outcome
         final outcome = await _repository.addOutcome(
           _incidentId,
@@ -106,13 +105,12 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
           formData['date'],
           dynamicValues.isNotEmpty ? dynamicValues : null,
         );
-        
+
         Get.back(result: outcome);
       } catch (e) {
         _notificationService.showSnackBar(
-          'Error',
           'Failed to add outcome. Please try again.',
-          SnackBarType.error,
+          type: SnackBarType.error,
         );
       } finally {
         _isLoading.value = false;
@@ -130,7 +128,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
         if (_isLoadingData.value) {
           return const Center(child: CircularProgressIndicator());
         }
-        
+
         return SingleChildScrollView(
           padding: const EdgeInsets.all(16),
           child: FormBuilder(
@@ -160,7 +158,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
                   onChanged: _onConflictOutcomeChanged,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Date field
                 FormBuilderDateTimePicker(
                   name: 'date',
@@ -177,7 +175,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
                   ]),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Notes field
                 FormBuilderTextField(
                   name: 'notes',
@@ -190,12 +188,12 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
                   maxLines: 3,
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Dynamic fields
                 ..._buildDynamicFields(),
-                
+
                 const SizedBox(height: 24),
-                
+
                 // Submit button
                 SizedBox(
                   width: double.infinity,
@@ -228,13 +226,13 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
 
   List<Widget> _buildDynamicFields() {
     final List<Widget> fields = [];
-    
+
     for (final dynamicValue in _dynamicValues) {
       final field = dynamicValue.dynamicField;
       if (field == null) continue;
-      
+
       Widget formField;
-      
+
       switch (field.type) {
         case 'text':
           formField = FormBuilderTextField(
@@ -289,7 +287,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
         default:
           formField = const SizedBox.shrink();
       }
-      
+
       fields.add(
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
@@ -297,7 +295,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
         ),
       );
     }
-    
+
     return fields;
   }
 }

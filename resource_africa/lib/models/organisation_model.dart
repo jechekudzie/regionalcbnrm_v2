@@ -1,5 +1,46 @@
 import 'user_model.dart';
 
+class OrganisationType {
+  final int id;
+  final String name;
+  final String? slug;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  OrganisationType({
+    required this.id,
+    required this.name,
+    this.slug,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'slug': slug ?? name.toLowerCase().replaceAll(' ', '-'),
+      'created_at': createdAt?.toIso8601String(),
+      'updated_at': updatedAt?.toIso8601String(),
+    };
+  }
+
+  factory OrganisationType.fromJson(Map<String, dynamic> json) {
+    return OrganisationType(
+      id: json['id'],
+      name: json['name'],
+      slug: json['slug'],
+      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
+      updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'OrganisationType{id: $id, name: $name}';
+  }
+}
+
 class OrganisationDetail {
   final int id;
   final String name;

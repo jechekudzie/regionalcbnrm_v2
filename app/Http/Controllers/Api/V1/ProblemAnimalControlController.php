@@ -20,11 +20,11 @@ class ProblemAnimalControlController extends Controller
      * @param Organisation $organisation
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getRecords(Request $request, Organisation $organisation)
+    public function getRecords(Request $request, $organisation)
     {
         // Check if user has access to this organisation
         $user = $request->user();
-        $hasAccess = $user->organisations()->where('organisations.id', $organisation->id)->exists();
+        $hasAccess = $user->organisations()->where('organisations.id', $organisation)->exists();
 
         if (!$hasAccess) {
             return response()->json([
@@ -35,7 +35,7 @@ class ProblemAnimalControlController extends Controller
 
         $records = ProblemAnimalControl::with(['wildlifeConflictIncident', 'controlMeasure'])
             ->whereHas('wildlifeConflictIncident', function ($query) use ($organisation) {
-                $query->where('organisation_id', $organisation->id);
+                $query->where('organisation_id', $organisation);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(15);

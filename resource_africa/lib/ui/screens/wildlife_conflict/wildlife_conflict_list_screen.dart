@@ -30,7 +30,16 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
   Future<void> _loadOrganisationId() async {
     try {
       // Get the current organisation ID from shared preferences
-      final repository = Get.find<OrganisationRepository>();
+      OrganisationRepository repository;
+
+      try {
+        repository = Get.find<OrganisationRepository>();
+      } catch (e) {
+        // If repository is not registered, register it now
+        repository = OrganisationRepository();
+        Get.put(repository, permanent: true);
+      }
+
       final organisation = await repository.getSelectedOrganisation();
 
       if (organisation != null) {
@@ -41,9 +50,8 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
         _hasError.value = true;
       }
     } catch (e) {
-      //print the exception
-      print('Error loading organisation ID: $e');
-      
+      // Error occurred when loading organisation
+
       _isLoading.value = false;
       _hasError.value = true;
     }
@@ -51,10 +59,10 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
 
   Future<void> _loadIncidents() async {
     if (_organisationId.value == 0) return;
-    
+
     _isLoading.value = true;
     _hasError.value = false;
-    
+
     try {
       final incidents = await _repository.getIncidents(_organisationId.value);
       _incidents.value = incidents;
@@ -135,12 +143,12 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
   }
 
   Widget _buildIncidentCard(WildlifeConflictIncident incident) {
-    final formattedDate = incident.date != null ? DateFormat('dd/MM/yyyy').format(incident.date!) : 'Unknown Date';
-    final formattedTime = incident.time != null ? DateFormat('h:mm a').format(DateTime.parse(incident.time!)) : 'Unknown Time';
-    
+    final formattedDate = DateFormat('dd/MM/yyyy').format(incident.date);
+    final formattedTime = DateFormat('h:mm a').format(DateTime.parse(incident.time));
+
     // Get appropriate icon based on conflict type
     IconData conflictIcon = _getConflictTypeIcon(incident.conflictType?.name);
-    
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       shape: RoundedRectangleBorder(
@@ -196,7 +204,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                 ],
               ),
             ),
-            
+
             // Conflict type - prominently displayed
             Container(
               width: double.infinity,
@@ -221,7 +229,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                 ],
               ),
             ),
-            
+
             // Content
             Padding(
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
@@ -247,7 +255,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                           ),
                         ],
                       ),
-                      
+
                       // Time on right
                       Row(
                         children: [
@@ -265,48 +273,51 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
-                  // Species chips - scrollable horizontal row
-                  if (incident.species != null && incident.species!.isNotEmpty)
+
+                  // Show species chips - multiple species support
+                  if (incident.speciesList != null && incident.speciesList!.isNotEmpty)
                     SizedBox(
                       height: 30,
-                      child: ListView.separated(
+                      child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: incident.species!.length,
-                        separatorBuilder: (context, index) => const SizedBox(width: 6),
-                        itemBuilder: (context, index) {
-                          final species = incident.species![index];
-                          return Chip(
-                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                            label: Text(
-                              species.name ?? 'Unknown',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.amber.shade900,
-                                fontWeight: FontWeight.w500,
+                        itemCount: incident.speciesList!.length,
+                        itemBuilder: (context, speciesIndex) {
+                          final species = incident.speciesList![speciesIndex];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: Chip(
+                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+                              label: Text(
+                                species.name ?? 'Unknown Species',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.amber.shade900,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
+                              avatar: Icon(
+                                _getSpeciesIcon(species.name),
+                                size: 14,
+                                color: Colors.amber.shade800,
+                              ),
+                              backgroundColor: Colors.amber.shade50,
+                              side: BorderSide(color: Colors.amber.shade100),
+                              visualDensity: VisualDensity.compact,
                             ),
-                            avatar: Icon(
-                              _getSpeciesIcon(species.name),
-                              size: 14,
-                              color: Colors.amber.shade800,
-                            ),
-                            backgroundColor: Colors.amber.shade50,
-                            side: BorderSide(color: Colors.amber.shade100),
-                            visualDensity: VisualDensity.compact,
                           );
                         },
                       ),
                     )
-                  else
+                  // Fallback to single species for backward compatibility
+                  else if (incident.species != null)
                     Chip(
                       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
                       label: Text(
-                        'Unknown Species',
+                        incident.species!.name ?? 'Unknown Species',
                         style: TextStyle(
                           fontSize: 11,
                           color: Colors.amber.shade900,
@@ -314,7 +325,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                         ),
                       ),
                       avatar: Icon(
-                        Icons.pets,
+                        _getSpeciesIcon(incident.species!.name),
                         size: 14,
                         color: Colors.amber.shade800,
                       ),
@@ -322,11 +333,11 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                       side: BorderSide(color: Colors.amber.shade100),
                       visualDensity: VisualDensity.compact,
                     ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Description - full width
-                  if (incident.description != null && incident.description!.isNotEmpty)
+                  if (incident.description.isNotEmpty)
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(8),
@@ -339,7 +350,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            incident.description!,
+                            incident.description,
                             style: const TextStyle(fontSize: 13),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -350,7 +361,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                 ],
               ),
             ),
-            
+
             // Footer with view details button - more compact
             Container(
               padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
@@ -383,36 +394,36 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
   // Helper function to determine conflict type icon
   IconData _getConflictTypeIcon(String? conflictType) {
     if (conflictType == null) return Icons.warning_amber_rounded;
-    
+
     conflictType = conflictType.toLowerCase();
-    
+
     if (conflictType.contains('attack')) return Icons.dangerous;
     if (conflictType.contains('damage')) return Icons.home_work;
     if (conflictType.contains('crop')) return Icons.grass;
     if (conflictType.contains('livestock')) return Icons.agriculture;
     if (conflictType.contains('sighting')) return Icons.visibility;
-    
+
     return Icons.warning_amber_rounded;
   }
 
   // Helper function to determine species icon
   IconData _getSpeciesIcon(String? species) {
     if (species == null) return Icons.pets;
-    
+
     species = species.toLowerCase();
-    
+
     if (species.contains('elephant')) return Icons.pets;
     if (species.contains('leopard') || species.contains('tiger') || species.contains('lion')) return Icons.catching_pokemon;
     if (species.contains('snake') || species.contains('reptile')) return Icons.pest_control;
     if (species.contains('monkey') || species.contains('primate')) return Icons.emoji_nature;
     if (species.contains('bird')) return Icons.flight;
-    
+
     return Icons.pets;
   }
 
   Color _getSyncStatusColor(String? status) {
     if (status == null) return Colors.grey;
-    
+
     switch (status.toLowerCase()) {
       case 'synced':
         return Colors.green;

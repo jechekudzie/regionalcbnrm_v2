@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:resource_africa/repositories/organisation_repository.dart';
+import 'package:resource_africa/repositories/wildlife_conflict_repository.dart';
 import 'package:resource_africa/services/auth_service.dart';
 import 'package:resource_africa/services/connectivity_service.dart';
 import 'package:resource_africa/services/error_handler_service.dart';
@@ -8,7 +10,18 @@ import 'package:resource_africa/services/notification_service.dart';
 import 'package:resource_africa/ui/screens/auth/login_screen.dart';
 import 'package:resource_africa/ui/screens/dashboard/dashboard_screen.dart';
 import 'package:resource_africa/ui/screens/debug/debug_settings_screen.dart';
+import 'package:resource_africa/ui/screens/poaching/poaching_add_poacher_screen.dart';
+import 'package:resource_africa/ui/screens/poaching/poaching_incident_create_screen.dart';
+import 'package:resource_africa/ui/screens/poaching/poaching_incident_details_screen.dart';
+import 'package:resource_africa/ui/screens/poaching/poaching_incident_list_screen.dart';
+import 'package:resource_africa/ui/screens/problem_animal_control/problem_animal_control_create_screen.dart';
+import 'package:resource_africa/ui/screens/problem_animal_control/problem_animal_control_details_screen.dart';
+import 'package:resource_africa/ui/screens/problem_animal_control/problem_animal_control_list_screen.dart';
 import 'package:resource_africa/ui/screens/splash_screen.dart';
+import 'package:resource_africa/ui/screens/wildlife_conflict/wildlife_conflict_add_outcome_screen.dart';
+import 'package:resource_africa/ui/screens/wildlife_conflict/wildlife_conflict_create_screen.dart';
+import 'package:resource_africa/ui/screens/wildlife_conflict/wildlife_conflict_details_screen.dart';
+import 'package:resource_africa/ui/screens/wildlife_conflict/wildlife_conflict_list_screen.dart';
 import 'package:resource_africa/ui/theme/app_theme.dart';
 import 'package:resource_africa/utils/app_constants.dart';
 import 'package:resource_africa/utils/app_routes.dart';
@@ -24,16 +37,16 @@ void main() async {
   // Handle errors that occur during app initialization
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     // Initialize services
     await initServices();
-    
+
     // Set preferred orientations
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    
+
     runApp(const ResourceAfricaApp());
   } catch (e, stackTrace) {
     AppLogger().e('Error during app initialization', e, stackTrace);
@@ -45,18 +58,21 @@ void main() async {
 // Initialize all Get services
 Future<void> initServices() async {
   final logger = AppLogger();
-  
+
   try {
     logger.i('Initializing services');
-    
+
     // Register error handler early to handle initialization errors
     await Get.putAsync(() => ErrorHandlerService().init());
-    
+
     // Register other services
     await Get.putAsync(() => ConnectivityService().init());
     await Get.putAsync(() => NotificationService().init());
     await Get.putAsync(() => AuthService().init());
-    
+
+    // Register repositories as singletons
+    Get.put(OrganisationRepository(), permanent: true);
+
     logger.i('All services initialized');
   } catch (e, stackTrace) {
     logger.e('Error initializing services', e, stackTrace);
@@ -85,6 +101,7 @@ class ResourceAfricaApp extends StatelessWidget {
       initialRoute: AppRoutes.splash,
       defaultTransition: Transition.fade,
       getPages: [
+        // Core routes
         GetPage(
           name: AppRoutes.splash,
           page: () => const SplashScreen(),
@@ -98,10 +115,86 @@ class ResourceAfricaApp extends StatelessWidget {
           page: () => const DashboardScreen(),
         ),
         GetPage(
+          name: AppRoutes.profile,
+          page: () => const DashboardScreen(), // Placeholder - needs to be implemented
+        ),
+        GetPage(
+          name: AppRoutes.syncData,
+          page: () => const DashboardScreen(), // Placeholder - needs to be implemented
+        ),
+
+        // Wildlife conflict routes
+        GetPage(
+          name: AppRoutes.wildlifeConflicts,
+          page: () => const WildlifeConflictListScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.wildlifeConflictDetails,
+          page: () => WildlifeConflictDetailsScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.createWildlifeConflict,
+          page: () => const WildlifeConflictCreateScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.addConflictOutcome,
+          page: () => const WildlifeConflictAddOutcomeScreen(),
+        ),
+
+        // Problem animal control routes
+        GetPage(
+          name: AppRoutes.problemAnimalControls,
+          page: () => const ProblemAnimalControlListScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.problemAnimalControlDetails,
+          page: () => const ProblemAnimalControlDetailsScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.createProblemAnimalControl,
+          page: () => const ProblemAnimalControlCreateScreen(),
+        ),
+        // Poaching routes
+        GetPage(
+          name: AppRoutes.poachingIncidents,
+          page: () => const PoachingIncidentListScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.poachingIncidentDetails,
+          page: () => const PoachingIncidentDetailsScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.createPoachingIncident,
+          page: () => const PoachingIncidentCreateScreen(),
+        ),
+        GetPage(
+          name: AppRoutes.poachingAddPoacher,
+          page: () => const PoachingAddPoacherScreen(),
+        ),
+
+        // Hunting routes (placeholders - need to be implemented)
+        GetPage(
+          name: AppRoutes.huntingActivities,
+          page: () => const DashboardScreen(), // Placeholder
+        ),
+        GetPage(
+          name: AppRoutes.createHuntingActivity,
+          page: () => const DashboardScreen(), // Placeholder
+        ),
+        GetPage(
+          name: AppRoutes.huntingConcessions,
+          page: () => const DashboardScreen(), // Placeholder
+        ),
+        GetPage(
+          name: AppRoutes.quotaAllocations,
+          page: () => const DashboardScreen(), // Placeholder
+        ),
+
+        // Debug routes
+        GetPage(
           name: AppRoutes.debugSettings,
           page: () => const DebugSettingsScreen(),
         ),
-        // Other routes will be defined here
       ],
     );
   }

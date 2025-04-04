@@ -16,7 +16,7 @@ class HuntingActivity {
   final DateTime? updatedAt;
   final String? syncStatus;
   final int? remoteId;
-  
+
   // Relations
   final HuntingConcession? huntingConcession;
   final Organisation? safariOperator;
@@ -165,7 +165,7 @@ class HuntingActivitySpecies {
   final int? quotaAllocationBalanceId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  
+
   // Relations
   final Species? species;
   final QuotaAllocationBalance? quotaAllocationBalance;
@@ -278,7 +278,7 @@ class HuntingConcession {
   final double? longitude;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  
+
   // Relations
   final Organisation? safariOperator;
 
@@ -346,7 +346,7 @@ class QuotaAllocation {
   final DateTime endDate;
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  
+
   // Relations
   final Species? species;
   final QuotaAllocationBalance? quotaAllocationBalance;
@@ -399,6 +399,36 @@ class QuotaAllocation {
       quotaAllocationBalance: json['quota_allocation_balance'] != null
           ? QuotaAllocationBalance.fromJson(json['quota_allocation_balance'])
           : null,
+    );
+  }
+
+  QuotaAllocation copyWith({
+    int? id,
+    int? organisationId,
+    int? speciesId,
+    int? huntingQuota,
+    int? rationalKillingQuota,
+    String? period,
+    DateTime? startDate,
+    DateTime? endDate,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    Species? species,
+    QuotaAllocationBalance? quotaAllocationBalance,
+  }) {
+    return QuotaAllocation(
+      id: id ?? this.id,
+      organisationId: organisationId ?? this.organisationId,
+      speciesId: speciesId ?? this.speciesId,
+      huntingQuota: huntingQuota ?? this.huntingQuota,
+      rationalKillingQuota: rationalKillingQuota ?? this.rationalKillingQuota,
+      period: period ?? this.period,
+      startDate: startDate ?? this.startDate,
+      endDate: endDate ?? this.endDate,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      species: species ?? this.species,
+      quotaAllocationBalance: quotaAllocationBalance ?? this.quotaAllocationBalance,
     );
   }
 }

@@ -13,10 +13,11 @@ class WildlifeConflictIncident {
   final DateTime? updatedAt;
   final String? syncStatus;
   final int? remoteId;
-  
+
   // Relations
   final ConflictType? conflictType;
   final Species? species;
+  final List<Species>? speciesList;
   final List<WildlifeConflictOutcome>? outcomes;
   final List<DynamicValue>? dynamicValues;
 
@@ -37,6 +38,7 @@ class WildlifeConflictIncident {
     this.remoteId,
     this.conflictType,
     this.species,
+    this.speciesList,
     this.outcomes,
     this.dynamicValues,
   });
@@ -59,29 +61,59 @@ class WildlifeConflictIncident {
       'remote_id': remoteId,
       'conflict_type': conflictType?.toJson(),
       'species': species?.toJson(),
+      'species_list': speciesList?.map((s) => s.toJson()).toList(),
       'outcomes': outcomes?.map((o) => o.toJson()).toList(),
       'dynamic_values': dynamicValues?.map((v) => v.toJson()).toList(),
     };
   }
 
   factory WildlifeConflictIncident.fromJson(Map<String, dynamic> json) {
+    // Handle the API structure differences
+    String dateField = json.containsKey('incident_date') ? 'incident_date' : 'date';
+    String timeField = json.containsKey('incident_time') ? 'incident_time' : 'time';
+
+    // Handle species list or single species
+    List<Species>? speciesList;
+    Species? primarySpecies;
+
+    if (json['species'] is List) {
+      final speciesJsonList = json['species'] as List;
+      if (speciesJsonList.isNotEmpty) {
+        // Convert all species in the list
+        speciesList = speciesJsonList
+            .map((speciesJson) => Species.fromJson(speciesJson))
+            .toList();
+        // Use the first one as the primary species for backward compatibility
+        primarySpecies = speciesList.first;
+      }
+    } else if (json['species'] is Map) {
+      // If it's a single species object
+      primarySpecies = Species.fromJson(json['species']);
+      speciesList = [primarySpecies];
+    }
+
+    // Get speciesId either directly or from the primary species
+    int speciesId = json['species_id'] ??
+                    (primarySpecies != null ? primarySpecies.id : 0);
+
     return WildlifeConflictIncident(
       id: json['id'],
       organisationId: json['organisation_id'],
       title: json['title'],
-      date: DateTime.parse(json['date']),
-      time: json['time'],
-      latitude: json['latitude'] is String ? double.parse(json['latitude']) : json['latitude'],
-      longitude: json['longitude'] is String ? double.parse(json['longitude']) : json['longitude'],
-      description: json['description'],
+      date: DateTime.parse(json[dateField]),
+      time: json[timeField] is String ? json[timeField] : json[timeField].toString(),
+      latitude: json['latitude'] is String ? double.parse(json['latitude']) : json['latitude'].toDouble(),
+      longitude: json['longitude'] is String ? double.parse(json['longitude']) : json['longitude'].toDouble(),
+      description: json['description'] ?? '',
       conflictTypeId: json['conflict_type_id'],
-      speciesId: json['species_id'],
+      speciesId: speciesId,
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       syncStatus: json['sync_status'] ?? 'synced',
       remoteId: json['remote_id'] ?? json['id'],
       conflictType: json['conflict_type'] != null ? ConflictType.fromJson(json['conflict_type']) : null,
-      species: json['species'] != null ? Species.fromJson(json['species']) : null,
+      species: primarySpecies, // Keep for backward compatibility
+      speciesList: speciesList, // Store the full list of species
       outcomes: json['outcomes'] != null
           ? (json['outcomes'] as List).map((o) => WildlifeConflictOutcome.fromJson(o)).toList()
           : null,
@@ -92,7 +124,8 @@ class WildlifeConflictIncident {
   }
 
   Map<String, dynamic> toApiJson() {
-    return {
+    // Create a base map with required fields
+    final Map<String, dynamic> json = {
       'organisation_id': organisationId,
       'title': title,
       'date': date.toIso8601String().split('T')[0],
@@ -104,6 +137,13 @@ class WildlifeConflictIncident {
       'species_id': speciesId,
       'dynamic_values': dynamicValues?.map((v) => v.toApiJson()).toList(),
     };
+
+    // Add additional species IDs if available
+    if (speciesList != null && speciesList!.isNotEmpty) {
+      json['species_ids'] = speciesList!.map((s) => s.id).toList();
+    }
+
+    return json;
   }
 
   WildlifeConflictIncident copyWith({
@@ -123,6 +163,7 @@ class WildlifeConflictIncident {
     int? remoteId,
     ConflictType? conflictType,
     Species? species,
+    List<Species>? speciesList,
     List<WildlifeConflictOutcome>? outcomes,
     List<DynamicValue>? dynamicValues,
   }) {
@@ -143,6 +184,7 @@ class WildlifeConflictIncident {
       remoteId: remoteId ?? this.remoteId,
       conflictType: conflictType ?? this.conflictType,
       species: species ?? this.species,
+      speciesList: speciesList ?? this.speciesList,
       outcomes: outcomes ?? this.outcomes,
       dynamicValues: dynamicValues ?? this.dynamicValues,
     );
@@ -159,7 +201,7 @@ class WildlifeConflictOutcome {
   final DateTime? updatedAt;
   final String? syncStatus;
   final int? remoteId;
-  
+
   // Relations
   final ConflictOutcome? conflictOutcome;
   final List<DynamicValue>? dynamicValues;

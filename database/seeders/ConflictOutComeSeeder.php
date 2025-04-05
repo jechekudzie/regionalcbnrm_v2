@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 
-use App\Models\ConflictOutCome;
+
 use App\Models\Admin\ConflictType;
+use App\Models\ConflictOutcome;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -30,7 +31,7 @@ class ConflictOutComeSeeder extends Seeder
         ];
 
         foreach ($ConflictOutComes as $ConflictOutCome) {
-            ConflictOutCome::create([
+            ConflictOutcome::create([
                 'name' => $ConflictOutCome['name'],
                 'conflict_type_id' => $conflictTypes[$ConflictOutCome['type']]->id,
             ]);

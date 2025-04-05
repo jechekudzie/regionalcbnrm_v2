@@ -1,4 +1,3 @@
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:regional_cbnrm/ui/widgets/location_picker.dart';
@@ -27,7 +26,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
   final NotificationService _notificationService = Get.find<NotificationService>();
   
   final RxBool _isLoading = false.obs;
-  final RxBool _isLoadingData = true.obs;
+  final RxBool _isLoadingData = true.obs; // Start with true to show loading initially
   final RxList<ConflictType> _conflictTypes = RxList<ConflictType>([]);
   final RxList<Species> _species = RxList<Species>([]);
   final RxDouble _latitude = 0.0.obs;
@@ -71,6 +70,11 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
       _conflictTypes.value = conflictTypes;
     } catch (e) {
       // Handle error
+      print('Error loading conflict types: $e');
+       _notificationService.showSnackBar(
+        'Error loading conflict types. Please try again.',
+        type: SnackBarType.error,
+      );
     }
   }
   
@@ -95,19 +99,6 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
         // Sort the species alphabetically for better usability
         species.sort((a, b) => a.name.compareTo(b.name));
         _species.value = species;
-        
-        _notificationService.showSnackBar(
-          'Loaded ${species.length} species',
-          type: SnackBarType.success,
-        );
-
-        _notificationService.closeSnackbar();
-        
-        print('Species loaded: ${species.length} species');
-        // Log first few species for debugging
-        if (species.isNotEmpty) {
-          print('Sample species: ${species.take(min(5, species.length)).map((s) => '${s.id}: ${s.name}').join(', ')}');
-        }
       }
     } catch (e) {
       print('Error loading species: $e');
@@ -121,30 +112,27 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
   Future<void> _submitForm() async {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final formData = _formKey.currentState!.value;
-      
       _isLoading.value = true;
-      
       try {
-        // Extract the primary species ID
-        final int primarySpeciesId = formData['species_id'];
-        
         // Collect all selected species IDs from checkboxes
         final List<Species> selectedSpecies = [];
-        
-        // Always add the primary species first
-        final primarySpecies = _species.firstWhere((s) => s.id == primarySpeciesId);
-        selectedSpecies.add(primarySpecies);
-        
-        // Add additional selected species
         for (int i = 0; i < _species.length; i++) {
-          if (formData['species_id_$i'] == true && _species[i].id != primarySpeciesId) {
+          // Use the correct checkbox name format
+          if (formData['species_id_$i'] == true) { 
             selectedSpecies.add(_species[i]);
           }
         }
-        
-        // For debugging
-        print('Selected species (${selectedSpecies.length}): ${selectedSpecies.map((s) => s.name).join(', ')}');
-        
+
+        // Validate if at least one species is selected
+        if (selectedSpecies.isEmpty) {
+           _notificationService.showSnackBar(
+            'Please select at least one species involved.',
+            type: SnackBarType.warning,
+          );
+          _isLoading.value = false; // Stop loading
+          return; // Prevent further execution
+        }
+
         // Create the incident with all the data
         final incident = WildlifeConflictIncident(
           organisationId: _organisationId.value,
@@ -155,46 +143,29 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
           longitude: double.parse(formData['longitude'] as String),
           description: formData['description'] as String,
           conflictTypeId: formData['conflict_type_id'] as int,
-          speciesId: primarySpeciesId,
-          // Add the species list - this will be handled in the API call
-          species: primarySpecies,  
+          // Use the ID of the first selected species, or null if none (though validated above)
+          speciesId: selectedSpecies.isNotEmpty ? selectedSpecies.first.id : null, 
           speciesList: selectedSpecies,
         );
-        
-        // Convert to API format with all the needed data
-        final Map<String, dynamic> apiData = {
-          'organisation_id': _organisationId.value,
-          'title': formData['title'] as String,
-          'date': DateFormat('yyyy-MM-dd').format(formData['date'] as DateTime),
-          'time': DateFormat('HH:mm').format(formData['time'] as DateTime),
-          'latitude': double.parse(formData['latitude'] as String),
-          'longitude': double.parse(formData['longitude'] as String),
-          'description': formData['description'] as String,
-          'conflict_type_id': formData['conflict_type_id'] as int,
-          'species_id': primarySpeciesId,
-        };
-        
-        // Add array of species IDs if more than just the primary species
-        if (selectedSpecies.length > 1) {
-          apiData['species_ids'] = selectedSpecies.map((s) => s.id).toList();
           
-          // Log for debugging
-          print('Sending species_ids to API: ${apiData['species_ids']}');
-        }
-        
-        // Send to the repository with the API format
+        // Send to the repository (repository handles API conversion)
         final createdIncident = await _repository.createIncident(incident);
-        
+          
         _notificationService.showSnackBar(
           'Wildlife conflict incident reported successfully',
           type: SnackBarType.success,
         );
-        
+            
         Get.back(result: createdIncident);
       } catch (e) {
         print('Error submitting form: $e');
+        // Check for specific error types if needed
+        String errorMessage = 'Failed to report incident. Please try again.';
+        if (e.toString().contains("type 'Null' is not a subtype of type 'int'")) {
+           errorMessage = 'Failed to report incident: A required number field is missing.';
+        }
         _notificationService.showSnackBar(
-          'Failed to report incident. Please try again.',
+          errorMessage,
           type: SnackBarType.error,
         );
       } finally {
@@ -320,46 +291,10 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                     FormBuilderValidators.required(),
                   ]),
                 ),
-                const SizedBox(height: 16),
-
-                // Species section header with count
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Species Involved',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (_species.isNotEmpty)
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade100,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.green.shade300),
-                          ),
-                          child: Text(
-                            '${_species.length} available',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.green.shade800,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                
-                // Display message if no species are available
+                  // Display message if no species are available
                 if (_species.isEmpty)
                   Container(
-                    margin: const EdgeInsets.only(bottom: 16),
+                    margin: const EdgeInsets.only(top: 16, bottom: 16), // Added top margin
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: Colors.red.shade50,
@@ -393,77 +328,6 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                     ),
                   ),
                 
-                // Primary species dropdown with enhanced UI
-                Card(
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.star, color: Colors.amber.shade800, size: 18),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Primary Species',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Select the main species involved in this conflict',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Colors.grey.shade700,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        FormBuilderDropdown<int>(
-                          name: 'species_id',
-                          decoration: const InputDecoration(
-                            hintText: 'Select one',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.pets),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-                          ),
-                          items: _species.map((species) {
-                            return DropdownMenuItem(
-                              value: species.id,
-                              child: Text(species.name),
-                            );
-                          }).toList(),
-                          validator: FormBuilderValidators.compose([
-                            FormBuilderValidators.required(),
-                          ]),
-                          onChanged: (value) {
-                            if (value != null) {
-                              // When primary species changes, ensure its checkbox is also checked
-                              int speciesId = value;
-                              // Find the index of the selected species in the _species list
-                              final index = _species.indexWhere((s) => s.id == speciesId);
-                              if (index >= 0) {
-                                // Mark the checkbox for this species as checked
-                                _formKey.currentState?.fields['species_id_$index']?.didChange(true);
-                                
-                                // Force UI refresh for checkboxes
-                                setState(() {});
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 16),
                 
                 // Species checkboxes for multiple selection
@@ -517,22 +381,13 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                           itemBuilder: (context, index) {
                             final species = _species[index];
                             // Create a unique key for the FormBuilderCheckbox
-                            final String checkboxName = 'species_id_$index';
-                            
-                            // Function to determine if this is the primary species
-                            bool isPrimarySpecies() {
-                              if (_formKey.currentState?.fields['species_id'] != null) {
-                                final primarySpeciesId = _formKey.currentState?.fields['species_id']?.value;
-                                return primarySpeciesId != null && primarySpeciesId == species.id;
-                              }
-                              return false;
-                            }
+                            final String checkboxName = 'species_id_$index'; // Corrected name
                             
                             return Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: isPrimarySpecies() ? Colors.amber.shade300 : Colors.grey.shade200),
-                                color: isPrimarySpecies() ? Colors.amber.shade50 : Colors.transparent,
+                                border: Border.all(color: Colors.grey.shade200), // Simplified border
+                                color: Colors.transparent,
                               ),
                               margin: const EdgeInsets.only(bottom: 2),
                               child: FormBuilderCheckbox(
@@ -542,33 +397,24 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                                     Expanded(
                                       child: Text(
                                         species.name,
-                                        style: TextStyle(
+                                        style: const TextStyle( // Simplified style
                                           fontSize: 14,
-                                          fontWeight: isPrimarySpecies() ? FontWeight.bold : FontWeight.normal,
-                                          color: isPrimarySpecies() ? Colors.amber.shade800 : Colors.black87,
+                                          color: Colors.black87,
                                         ),
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    if (isPrimarySpecies())
-                                      const Icon(Icons.star, size: 14, color: Colors.amber),
                                   ],
                                 ),
-                                initialValue: isPrimarySpecies(),
+                                // initialValue: false, // Let the form handle initial state
                                 decoration: const InputDecoration(
                                   contentPadding: EdgeInsets.zero,
                                   border: InputBorder.none,
                                 ),
                                 controlAffinity: ListTileControlAffinity.leading,
                                 onChanged: (value) {
-                                  // Make sure the form is updated (required for Obx to work correctly)
+                                  // Make sure the form is updated
                                   _formKey.currentState?.fields[checkboxName]?.didChange(value);
-                                  
-                                  // If this is the primary species, auto-check it
-                                  if (isPrimarySpecies() && value == false) {
-                                    // If they try to uncheck primary species, prevent it
-                                    _formKey.currentState?.fields[checkboxName]?.didChange(true);
-                                  }
                                 },
                               ),
                             );
@@ -648,8 +494,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.description),
                   ),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 5,
+                  maxLines: 3,
                   validator: FormBuilderValidators.compose([
                     FormBuilderValidators.required(),
                     FormBuilderValidators.maxLength(500),
@@ -658,30 +503,23 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                 const SizedBox(height: 24),
                 
                 // Submit button
-                Center(
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: Obx(() {
-                      return ElevatedButton(
-                        onPressed: _isLoading.value ? null : _submitForm,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: _isLoading.value
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : const Text('Report Incident'),
-                      );
-                    }),
+                SizedBox( // Ensure button takes full width
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16), // Make button taller
+                    ),
+                    onPressed: _isLoading.value ? null : _submitForm,
+                    child: Obx(() => _isLoading.value
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Text('Report Incident'),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
               ],
             ),
           ),

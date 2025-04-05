@@ -8,7 +8,7 @@ class WildlifeConflictIncident {
   final double longitude;
   final String description;
   final int conflictTypeId;
-  final int speciesId;
+  final int? speciesId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? syncStatus;
@@ -31,7 +31,7 @@ class WildlifeConflictIncident {
     required this.longitude,
     required this.description,
     required this.conflictTypeId,
-    required this.speciesId,
+    this.speciesId,
     this.createdAt,
     this.updatedAt,
     this.syncStatus = 'pending',

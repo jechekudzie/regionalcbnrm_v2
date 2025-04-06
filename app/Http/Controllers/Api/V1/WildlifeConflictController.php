@@ -86,11 +86,13 @@ class WildlifeConflictController extends Controller
         $validator = Validator::make($request->all(), [
             'organisation_id' => 'required|exists:organisations,id',
             'title' => 'required|string|max:255',
-            'date' => 'required|date',
-            'time' => 'required',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'description' => 'required|string',
+            'period' => 'required|integer',
+            'incident_date' => 'required|date',
+            'incident_time' => 'required',
+            'latitude' => 'nullable|numeric',
+            'longitude' => 'nullable|numeric',
+            'location_description' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
             'conflict_type_id' => 'required|exists:conflict_types,id',
             'species_id' => 'required|exists:species,id',
         ]);
@@ -117,13 +119,29 @@ class WildlifeConflictController extends Controller
         try {
             DB::beginTransaction();
 
-            $incident = WildlifeConflictIncident::create($request->all());
+            $incident = WildlifeConflictIncident::create([
+                'organisation_id' => $request->organisation_id,
+                'title' => $request->title,
+                'period' => $request->period,
+                'incident_date' => $request->incident_date,
+                'incident_time' => $request->incident_time,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'location_description' => $request->location_description,
+                'description' => $request->description,
+                'conflict_type_id' => $request->conflict_type_id,
+            ]);
 
             // If dynamic values are provided, store them
-            if ($request->has('dynamic_values')) {
+            if ($request->has('dynamic_values') && is_array($request->dynamic_values)) {
                 foreach ($request->dynamic_values as $value) {
                     $incident->dynamicValues()->create($value);
                 }
+            }
+
+            // Sync species IDs to pivot table if provided
+            if ($request->has('species_ids') && is_array($request->species_ids)) {
+                $incident->species()->sync($request->species_ids);
             }
 
             DB::commit();

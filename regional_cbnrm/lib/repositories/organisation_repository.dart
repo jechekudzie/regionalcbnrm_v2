@@ -60,12 +60,15 @@ class OrganisationRepository {
 
     // Insert new organisations
     for (var org in organisations) {
+      // Assuming 'org' has properties matching OrganisationDetail or a similar Organisation class
       await _dbHelper.insert('organisations', {
         'id': org.id,
         'name': org.name,
-        'type_id': org.organisationTypeId,
-        'type_name': org.organisationType?.name,
-        'parent_id': org.parentId,
+        'organisation_type_id': org.organisationTypeId, // Corrected column name
+        // 'type_name' removed as column doesn't exist
+        'organisation_id': org.parentId, // Corrected column name (maps from parentId)
+        'slug': org.slug, // Added column
+        // logo and description are missing from the model, so not included here
         'created_at': org.createdAt?.toIso8601String(),
         'updated_at': org.updatedAt?.toIso8601String(),
       });

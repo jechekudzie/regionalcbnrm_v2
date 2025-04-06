@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:regional_cbnrm/core/database_helper.dart'; // Use the Singleton helper
 import 'package:regional_cbnrm/repositories/organisation_repository.dart';
+import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';
 import 'package:regional_cbnrm/services/auth_service.dart';
 import 'package:regional_cbnrm/services/connectivity_service.dart';
 import 'package:regional_cbnrm/services/error_handler_service.dart';
@@ -25,6 +27,10 @@ import 'package:regional_cbnrm/ui/theme/app_theme.dart';
 import 'package:regional_cbnrm/utils/app_constants.dart';
 import 'package:regional_cbnrm/utils/app_routes.dart';
 import 'package:regional_cbnrm/utils/logger.dart';
+
+import 'package:regional_cbnrm/ui/screens/hunting_activity/hunting_activity_create_screen.dart';
+import 'package:regional_cbnrm/ui/screens/hunting_concession/hunting_concession_create_screen.dart';
+import 'package:regional_cbnrm/ui/screens/quota_allocation/quota_allocation_list_screen.dart';
 
 void main() async {
   // Add error handling for Flutter framework errors
@@ -68,9 +74,17 @@ Future<void> initServices() async {
     await Get.putAsync(() => ConnectivityService().init());
     await Get.putAsync(() => NotificationService().init());
     await Get.putAsync(() => AuthService().init());
+    
+    // Register and initialize the DatabaseHelper Singleton
+    logger.i('Initializing Database Helper Singleton');
+    Get.put(DatabaseHelper(), permanent: true);
+    // Eagerly initialize the database by accessing the getter
+    await Get.find<DatabaseHelper>().database;
+    logger.i('Database Helper initialized and database opened/created');
 
     // Register repositories as singletons
     Get.put(OrganisationRepository(), permanent: true);
+    Get.put(WildlifeConflictRepository(), permanent: true);
 
     logger.i('All services initialized');
   } catch (e, stackTrace) {
@@ -174,19 +188,19 @@ class RegionalCbnrmApp extends StatelessWidget {
         // Hunting routes (placeholders - need to be implemented)
         GetPage(
           name: AppRoutes.huntingActivities,
-          page: () => const DashboardScreen(), // Placeholder
+          page: () => const DashboardScreen(), // TODO: Implement hunting activity list screen
         ),
         GetPage(
           name: AppRoutes.createHuntingActivity,
-          page: () => const DashboardScreen(), // Placeholder
+          page: () => const HuntingActivityCreateScreen(),
         ),
         GetPage(
           name: AppRoutes.huntingConcessions,
-          page: () => const DashboardScreen(), // Placeholder
+          page: () => const HuntingConcessionCreateScreen(),
         ),
         GetPage(
           name: AppRoutes.quotaAllocations,
-          page: () => const DashboardScreen(), // Placeholder
+          page: () => const QuotaAllocationListScreen(),
         ),
 
         // Debug routes

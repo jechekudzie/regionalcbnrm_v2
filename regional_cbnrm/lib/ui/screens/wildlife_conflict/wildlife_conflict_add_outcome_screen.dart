@@ -56,7 +56,8 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
     // Find the selected conflict outcome
     final selectedOutcome = _conflictOutcomes.firstWhere(
       (outcome) => outcome.id == outcomeId,
-      orElse: () => ConflictOutcome(id: 0, name: ''),
+      // Provide required fields for the default ConflictOutcome, using placeholders
+      orElse: () => ConflictOutcome(id: 0, conflictTypeId: 0, name: ''),
     );
 
     // Clear previous dynamic values
@@ -233,7 +234,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
 
       Widget formField;
 
-      switch (field.type) {
+      switch (field.fieldType) { // Changed from field.type
         case 'text':
           formField = FormBuilderTextField(
             name: 'dynamic_field_${field.id}',
@@ -241,9 +242,8 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
               labelText: field.label,
               border: const OutlineInputBorder(),
             ),
-            validator: field.required
-                ? FormBuilderValidators.compose([FormBuilderValidators.required()])
-                : null,
+            // Removed validator based on field.required
+            validator: null, // Or add other validators if needed
           );
           break;
         case 'number':
@@ -254,12 +254,8 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
               border: const OutlineInputBorder(),
             ),
             keyboardType: TextInputType.number,
-            validator: field.required
-                ? FormBuilderValidators.compose([
-                    FormBuilderValidators.required(),
-                    FormBuilderValidators.numeric(),
-                  ])
-                : FormBuilderValidators.numeric(),
+            // Removed validator based on field.required
+            validator: FormBuilderValidators.numeric(), // Keep numeric validation
           );
           break;
         case 'select':
@@ -278,9 +274,8 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
                   child: Text(option.label),
                 );
               }).toList(),
-              validator: field.required
-                  ? FormBuilderValidators.compose([FormBuilderValidators.required()])
-                  : null,
+              // Removed validator based on field.required
+              validator: null, // Or add other validators if needed
             );
           }
           break;

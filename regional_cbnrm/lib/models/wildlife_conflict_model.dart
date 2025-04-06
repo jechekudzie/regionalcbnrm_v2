@@ -2,16 +2,19 @@ class WildlifeConflictIncident {
   final int? id;
   final int organisationId;
   final String title;
+  final int period;
   final DateTime date;
   final String time;
   final double latitude;
   final double longitude;
+  final String? locationDescription;
   final String description;
   final int conflictTypeId;
   final int? speciesId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? syncStatus;
+  final String? author;
   final int? remoteId;
   
   // Relations
@@ -25,16 +28,19 @@ class WildlifeConflictIncident {
     this.id,
     required this.organisationId,
     required this.title,
+    required this.period,
     required this.date,
     required this.time,
     required this.latitude,
     required this.longitude,
+    this.locationDescription,
     required this.description,
     required this.conflictTypeId,
     this.speciesId,
     this.createdAt,
     this.updatedAt,
     this.syncStatus = 'pending',
+    this.author,
     this.remoteId,
     this.conflictType,
     this.species,
@@ -48,6 +54,7 @@ class WildlifeConflictIncident {
       'id': id,
       'organisation_id': organisationId,
       'title': title,
+      'period': period,
       'date': date.toIso8601String().split('T')[0],
       'time': time,
       'latitude': latitude,
@@ -58,6 +65,7 @@ class WildlifeConflictIncident {
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'sync_status': syncStatus,
+      'author': author,
       'remote_id': remoteId,
       'conflict_type': conflictType?.toJson(),
       'species': species?.toJson(),
@@ -100,6 +108,7 @@ class WildlifeConflictIncident {
       id: json['id'],
       organisationId: json['organisation_id'],
       title: json['title'],
+      period: json['period'] ?? DateTime.now().year,
       date: DateTime.parse(json[dateField]),
       time: json[timeField] is String ? json[timeField] : json[timeField].toString(),
       latitude: json['latitude'] is String ? double.parse(json['latitude']) : json['latitude'].toDouble(),
@@ -110,6 +119,7 @@ class WildlifeConflictIncident {
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       syncStatus: json['sync_status'] ?? 'synced',
+      author: json['author'],
       remoteId: json['remote_id'] ?? json['id'],
       conflictType: json['conflict_type'] != null ? ConflictType.fromJson(json['conflict_type']) : null,
       species: primarySpecies, // Keep for backward compatibility
@@ -128,10 +138,12 @@ class WildlifeConflictIncident {
     final Map<String, dynamic> json = {
       'organisation_id': organisationId,
       'title': title,
-      'date': date.toIso8601String().split('T')[0],
-      'time': time,
+      'period': period,
+      'incident_date': date.toIso8601String().split('T')[0],
+      'incident_time': time,
       'latitude': latitude,
       'longitude': longitude,
+      'location_description': '',  // Placeholder, will be filled from form
       'description': description,
       'conflict_type_id': conflictTypeId,
       'species_id': speciesId,
@@ -150,6 +162,7 @@ class WildlifeConflictIncident {
     int? id,
     int? organisationId,
     String? title,
+    int? period,
     DateTime? date,
     String? time,
     double? latitude,
@@ -160,6 +173,7 @@ class WildlifeConflictIncident {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? syncStatus,
+    String? author,
     int? remoteId,
     ConflictType? conflictType,
     Species? species,
@@ -171,6 +185,7 @@ class WildlifeConflictIncident {
       id: id ?? this.id,
       organisationId: organisationId ?? this.organisationId,
       title: title ?? this.title,
+      period: period ?? this.period,
       date: date ?? this.date,
       time: time ?? this.time,
       latitude: latitude ?? this.latitude,
@@ -181,6 +196,7 @@ class WildlifeConflictIncident {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       syncStatus: syncStatus ?? this.syncStatus,
+      author: author ?? this.author,
       remoteId: remoteId ?? this.remoteId,
       conflictType: conflictType ?? this.conflictType,
       species: species ?? this.species,
@@ -204,7 +220,7 @@ class WildlifeConflictOutcome {
   
   // Relations
   final ConflictOutcome? conflictOutcome;
-  final List<DynamicValue>? dynamicValues;
+  final List<DynamicValue>? dynamicValues; // Note: DB schema links these to Incident, but API might nest them here.
 
   WildlifeConflictOutcome({
     this.id,
@@ -232,14 +248,18 @@ class WildlifeConflictOutcome {
       'sync_status': syncStatus,
       'remote_id': remoteId,
       'conflict_outcome': conflictOutcome?.toJson(),
-      'dynamic_values': dynamicValues?.map((v) => v.toJson()).toList(),
+      'dynamic_values': dynamicValues?.map((v) => v.toJson()).toList(), // Serializes DynamicValue list
     };
   }
 
   factory WildlifeConflictOutcome.fromJson(Map<String, dynamic> json) {
+    // Note: wildlifeConflictIncidentId might not be directly in the outcome JSON from the API,
+    // it might be inferred from the parent incident context when parsing.
+    // Assuming it's present for local DB deserialization.
     return WildlifeConflictOutcome(
       id: json['id'],
-      wildlifeConflictIncidentId: json['wildlife_conflict_incident_id'],
+      // Assuming wildlife_conflict_incident_id is available for local DB mapping
+      wildlifeConflictIncidentId: json['wildlife_conflict_incident_id'] ?? 0,
       conflictOutcomeId: json['conflict_outcome_id'],
       notes: json['notes'],
       date: DateTime.parse(json['date']),
@@ -247,7 +267,9 @@ class WildlifeConflictOutcome {
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       syncStatus: json['sync_status'] ?? 'synced',
       remoteId: json['remote_id'] ?? json['id'],
+      // Assuming 'conflict_outcome' relation is provided by API
       conflictOutcome: json['conflict_outcome'] != null ? ConflictOutcome.fromJson(json['conflict_outcome']) : null,
+      // Assuming 'dynamic_values' might be nested under outcome by API, despite DB change
       dynamicValues: json['dynamic_values'] != null
           ? (json['dynamic_values'] as List).map((v) => DynamicValue.fromJson(v)).toList()
           : null,
@@ -259,6 +281,7 @@ class WildlifeConflictOutcome {
       'conflict_outcome_id': conflictOutcomeId,
       'notes': notes,
       'date': date.toIso8601String().split('T')[0],
+      // Ensure dynamic_values are formatted correctly for API submission
       'dynamic_values': dynamicValues?.map((v) => v.toApiJson()).toList(),
     };
   }
@@ -295,28 +318,38 @@ class ConflictType {
     );
   }
 }
-
+// Aligned with MySQL schema (conflict_out_comes table)
 class ConflictOutcome {
   final int id;
+  final int conflictTypeId; // Added
   final String name;
+  final String? description; // Added
+  final String? slug; // Added
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final List<DynamicField>? dynamicFields;
+  final List<DynamicField>? dynamicFields; // Kept for potential API structure
 
   ConflictOutcome({
     required this.id,
+    required this.conflictTypeId, // Added
     required this.name,
+    this.description, // Added
+    this.slug, // Added
     this.createdAt,
     this.updatedAt,
-    this.dynamicFields,
+    this.dynamicFields, // Kept for potential API structure
   });
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'conflict_type_id': conflictTypeId, // Added
       'name': name,
+      'description': description, // Added
+      'slug': slug, // Added
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      // Serializes DynamicField list if present
       'dynamic_fields': dynamicFields?.map((field) => field.toJson()).toList(),
     };
   }
@@ -324,9 +357,14 @@ class ConflictOutcome {
   factory ConflictOutcome.fromJson(Map<String, dynamic> json) {
     return ConflictOutcome(
       id: json['id'],
+      // Ensure these fields are correctly parsed from API response
+      conflictTypeId: json['conflict_type_id'] ?? 0, // Provide default if potentially null
       name: json['name'],
+      description: json['description'],
+      slug: json['slug'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      // Assuming API might provide 'dynamic_fields' nested under outcome
       dynamicFields: json['dynamic_fields'] != null
           ? (json['dynamic_fields'] as List).map((field) => DynamicField.fromJson(field)).toList()
           : null,
@@ -334,49 +372,62 @@ class ConflictOutcome {
   }
 }
 
+// Aligned with MySQL schema (dynamic_fields table)
 class DynamicField {
   final int id;
-  final String name;
-  final String type;
-  final String label;
-  final bool required;
+  final int organisationId; // Added
+  final int? conflictOutcomeId; // Added (nullable)
+  final String fieldName; // Renamed from 'name'
+  final String fieldType; // Renamed from 'type'
+  final String? label; // Made nullable
+  final String? slug; // Added
   final DateTime? createdAt;
   final DateTime? updatedAt;
-  final List<DynamicFieldOption>? options;
+  final List<DynamicFieldOption>? options; // Kept for potential API structure / options table
 
   DynamicField({
     required this.id,
-    required this.name,
-    required this.type,
-    required this.label,
-    required this.required,
+    required this.organisationId, // Added
+    this.conflictOutcomeId, // Added
+    required this.fieldName, // Renamed
+    required this.fieldType, // Renamed
+    this.label, // Made nullable
+    this.slug, // Added
     this.createdAt,
     this.updatedAt,
-    this.options,
+    this.options, // Kept
   });
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'name': name,
-      'type': type,
+      'organisation_id': organisationId, // Added
+      'conflict_outcome_id': conflictOutcomeId, // Added
+      'field_name': fieldName, // Renamed
+      'field_type': fieldType, // Renamed
       'label': label,
-      'required': required,
+      'slug': slug, // Added
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
+      // Serializes DynamicFieldOption list if present
       'options': options?.map((option) => option.toJson()).toList(),
     };
   }
 
   factory DynamicField.fromJson(Map<String, dynamic> json) {
+    // Ensure correct parsing of fields from API response
     return DynamicField(
       id: json['id'],
-      name: json['name'],
-      type: json['type'],
+      // Provide defaults if potentially null from API
+      organisationId: json['organisation_id'] ?? 0,
+      conflictOutcomeId: json['conflict_outcome_id'], // Nullable is okay
+      fieldName: json['field_name'],
+      fieldType: json['field_type'],
       label: json['label'],
-      required: json['required'] == 1 || json['required'] == true,
+      slug: json['slug'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
+      // Assuming API might provide 'options' nested under field
       options: json['options'] != null
           ? (json['options'] as List).map((option) => DynamicFieldOption.fromJson(option)).toList()
           : null,

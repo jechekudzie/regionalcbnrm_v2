@@ -143,6 +143,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
           longitude: double.parse(formData['longitude'] as String),
           description: formData['description'] as String,
           conflictTypeId: formData['conflict_type_id'] as int,
+          period: DateTime.now().year,
           // Use the ID of the first selected species, or null if none (though validated above)
           speciesId: selectedSpecies.isNotEmpty ? selectedSpecies.first.id : null, 
           speciesList: selectedSpecies,
@@ -151,8 +152,15 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
         // Send to the repository (repository handles API conversion)
         final createdIncident = await _repository.createIncident(incident);
           
+        // Sync local database and repository
+        await _repository.getIncidents(_organisationId.value);
+
+        // Clear the form
+        _formKey.currentState?.reset();
+
+        // Show success snackbar
         _notificationService.showSnackBar(
-          'Wildlife conflict incident reported successfully',
+          'Record added successfully',
           type: SnackBarType.success,
         );
             
@@ -412,10 +420,6 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                                   border: InputBorder.none,
                                 ),
                                 controlAffinity: ListTileControlAffinity.leading,
-                                onChanged: (value) {
-                                  // Make sure the form is updated
-                                  _formKey.currentState?.fields[checkboxName]?.didChange(value);
-                                },
                               ),
                             );
                           },

@@ -14,6 +14,7 @@ class ProblemAnimalControl {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? syncStatus;
+  final String? author;
   final int? remoteId;
 
   // Relations
@@ -34,6 +35,7 @@ class ProblemAnimalControl {
     this.createdAt,
     this.updatedAt,
     this.syncStatus = 'pending',
+    this.author,
     this.remoteId,
     this.controlMeasure,
     this.wildlifeConflictIncident,
@@ -54,6 +56,7 @@ class ProblemAnimalControl {
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
       'sync_status': syncStatus,
+      'author': author,
       'remote_id': remoteId,
       'control_measure': controlMeasure?.toJson(),
       'wildlife_conflict_incident': wildlifeConflictIncident?.toJson(),
@@ -75,10 +78,11 @@ class ProblemAnimalControl {
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       syncStatus: json['sync_status'] ?? 'synced',
+      author: json['author'],
       remoteId: json['remote_id'] ?? json['id'],
-      controlMeasure: json['control_measure'] != null ? ControlMeasure.fromJson(json['control_measure']) : null,
+      controlMeasure: json['control_measure'] != null ? ControlMeasure.fromJson(json['control_measure'] as Map<String, dynamic>) : null,
       wildlifeConflictIncident: json['wildlife_conflict_incident'] != null
-          ? WildlifeConflictIncident.fromJson(json['wildlife_conflict_incident'])
+          ? WildlifeConflictIncident.fromJson(json['wildlife_conflict_incident'] as Map<String, dynamic>)
           : null,
     );
   }
@@ -111,6 +115,7 @@ class ProblemAnimalControl {
     DateTime? createdAt,
     DateTime? updatedAt,
     String? syncStatus,
+    String? author,
     int? remoteId,
     ControlMeasure? controlMeasure,
     WildlifeConflictIncident? wildlifeConflictIncident,
@@ -129,6 +134,7 @@ class ProblemAnimalControl {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       syncStatus: syncStatus ?? this.syncStatus,
+      author: author ?? this.author,
       remoteId: remoteId ?? this.remoteId,
       controlMeasure: controlMeasure ?? this.controlMeasure,
       wildlifeConflictIncident: wildlifeConflictIncident ?? this.wildlifeConflictIncident,

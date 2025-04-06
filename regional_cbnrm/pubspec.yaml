@@ -59,6 +59,7 @@ flutter:
 
   assets:
     - assets/images/
+    - resource_africa_sqlite_migration.sql
 
 flutter_launcher_icons:
   android: true

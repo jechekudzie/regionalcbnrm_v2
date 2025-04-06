@@ -150,13 +150,13 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
     IconData conflictIcon = _getConflictTypeIcon(incident.conflictType?.name);
     
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Colors.black12, width: 0.5),
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: Colors.blueGrey.shade100, width: 1),
       ),
-      elevation: 2,
-      shadowColor: Colors.black26,
+      elevation: 4,
+      shadowColor: Colors.black38,
       child: InkWell(
         onTap: () => Get.toNamed(
           AppRoutes.wildlifeConflictDetails,
@@ -168,33 +168,34 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
           children: [
             // Header with status and title
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
               child: Row(
                 children: [
                   // Status indicator
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: _getSyncStatusColor(incident.syncStatus),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      incident.syncStatus ?? 'unknown',
+                      incident.syncStatus?.toUpperCase() ?? 'UNKNOWN',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   // Title
                   Expanded(
                     child: Text(
                       incident.title,
                       style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
                         color: Colors.black87,
                       ),
                       maxLines: 1,
@@ -208,8 +209,13 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
             // Conflict type - prominently displayed
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              color: Colors.red.shade50,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                border: Border(
+                  bottom: BorderSide(color: Colors.red.shade100, width: 0.5),
+                ),
+              ),
               child: Row(
                 children: [
                   Icon(conflictIcon, size: 16, color: Colors.red.shade800),
@@ -232,7 +238,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
             
             // Content
             Padding(
-              padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -274,7 +280,9 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                     ],
                   ),
                   
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+                  Divider(color: Colors.grey.shade300, height: 1),
+                  const SizedBox(height: 12),
                   
                   // Show species chips - multiple species support
                   if (incident.speciesList != null && incident.speciesList!.isNotEmpty)

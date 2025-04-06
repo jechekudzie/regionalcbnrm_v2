@@ -1,8 +1,10 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:flutter/services.dart'; // Added for rootBundle
 import 'package:path_provider/path_provider.dart';
 import 'package:regional_cbnrm/utils/app_constants.dart';
 import 'package:regional_cbnrm/utils/logger.dart';
+import 'package:regional_cbnrm/database/db_patch.dart'; // Added for patching
 import 'dart:async';
 
 class DatabaseHelper {
@@ -47,332 +49,41 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    _logger.i('Creating database tables for version $version');
+    _logger.i('Creating database tables for version $version using SQL script');
 
-    // Wrap in transaction for better performance and atomicity
-    await db.transaction((txn) async {
-      try {
-        // Create tables with foreign key constraints
-        await txn.execute('''
-          CREATE TABLE user (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            email TEXT,
-            roles TEXT
-          )
-        ''');
-        _logger.d('Created user table');
+    // Execute the main migration script
+    try {
+      String migrationScript = await rootBundle.loadString('resource_africa_sqlite_migration.sql');
+      _logger.d('Loaded migration script successfully');
 
-        await txn.execute('''
-          CREATE TABLE organisations (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            type_id INTEGER,
-            type_name TEXT,
-            parent_id INTEGER,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created organisations table');
+      List<String> statements = migrationScript.split(';');
+      await db.transaction((txn) async {
+         for (String statement in statements) {
+           final trimmedStatement = statement.trim();
+           if (trimmedStatement.isNotEmpty) {
+             _logger.d('Executing SQL: $trimmedStatement');
+             await txn.execute(trimmedStatement);
+           }
+         }
+      });
+      _logger.i('Successfully executed migration script');
 
-        await txn.execute('''
-          CREATE TABLE wildlife_conflict_incidents (
-            id INTEGER PRIMARY KEY,
-            organisation_id INTEGER,
-            title TEXT,
-            date TEXT,
-            time TEXT,
-            latitude REAL,
-            longitude REAL,
-            description TEXT,
-            conflict_type_id INTEGER,
-            species_id INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            sync_status TEXT DEFAULT 'pending',
-            remote_id INTEGER
-          )
-        ''');
-        _logger.d('Created wildlife_conflict_incidents table');
+    } catch (e, stackTrace) {
+      _logger.e('Error executing migration script', e, stackTrace);
+      rethrow; // Rethrow to prevent proceeding if script fails
+    }
 
-        await txn.execute('''
-          CREATE TABLE wildlife_conflict_outcomes (
-            id INTEGER PRIMARY KEY,
-            incident_id INTEGER,
-            conflict_outcome_id INTEGER,
-            notes TEXT,
-            date TEXT,
-            created_at TEXT,
-            updated_at TEXT,
-            sync_status TEXT DEFAULT 'pending',
-            remote_id INTEGER,
-            FOREIGN KEY (incident_id) REFERENCES wildlife_conflict_incidents(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created wildlife_conflict_outcomes table');
-
-        await txn.execute('''
-          CREATE TABLE problem_animal_controls (
-            id INTEGER PRIMARY KEY,
-            wildlife_conflict_incident_id INTEGER,
-            control_measure_id INTEGER,
-            date TEXT,
-            time TEXT,
-            description TEXT,
-            latitude REAL,
-            longitude REAL,
-            number_of_animals INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            sync_status TEXT DEFAULT 'pending',
-            remote_id INTEGER,
-            FOREIGN KEY (wildlife_conflict_incident_id) REFERENCES wildlife_conflict_incidents(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created problem_animal_controls table');
-
-        await txn.execute('''
-          CREATE TABLE poaching_incidents (
-            id INTEGER PRIMARY KEY,
-            organisation_id INTEGER,
-            title TEXT,
-            date TEXT,
-            time TEXT,
-            latitude REAL,
-            longitude REAL,
-            description TEXT,
-            docket_number TEXT,
-            docket_status TEXT,
-            created_at TEXT,
-            updated_at TEXT,
-            sync_status TEXT DEFAULT 'pending',
-            remote_id INTEGER
-          )
-        ''');
-        _logger.d('Created poaching_incidents table');
-
-        await txn.execute('''
-          CREATE TABLE poaching_incident_species (
-            id INTEGER PRIMARY KEY,
-            poaching_incident_id INTEGER,
-            species_id INTEGER,
-            quantity INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            FOREIGN KEY (poaching_incident_id) REFERENCES poaching_incidents(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created poaching_incident_species table');
-
-        await txn.execute('''
-          CREATE TABLE poaching_incident_methods (
-            id INTEGER PRIMARY KEY,
-            poaching_incident_id INTEGER,
-            poaching_method_id INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            FOREIGN KEY (poaching_incident_id) REFERENCES poaching_incidents(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created poaching_incident_methods table');
-
-        await txn.execute('''
-          CREATE TABLE poachers (
-            id INTEGER PRIMARY KEY,
-            poaching_incident_id INTEGER,
-            name TEXT,
-            id_number TEXT,
-            identification_type_id INTEGER,
-            gender TEXT,
-            age INTEGER,
-            nationality TEXT,
-            status TEXT,
-            created_at TEXT,
-            updated_at TEXT,
-            sync_status TEXT DEFAULT 'pending',
-            remote_id INTEGER,
-            FOREIGN KEY (poaching_incident_id) REFERENCES poaching_incidents(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created poachers table');
-
-        await txn.execute('''
-          CREATE TABLE hunting_activities (
-            id INTEGER PRIMARY KEY,
-            organisation_id INTEGER,
-            hunting_concession_id INTEGER,
-            safari_operator_id INTEGER,
-            period TEXT,
-            start_date TEXT,
-            end_date TEXT,
-            client_name TEXT,
-            client_nationality TEXT,
-            client_country_of_residence TEXT,
-            created_at TEXT,
-            updated_at TEXT,
-            sync_status TEXT DEFAULT 'pending',
-            remote_id INTEGER
-          )
-        ''');
-        _logger.d('Created hunting_activities table');
-
-        await txn.execute('''
-          CREATE TABLE hunting_activity_species (
-            id INTEGER PRIMARY KEY,
-            hunting_activity_id INTEGER,
-            species_id INTEGER,
-            quantity INTEGER,
-            quota_allocation_balance_id INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            FOREIGN KEY (hunting_activity_id) REFERENCES hunting_activities(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created hunting_activity_species table');
-
-        await txn.execute('''
-          CREATE TABLE professional_hunter_licenses (
-            id INTEGER PRIMARY KEY,
-            hunting_activity_id INTEGER,
-            name TEXT,
-            license_number TEXT,
-            created_at TEXT,
-            updated_at TEXT,
-            FOREIGN KEY (hunting_activity_id) REFERENCES hunting_activities(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created professional_hunter_licenses table');
-
-        await txn.execute('''
-          CREATE TABLE species (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            species_gender_id INTEGER,
-            maturity_id INTEGER,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created species table');
-
-        await txn.execute('''
-          CREATE TABLE conflict_types (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created conflict_types table');
-
-        await txn.execute('''
-          CREATE TABLE conflict_outcomes (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created conflict_outcomes table');
-
-        await txn.execute('''
-          CREATE TABLE control_measures (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created control_measures table');
-
-        await txn.execute('''
-          CREATE TABLE poaching_methods (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created poaching_methods table');
-
-        await txn.execute('''
-          CREATE TABLE poaching_reasons (
-            id INTEGER PRIMARY KEY,
-            name TEXT,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created poaching_reasons table');
-
-        await txn.execute('''
-          CREATE TABLE hunting_concessions (
-            id INTEGER PRIMARY KEY,
-            organisation_id INTEGER,
-            safari_id INTEGER,
-            name TEXT,
-            hectarage REAL,
-            description TEXT,
-            latitude REAL,
-            longitude REAL,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created hunting_concessions table');
-
-        await txn.execute('''
-          CREATE TABLE quota_allocations (
-            id INTEGER PRIMARY KEY,
-            organisation_id INTEGER,
-            species_id INTEGER,
-            hunting_quota INTEGER,
-            rational_killing_quota INTEGER,
-            period TEXT,
-            start_date TEXT,
-            end_date TEXT,
-            created_at TEXT,
-            updated_at TEXT
-          )
-        ''');
-        _logger.d('Created quota_allocations table');
-
-        await txn.execute('''
-          CREATE TABLE quota_allocation_balances (
-            id INTEGER PRIMARY KEY,
-            quota_allocation_id INTEGER,
-            allocated INTEGER,
-            off_take INTEGER,
-            remaining INTEGER,
-            created_at TEXT,
-            updated_at TEXT,
-            FOREIGN KEY (quota_allocation_id) REFERENCES quota_allocations(id) ON DELETE CASCADE
-          )
-        ''');
-        _logger.d('Created quota_allocation_balances table');
-
-        await txn.execute('''
-          CREATE TABLE sync_queue (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            table_name TEXT,
-            record_id INTEGER,
-            action TEXT,
-            data TEXT,
-            timestamp TEXT,
-            status TEXT DEFAULT 'pending',
-            attempt_count INTEGER DEFAULT 0,
-            last_attempt TEXT
-          )
-        ''');
-        _logger.d('Created sync_queue table');
-
-        _logger.i('All tables created successfully');
-      } catch (e, stackTrace) {
-        _logger.e('Error creating database tables', e, stackTrace);
-        rethrow;
-      }
-    });
+    // Apply patches if needed (e.g., for tables not in the main script)
+    // Note: The current patch script seems to duplicate tables already in the main script.
+    // Review if this patch is still necessary or if its logic should be merged into the main script.
+    try {
+      _logger.i('Applying database patches...');
+      await patchDatabaseForConflictOutcomes(db); // Call the patch function
+      _logger.i('Patches applied successfully');
+    } catch (e, stackTrace) {
+      _logger.e('Error applying patches', e, stackTrace);
+      // Decide if patch errors should prevent app start, currently it logs and continues
+    }
   }
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -596,6 +307,7 @@ class DatabaseHelper {
 
       final tables = [
         'user',
+        'organisation_types', // Added
         'organisations',
         'wildlife_conflict_incidents',
         'wildlife_conflict_outcomes',

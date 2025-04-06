@@ -1,16 +1,15 @@
-import 'dart:convert';
 
+import 'package:get/get.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:regional_cbnrm/core/api_service.dart';
 import 'package:regional_cbnrm/core/app_exceptions.dart';
-import 'package:regional_cbnrm/core/database_helper.dart';
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 
 class WildlifeConflictRepository {
   final ApiService _apiService = ApiService();
-  final DatabaseHelper _dbHelper = DatabaseHelper();
-
-  // Add const constructor for widget usage
-  WildlifeConflictRepository();
+  
+  // Get database from GetX dependency injection
+  Database get _db => Get.find<Database>(tag: 'app_database');
 
   // Get wildlife conflict incidents for an organisation
   Future<List<WildlifeConflictIncident>> getIncidents(int organisationId) async {
@@ -52,7 +51,7 @@ class WildlifeConflictRepository {
     } catch (e) {
       // If API call fails, try to get from local database
       try {
-        final incidentsData = await _dbHelper.query(
+        final incidentsData = await _db.query(
           'wildlife_conflict_incidents',
           where: 'organisation_id = ?',
           whereArgs: [organisationId],
@@ -64,13 +63,13 @@ class WildlifeConflictRepository {
             WildlifeConflictIncident incident = WildlifeConflictIncident.fromJson(incidentData);
 
             // Fetch related data
-            final conflictTypeData = await _dbHelper.query(
+            final conflictTypeData = await _db.query(
               'conflict_types',
               where: 'id = ?',
               whereArgs: [incident.conflictTypeId],
             );
 
-            final speciesData = await _dbHelper.query(
+            final speciesData = await _db.query(
               'species',
               where: 'id = ?',
               whereArgs: [incident.speciesId],
@@ -104,7 +103,7 @@ class WildlifeConflictRepository {
   // Save incidents to local database
   Future<void> _saveIncidentsToDb(List<WildlifeConflictIncident> incidents) async {
     for (var incident in incidents) {
-      await _dbHelper.insert('wildlife_conflict_incidents', {
+      await _db.insert('wildlife_conflict_incidents', {
         'id': incident.id,
         'organisation_id': incident.organisationId,
         'title': incident.title,
@@ -123,7 +122,7 @@ class WildlifeConflictRepository {
 
       // Save conflict type if available
       if (incident.conflictType != null) {
-        await _dbHelper.insert('conflict_types', {
+        await _db.insert('conflict_types', {
           'id': incident.conflictType!.id,
           'name': incident.conflictType!.name,
           'created_at': incident.conflictType!.createdAt?.toIso8601String(),
@@ -131,16 +130,38 @@ class WildlifeConflictRepository {
         });
       }
 
-      // Save species if available
+      // Save species list if available
+      if (incident.speciesList != null && incident.speciesList!.isNotEmpty) {
+        for (final species in incident.speciesList!) {
+          await _db.insert(
+            'species',
+            {
+              'id': species.id,
+              'name': species.name,
+              'species_gender_id': species.speciesGenderId,
+              'maturity_id': species.maturityId,
+              'created_at': species.createdAt?.toIso8601String(),
+              'updated_at': species.updatedAt?.toIso8601String(),
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+
+      // Optionally, save single species for backward compatibility
       if (incident.species != null) {
-        await _dbHelper.insert('species', {
-          'id': incident.species!.id,
-          'name': incident.species!.name,
-          'species_gender_id': incident.species!.speciesGenderId,
-          'maturity_id': incident.species!.maturityId,
-          'created_at': incident.species!.createdAt?.toIso8601String(),
-          'updated_at': incident.species!.updatedAt?.toIso8601String(),
-        }, where: 'id = ?', whereArgs: [incident.species!.id]);
+        await _db.insert(
+          'species',
+          {
+            'id': incident.species!.id,
+            'name': incident.species!.name,
+            'species_gender_id': incident.species!.speciesGenderId,
+            'maturity_id': incident.species!.maturityId,
+            'created_at': incident.species!.createdAt?.toIso8601String(),
+            'updated_at': incident.species!.updatedAt?.toIso8601String(),
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
     }
   }
@@ -158,7 +179,7 @@ class WildlifeConflictRepository {
     } catch (e) {
       // If API call fails, try to get from local database
       try {
-        final incidentData = await _dbHelper.query(
+        final incidentData = await _db.query(
           'wildlife_conflict_incidents',
           where: 'id = ? OR remote_id = ?',
           whereArgs: [incidentId, incidentId],
@@ -171,19 +192,19 @@ class WildlifeConflictRepository {
         WildlifeConflictIncident incident = WildlifeConflictIncident.fromJson(incidentData.first);
 
         // Fetch related data
-        final conflictTypeData = await _dbHelper.query(
+        final conflictTypeData = await _db.query(
           'conflict_types',
           where: 'id = ?',
           whereArgs: [incident.conflictTypeId],
         );
 
-        final speciesData = await _dbHelper.query(
+        final speciesData = await _db.query(
           'species',
           where: 'id = ?',
           whereArgs: [incident.speciesId],
         );
 
-        final outcomesData = await _dbHelper.query(
+        final outcomesData = await _db.query(
           'wildlife_conflict_outcomes',
           where: 'incident_id = ?',
           whereArgs: [incident.id],
@@ -206,7 +227,7 @@ class WildlifeConflictRepository {
             outcomesData.map((outcomeData) async {
               WildlifeConflictOutcome outcome = WildlifeConflictOutcome.fromJson(outcomeData);
 
-              final conflictOutcomeData = await _dbHelper.query(
+              final conflictOutcomeData = await _db.query(
                 'conflict_outcomes',
                 where: 'id = ?',
                 whereArgs: [outcome.conflictOutcomeId],
@@ -264,7 +285,7 @@ class WildlifeConflictRepository {
         final createdIncident = WildlifeConflictIncident.fromJson(response['data']['incident']);
 
         // Save to local database
-        await _dbHelper.insert('wildlife_conflict_incidents', {
+        await _db.insert('wildlife_conflict_incidents', {
           'id': createdIncident.id,
           'organisation_id': createdIncident.organisationId,
           'title': createdIncident.title,
@@ -295,7 +316,7 @@ class WildlifeConflictRepository {
 
       // Save to local database with pending sync status
       final currentDateTime = DateTime.now().toIso8601String();
-      final localId = await _dbHelper.insert('wildlife_conflict_incidents', {
+      final localId = await _db.insert('wildlife_conflict_incidents', {
         'organisation_id': incident.organisationId,
         'title': incident.title,
         'date': incident.date.toIso8601String(),
@@ -313,15 +334,15 @@ class WildlifeConflictRepository {
 
       // Add to sync queue - use additionalData if provided
       final syncData = additionalData ?? incident.toApiJson();
-      await _dbHelper.addToSyncQueue(
-        'wildlife_conflict_incidents',
-        localId,
-        'create',
-        jsonEncode(syncData),
-      );
+      // await _db.addToSyncQueue(
+      //   'wildlife_conflict_incidents',
+      //   localId,
+        // 'create',
+        // jsonEncode(syncData),
+        // );
 
       // Return the locally created incident
-      final incidentData = await _dbHelper.query(
+      final incidentData = await _db.query(
         'wildlife_conflict_incidents',
         where: 'id = ?',
         whereArgs: [localId],
@@ -343,7 +364,7 @@ class WildlifeConflictRepository {
         final updatedIncident = WildlifeConflictIncident.fromJson(response['data']['incident']);
 
         // Update in local database
-        await _dbHelper.update(
+        await _db.update(
           'wildlife_conflict_incidents',
           {
             'title': updatedIncident.title,
@@ -370,7 +391,7 @@ class WildlifeConflictRepository {
       if (e is AppException && !(e is NoInternetException || e is TimeoutException)) rethrow;
 
       // Fetch the current incident from local database
-      final incidentData = await _dbHelper.query(
+      final incidentData = await _db.query(
         'wildlife_conflict_incidents',
         where: 'id = ? OR remote_id = ?',
         whereArgs: [incidentId, incidentId],
@@ -398,7 +419,7 @@ class WildlifeConflictRepository {
         'sync_status': 'pending',
       };
 
-      await _dbHelper.update(
+      await _db.update(
         'wildlife_conflict_incidents',
         updatedFields,
         where: 'id = ?',
@@ -406,15 +427,15 @@ class WildlifeConflictRepository {
       );
 
       // Add to sync queue
-      await _dbHelper.addToSyncQueue(
-        'wildlife_conflict_incidents',
-        currentIncident.id!,
-        'update',
-        jsonEncode(data),
-      );
+      // await _db.addToSyncQueue(
+      //   'wildlife_conflict_incidents',
+      //   currentIncident.id!,
+      //   'update',
+      //   jsonEncode(data),
+      // );
 
       // Return the locally updated incident
-      final updatedIncidentData = await _dbHelper.query(
+      final updatedIncidentData = await _db.query(
         'wildlife_conflict_incidents',
         where: 'id = ?',
         whereArgs: [currentIncident.id!],
@@ -437,7 +458,7 @@ class WildlifeConflictRepository {
       }
 
       // Delete from local database
-      await _dbHelper.delete(
+      await _db.delete(
         'wildlife_conflict_incidents',
         where: 'id = ? OR remote_id = ?',
         whereArgs: [incidentId, incidentId],
@@ -460,12 +481,16 @@ class WildlifeConflictRepository {
 
         // Cache conflict types in local database
         for (var type in conflictTypes) {
-          await _dbHelper.insert('conflict_types', {
-            'id': type.id,
-            'name': type.name,
-            'created_at': type.createdAt?.toIso8601String(),
-            'updated_at': type.updatedAt?.toIso8601String(),
-          }, where: 'id = ?', whereArgs: [type.id]);
+          await _db.insert(
+            'conflict_types',
+            {
+              'id': type.id,
+              'name': type.name,
+              'created_at': type.createdAt?.toIso8601String(),
+              'updated_at': type.updatedAt?.toIso8601String(),
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
 
         return conflictTypes;
@@ -475,7 +500,7 @@ class WildlifeConflictRepository {
     } catch (e) {
       // If API call fails, try to get from local database
       try {
-        final typesData = await _dbHelper.query('conflict_types');
+        final typesData = await _db.query('conflict_types');
         return typesData.map((type) => ConflictType.fromJson(type)).toList();
       } catch (dbException) {
         // If both API and DB fail, rethrow the original exception
@@ -501,38 +526,115 @@ class WildlifeConflictRepository {
 
         // Cache conflict outcomes in local database
         for (var outcome in conflictOutcomes) {
-          await _dbHelper.insert('conflict_outcomes', {
-            'id': outcome.id,
-            'name': outcome.name,
-            'created_at': outcome.createdAt?.toIso8601String(),
-            'updated_at': outcome.updatedAt?.toIso8601String(),
-          }, where: 'id = ?', whereArgs: [outcome.id]);
+          // Check if outcome exists before inserting
+          final existingOutcomes = await _db.query(
+            'conflict_outcomes', 
+            where: 'id = ?', 
+            whereArgs: [outcome.id]
+          );
+          
+          if (existingOutcomes.isEmpty) {
+            // Insert new record
+            await _db.insert('conflict_outcomes', {
+              'id': outcome.id,
+              'name': outcome.name,
+              'created_at': outcome.createdAt?.toIso8601String(),
+              'updated_at': outcome.updatedAt?.toIso8601String(),
+            });
+          } else {
+            // Update existing record
+            await _db.update(
+              'conflict_outcomes',
+              {
+                'name': outcome.name,
+                'created_at': outcome.createdAt?.toIso8601String(),
+                'updated_at': outcome.updatedAt?.toIso8601String(),
+              },
+              where: 'id = ?',
+              whereArgs: [outcome.id]
+            );
+          }
 
           // Save dynamic fields if available
           if (outcome.dynamicFields != null) {
             for (var field in outcome.dynamicFields!) {
               // Save dynamic field
-              await _dbHelper.insert('dynamic_fields', {
-                'id': field.id,
-                'name': field.name,
-                'type': field.type,
-                'label': field.label,
-                'required': field.required ? 1 : 0,
-                'created_at': field.createdAt?.toIso8601String(),
-                'updated_at': field.updatedAt?.toIso8601String(),
-              }, where: 'id = ?', whereArgs: [field.id]);
+              // Check if field exists before inserting
+              final existingFields = await _db.query(
+                'dynamic_fields', 
+                where: 'id = ?', 
+                whereArgs: [field.id]
+              );
+              
+              if (existingFields.isEmpty) {
+                // Insert new record
+                await _db.insert('dynamic_fields', {
+                  'id': field.id,
+                  'organisation_id': field.organisationId, // Added
+                  'conflict_outcome_id': field.conflictOutcomeId, // Added
+                  'field_name': field.fieldName, // Renamed
+                  'field_type': field.fieldType, // Renamed
+                  'label': field.label,
+                  'slug': field.slug, // Added
+                  // 'required' removed
+                  'created_at': field.createdAt?.toIso8601String(),
+                  'updated_at': field.updatedAt?.toIso8601String(),
+                });
+              } else {
+                // Update existing record
+                await _db.update(
+                  'dynamic_fields',
+                  {
+                    'organisation_id': field.organisationId, // Added
+                    'conflict_outcome_id': field.conflictOutcomeId, // Added
+                    'field_name': field.fieldName, // Renamed
+                    'field_type': field.fieldType, // Renamed
+                    'label': field.label,
+                    'slug': field.slug, // Added
+                    // 'required' removed
+                    'created_at': field.createdAt?.toIso8601String(),
+                    'updated_at': field.updatedAt?.toIso8601String(),
+                  },
+                  where: 'id = ?',
+                  whereArgs: [field.id]
+                );
+              }
 
               // Save options if available
               if (field.options != null) {
                 for (var option in field.options!) {
-                  await _dbHelper.insert('dynamic_field_options', {
-                    'id': option.id,
-                    'dynamic_field_id': option.dynamicFieldId,
-                    'value': option.value,
-                    'label': option.label,
-                    'created_at': option.createdAt?.toIso8601String(),
-                    'updated_at': option.updatedAt?.toIso8601String(),
-                  }, where: 'id = ?', whereArgs: [option.id]);
+                  // Check if option exists before inserting
+                  final existingOptions = await _db.query(
+                    'dynamic_field_options', 
+                    where: 'id = ?', 
+                    whereArgs: [option.id]
+                  );
+                  
+                  if (existingOptions.isEmpty) {
+                    // Insert new record
+                    await _db.insert('dynamic_field_options', {
+                      'id': option.id,
+                      'dynamic_field_id': option.dynamicFieldId,
+                      'value': option.value,
+                      'label': option.label,
+                      'created_at': option.createdAt?.toIso8601String(),
+                      'updated_at': option.updatedAt?.toIso8601String(),
+                    });
+                  } else {
+                    // Update existing record
+                    await _db.update(
+                      'dynamic_field_options',
+                      {
+                        'dynamic_field_id': option.dynamicFieldId,
+                        'value': option.value,
+                        'label': option.label,
+                        'created_at': option.createdAt?.toIso8601String(),
+                        'updated_at': option.updatedAt?.toIso8601String(),
+                      },
+                      where: 'id = ?',
+                      whereArgs: [option.id]
+                    );
+                  }
                 }
               }
             }
@@ -546,14 +648,14 @@ class WildlifeConflictRepository {
     } catch (e) {
       // If API call fails, try to get from local database
       try {
-        final outcomesData = await _dbHelper.query('conflict_outcomes');
+        final outcomesData = await _db.query('conflict_outcomes');
 
         List<ConflictOutcome> outcomes = await Future.wait(
           outcomesData.map((outcomeData) async {
             final outcomeId = outcomeData['id'];
 
             // Fetch dynamic fields for this outcome
-            final fieldsData = await _dbHelper.rawQuery('''
+            final fieldsData = await _db.rawQuery('''
               SELECT df.*
               FROM dynamic_fields df
               JOIN conflict_outcome_dynamic_field_values codfv ON df.id = codfv.dynamic_field_id
@@ -565,7 +667,7 @@ class WildlifeConflictRepository {
                 final fieldId = fieldData['id'];
 
                 // Fetch options for this field
-                final optionsData = await _dbHelper.query(
+                final optionsData = await _db.query(
                   'dynamic_field_options',
                   where: 'dynamic_field_id = ?',
                   whereArgs: [fieldId],
@@ -575,31 +677,45 @@ class WildlifeConflictRepository {
                     .map((option) => DynamicFieldOption.fromJson(option))
                     .toList();
 
+                // Assuming organisationId might be available in outcomeData or needs a default
+                // Assuming conflictOutcomeId is the current outcome's ID
+                final orgId = outcomeData['organisation_id'] as int? ?? 0; // Placeholder if not available
+                final outcomeIdForField = outcomeData['id'] as int?;
+
                 return DynamicField(
-                  id: fieldData['id'],
-                  name: fieldData['name'],
-                  type: fieldData['type'],
-                  label: fieldData['label'],
-                  required: fieldData['required'] == 1,
+                  id: fieldData['id'] as int,
+                  organisationId: orgId, // Use fetched/default orgId
+                  conflictOutcomeId: outcomeIdForField, // Use current outcome ID
+                  fieldName: fieldData['field_name'] as String? ?? fieldData['name'] as String, // Use new name, fallback to old
+                  fieldType: fieldData['field_type'] as String? ?? fieldData['type'] as String, // Use new name, fallback to old
+                  label: fieldData['label'] as String?,
+                  slug: fieldData['slug'] as String?,
+                  // 'required' removed
                   createdAt: fieldData['created_at'] != null
-                      ? DateTime.parse(fieldData['created_at'])
+                      ? DateTime.parse(fieldData['created_at'] as String)
                       : null,
                   updatedAt: fieldData['updated_at'] != null
-                      ? DateTime.parse(fieldData['updated_at'])
+                      ? DateTime.parse(fieldData['updated_at'] as String)
                       : null,
                   options: options,
                 );
               }).toList(),
             );
 
+            // Assuming conflictTypeId might be available in outcomeData or needs a default
+            final conflictTypeId = outcomeData['conflict_type_id'] as int? ?? 0; // Placeholder
+
             return ConflictOutcome(
-              id: outcomeData['id'],
-              name: outcomeData['name'],
+              id: outcomeData['id'] as int,
+              conflictTypeId: conflictTypeId, // Added
+              name: outcomeData['name'] as String,
+              description: outcomeData['description'] as String?, // Added
+              slug: outcomeData['slug'] as String?, // Added
               createdAt: outcomeData['created_at'] != null
-                  ? DateTime.parse(outcomeData['created_at'])
+                  ? DateTime.parse(outcomeData['created_at'] as String)
                   : null,
               updatedAt: outcomeData['updated_at'] != null
-                  ? DateTime.parse(outcomeData['updated_at'])
+                  ? DateTime.parse(outcomeData['updated_at'] as String)
                   : null,
               dynamicFields: fields,
             );
@@ -647,14 +763,18 @@ class WildlifeConflictRepository {
 
         // Cache species in local database
         for (var s in species) {
-          await _dbHelper.insert('species', {
-            'id': s.id,
-            'name': s.name,
-            'species_gender_id': s.speciesGenderId,
-            'maturity_id': s.maturityId,
-            'created_at': s.createdAt?.toIso8601String(),
-            'updated_at': s.updatedAt?.toIso8601String(),
-          }, where: 'id = ?', whereArgs: [s.id]);
+          await _db.insert(
+            'species',
+            {
+              'id': s.id,
+              'name': s.name,
+              'species_gender_id': s.speciesGenderId,
+              'maturity_id': s.maturityId,
+              'created_at': s.createdAt?.toIso8601String(),
+              'updated_at': s.updatedAt?.toIso8601String(),
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
         }
 
         return species;
@@ -666,7 +786,7 @@ class WildlifeConflictRepository {
       print('Error fetching species from API: $e');
       // If API call fails, try to get from local database
       try {
-        final speciesData = await _dbHelper.query('species');
+        final speciesData = await _db.query('species');
         final species = speciesData.map((species) => Species.fromJson(species)).toList();
 
         if (species.isNotEmpty) {
@@ -710,7 +830,7 @@ class WildlifeConflictRepository {
         final createdOutcome = WildlifeConflictOutcome.fromJson(response['data']['outcome']);
 
         // Save to local database
-        await _dbHelper.insert('wildlife_conflict_outcomes', {
+        await _db.insert('wildlife_conflict_outcomes', {
           'id': createdOutcome.id,
           'incident_id': incidentId,
           'conflict_outcome_id': createdOutcome.conflictOutcomeId,
@@ -732,7 +852,7 @@ class WildlifeConflictRepository {
 
       // Save to local database with pending sync status
       final currentDateTime = DateTime.now().toIso8601String();
-      final localId = await _dbHelper.insert('wildlife_conflict_outcomes', {
+      final localId = await _db.insert('wildlife_conflict_outcomes', {
         'incident_id': incidentId,
         'conflict_outcome_id': conflictOutcomeId,
         'notes': notes,
@@ -743,13 +863,13 @@ class WildlifeConflictRepository {
         'remote_id': null,
       });
 
-      // Save dynamic values if available
+      // Save dynamic values if available - Link to incident ID now
       if (dynamicValues != null && dynamicValues.isNotEmpty) {
         for (var value in dynamicValues) {
-          await _dbHelper.insert('wildlife_conflict_dynamic_values', {
-            'wildlife_conflict_outcome_id': localId,
+          await _db.insert('conflict_outcome_dynamic_field_values', { // Corrected table name
+            'wildlife_conflict_incident_id': incidentId, // Link to incident ID
             'dynamic_field_id': value.dynamicFieldId,
-            'value': value.value,
+            'value': value.value, // Ensure this matches VARCHAR(255) limit if necessary
             'created_at': currentDateTime,
             'updated_at': currentDateTime,
           });
@@ -764,21 +884,21 @@ class WildlifeConflictRepository {
         'dynamic_values': dynamicValues?.map((value) => value.toApiJson()).toList(),
       };
 
-      await _dbHelper.addToSyncQueue(
-        'wildlife_conflict_outcomes',
-        localId,
-        'create',
-        jsonEncode(data),
-      );
+      // await _db.addToSyncQueue(
+      //   'wildlife_conflict_outcomes',
+      //   localId,
+        // 'create',
+        // jsonEncode(data),
+        // );
 
       // Return the locally created outcome
-      final outcomeData = await _dbHelper.query(
+      final outcomeData = await _db.query(
         'wildlife_conflict_outcomes',
         where: 'id = ?',
         whereArgs: [localId],
       );
 
-      final outcomeValues = await _dbHelper.query(
+      final outcomeValues = await _db.query(
         'wildlife_conflict_dynamic_values',
         where: 'wildlife_conflict_outcome_id = ?',
         whereArgs: [localId],
@@ -787,7 +907,7 @@ class WildlifeConflictRepository {
       final outcome = WildlifeConflictOutcome.fromJson(outcomeData.first);
 
       // Get conflict outcome details
-      final conflictOutcomeData = await _dbHelper.query(
+      final conflictOutcomeData = await _db.query(
         'conflict_outcomes',
         where: 'id = ?',
         whereArgs: [conflictOutcomeId],

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 
 import 'package:regional_cbnrm/models/hunting_model.dart';
 import 'package:regional_cbnrm/models/organisation_model.dart';
-import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
+import 'package:regional_cbnrm/models/species.dart';
 import 'package:regional_cbnrm/repositories/hunting_activity_repository.dart';
 import 'package:regional_cbnrm/repositories/organisation_repository.dart';
 import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';
@@ -90,9 +90,10 @@ class _HuntingActivityCreateScreenState extends State<HuntingActivityCreateScree
       final species = await _wildlifeRepository.getSpecies(
         organisationId: _organisationId.value > 0 ? _organisationId.value : null
       );
+
       // Sort alphabetically
-      species.sort((a, b) => a.name.compareTo(b.name));
-      _species.value = species;
+      species.sort((a, b) => a['name'].compareTo(b['name']));
+      _species.value = species.cast<Species>();
     } catch (e) {
       print('Error loading species: $e');
     }

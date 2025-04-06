@@ -62,7 +62,7 @@ class ProblemAnimalControlRepository {
 
             if (incidentData.isNotEmpty) {
               control = control.copyWith(
-                wildlifeConflictIncident: WildlifeConflictIncident.fromJson(incidentData.first)
+                wildlifeConflictIncident: WildlifeConflictIncident.fromApiJson(incidentData.first)
               );
             }
 
@@ -115,8 +115,8 @@ class ProblemAnimalControlRepository {
           'id': control.wildlifeConflictIncident!.id,
           'organisation_id': control.wildlifeConflictIncident!.organisationId,
           'title': control.wildlifeConflictIncident!.title,
-          'date': control.wildlifeConflictIncident!.date.toIso8601String(),
-          'time': control.wildlifeConflictIncident!.time,
+          'date': control.wildlifeConflictIncident!.incidentDate.toIso8601String(),
+          'time': control.wildlifeConflictIncident!.incidentTime,
           'latitude': control.wildlifeConflictIncident!.latitude,
           'longitude': control.wildlifeConflictIncident!.longitude,
           'description': control.wildlifeConflictIncident!.description,
@@ -176,7 +176,7 @@ class ProblemAnimalControlRepository {
 
         if (incidentData.isNotEmpty) {
           control = control.copyWith(
-            wildlifeConflictIncident: WildlifeConflictIncident.fromJson(incidentData.first)
+            wildlifeConflictIncident: WildlifeConflictIncident.fromApiJson(incidentData.first)
           );
         }
 

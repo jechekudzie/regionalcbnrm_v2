@@ -1,4 +1,5 @@
-import 'wildlife_conflict_model.dart';
+
+import 'package:regional_cbnrm/models/species.dart';
 
 class PoachingIncident {
   final int? id;
@@ -177,7 +178,7 @@ class PoachingIncidentSpecies {
       'quantity': quantity,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
-      'species': species?.toJson(),
+      'species': species?.toApiJson(),
     };
   }
 
@@ -189,7 +190,7 @@ class PoachingIncidentSpecies {
       quantity: json['quantity'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      species: json['species'] != null ? Species.fromJson(json['species']) : null,
+      species: json['species'] != null ? Species.fromApiJson(json['species']) : null,
     );
   }
 

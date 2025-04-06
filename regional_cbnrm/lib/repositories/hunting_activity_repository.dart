@@ -4,6 +4,7 @@ import 'package:regional_cbnrm/core/api_service.dart';
 import 'package:regional_cbnrm/core/app_exceptions.dart';
 import 'package:regional_cbnrm/core/database_helper.dart';
 import 'package:regional_cbnrm/models/hunting_model.dart';
+import 'package:regional_cbnrm/models/species.dart';
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 
 class HuntingActivityRepository {
@@ -165,7 +166,7 @@ class HuntingActivityRepository {
               quotaAllocationBalanceId: data['quota_allocation_balance_id'],
               createdAt: data['created_at'] != null ? DateTime.parse(data['created_at']) : null,
               updatedAt: data['updated_at'] != null ? DateTime.parse(data['updated_at']) : null,
-              species: speciesInfo.isNotEmpty ? Species.fromJson(speciesInfo.first) : null,
+              species: speciesInfo.isNotEmpty ? Species.fromApiJson(speciesInfo.first) : null,
             );
           }).toList(),
         );
@@ -599,7 +600,7 @@ class HuntingActivityRepository {
             whereArgs: [allocation.speciesId],
           );
           
-          final species = speciesData.isNotEmpty ? Species.fromJson(speciesData.first) : null;
+          final species = speciesData.isNotEmpty ? Species.fromApiJson(speciesData.first) : null;
           
           return allocation.copyWith(
             quotaAllocationBalance: balance,

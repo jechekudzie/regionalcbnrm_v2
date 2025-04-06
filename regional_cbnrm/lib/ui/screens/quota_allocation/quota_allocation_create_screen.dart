@@ -3,8 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
-
-import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
+import 'package:regional_cbnrm/models/species.dart';
 import 'package:regional_cbnrm/repositories/hunting_activity_repository.dart';
 import 'package:regional_cbnrm/repositories/organisation_repository.dart';
 import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';

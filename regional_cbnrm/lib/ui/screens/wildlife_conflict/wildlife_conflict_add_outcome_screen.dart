@@ -3,7 +3,8 @@ import 'package:get/get.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:intl/intl.dart';
-import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
+import 'package:regional_cbnrm/models/conflict_outcome.dart';
+import 'package:regional_cbnrm/models/dynamic_value.dart';
 import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';
 import 'package:regional_cbnrm/services/notification_service.dart';
 
@@ -39,7 +40,7 @@ class _WildlifeConflictAddOutcomeScreenState extends State<WildlifeConflictAddOu
 
     try {
       final outcomes = await _repository.getConflictOutcomes();
-      _conflictOutcomes.value = outcomes;
+      _conflictOutcomes.value = outcomes.map((outcome) => ConflictOutcome.fromApiJson(outcome)).toList();
     } catch (e) {
       _notificationService.showSnackBar(
         'Failed to load conflict outcomes',

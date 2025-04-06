@@ -4,6 +4,7 @@ import 'package:regional_cbnrm/core/api_service.dart';
 import 'package:regional_cbnrm/core/app_exceptions.dart';
 import 'package:regional_cbnrm/core/database_helper.dart';
 import 'package:regional_cbnrm/models/poaching_model.dart';
+import 'package:regional_cbnrm/models/species.dart';
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 
 class PoachingRepository {
@@ -72,7 +73,7 @@ class PoachingRepository {
                 updatedAt: speciesItem['updated_at'] != null 
                     ? DateTime.parse(speciesItem['updated_at']) 
                     : null,
-                species: Species.fromJson(speciesDef.first),
+                species: Species.fromApiJson(speciesDef.first),
               ));
             }
           }

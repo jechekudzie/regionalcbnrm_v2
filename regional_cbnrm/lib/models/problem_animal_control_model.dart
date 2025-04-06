@@ -1,4 +1,4 @@
-import 'wildlife_conflict_model.dart';
+import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 
 class ProblemAnimalControl {
   final int? id;
@@ -59,7 +59,7 @@ class ProblemAnimalControl {
       'author': author,
       'remote_id': remoteId,
       'control_measure': controlMeasure?.toJson(),
-      'wildlife_conflict_incident': wildlifeConflictIncident?.toJson(),
+      'wildlife_conflict_incident': wildlifeConflictIncident?.toApiJson(),
     };
   }
 
@@ -82,7 +82,7 @@ class ProblemAnimalControl {
       remoteId: json['remote_id'] ?? json['id'],
       controlMeasure: json['control_measure'] != null ? ControlMeasure.fromJson(json['control_measure'] as Map<String, dynamic>) : null,
       wildlifeConflictIncident: json['wildlife_conflict_incident'] != null
-          ? WildlifeConflictIncident.fromJson(json['wildlife_conflict_incident'] as Map<String, dynamic>)
+          ? WildlifeConflictIncident.fromApiJson(json['wildlife_conflict_incident'] as Map<String, dynamic>)
           : null,
     );
   }

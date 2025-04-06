@@ -1,8 +1,3 @@
--- SQLite migration for Resource Africa Flutter App
--- Based on MySQL schema structure
-
-PRAGMA foreign_keys = ON;
-
 -- Countries table
 CREATE TABLE countries (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -10,7 +5,9 @@ CREATE TABLE countries (
   code TEXT,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Provinces table
@@ -19,7 +16,9 @@ CREATE TABLE provinces (
   name TEXT NOT NULL,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Cities table
@@ -30,6 +29,8 @@ CREATE TABLE cities (
   slug TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Species table
@@ -43,7 +44,9 @@ CREATE TABLE species (
   is_special INTEGER NOT NULL DEFAULT 0,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Genders table
@@ -53,7 +56,9 @@ CREATE TABLE genders (
   description TEXT,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Species genders table
@@ -63,7 +68,9 @@ CREATE TABLE species_genders (
   description TEXT,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Organisation types table
@@ -73,7 +80,9 @@ CREATE TABLE organisation_types (
   description TEXT,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Organisations table
@@ -87,6 +96,8 @@ CREATE TABLE organisations (
   slug TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Users table
@@ -99,7 +110,9 @@ CREATE TABLE users (
   slug TEXT,
   remember_token TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Permissions table
@@ -108,7 +121,9 @@ CREATE TABLE permissions (
   name TEXT NOT NULL,
   guard_name TEXT NOT NULL,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Roles table
@@ -119,31 +134,36 @@ CREATE TABLE roles (
   guard_name TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
--- Role has permissions table
 CREATE TABLE role_has_permissions (
   permission_id INTEGER NOT NULL,
   role_id INTEGER NOT NULL,
-  PRIMARY KEY (permission_id, role_id),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  PRIMARY KEY (permission_id, role_id)
 );
 
--- Model has permissions table
 CREATE TABLE model_has_permissions (
   permission_id INTEGER NOT NULL,
   model_type TEXT NOT NULL,
   model_id INTEGER NOT NULL,
   organisation_id INTEGER NOT NULL,
-  PRIMARY KEY (organisation_id, permission_id, model_id, model_type),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  PRIMARY KEY (organisation_id, permission_id, model_id, model_type)
 );
 
--- Model has roles table
 CREATE TABLE model_has_roles (
   role_id INTEGER NOT NULL,
   model_type TEXT NOT NULL,
   model_id INTEGER NOT NULL,
   organisation_id INTEGER NOT NULL,
-  PRIMARY KEY (organisation_id, role_id, model_id, model_type),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  PRIMARY KEY (organisation_id, role_id, model_id, model_type)
 );
 
 -- Organisation users table
@@ -155,6 +175,8 @@ CREATE TABLE organisation_users (
   is_active INTEGER NOT NULL DEFAULT 1,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Organisation permissions table
@@ -164,6 +186,8 @@ CREATE TABLE organisation_permissions (
   permission_id INTEGER NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Conflict types table
@@ -173,7 +197,9 @@ CREATE TABLE conflict_types (
   description TEXT,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Conflict outcomes table
@@ -185,6 +211,8 @@ CREATE TABLE conflict_out_comes (
   slug TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Control measures table
@@ -197,6 +225,8 @@ CREATE TABLE control_measures (
   slug TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Wildlife conflict incidents table
@@ -225,16 +255,19 @@ CREATE TABLE wildlife_conflict_incident_species (
   species_id INTEGER NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
--- Wildlife conflict outcomes table
 CREATE TABLE wildlife_conflict_outcomes (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   wildlife_conflict_incident_id INTEGER NOT NULL,
   conflict_out_come_id INTEGER NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (wildlife_conflict_incident_id, conflict_out_come_id),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (wildlife_conflict_incident_id, conflict_out_come_id)
 );
 
 -- Dynamic fields table
@@ -248,6 +281,8 @@ CREATE TABLE dynamic_fields (
   slug TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Dynamic field options table
@@ -258,6 +293,8 @@ CREATE TABLE dynamic_field_options (
   option_label TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Conflict outcome dynamic field values table
@@ -268,9 +305,10 @@ CREATE TABLE conflict_outcome_dynamic_field_values (
   value TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
--- Wildlife conflict dynamic values table
 CREATE TABLE wildlife_conflict_dynamic_values (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   wildlife_conflict_outcome_id INTEGER NOT NULL,
@@ -278,7 +316,9 @@ CREATE TABLE wildlife_conflict_dynamic_values (
   field_value TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (wildlife_conflict_outcome_id, dynamic_field_id),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (wildlife_conflict_outcome_id, dynamic_field_id)
 );
 
 -- Problem animal controls table
@@ -307,6 +347,8 @@ CREATE TABLE pac_control_measures (
   control_measure_id INTEGER NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Crop types table
@@ -315,7 +357,9 @@ CREATE TABLE crop_types (
   name TEXT NOT NULL,
   description TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Livestock types table
@@ -324,10 +368,11 @@ CREATE TABLE live_stock_types (
   name TEXT NOT NULL,
   description TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
--- Animal control records table
 CREATE TABLE animal_control_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -340,12 +385,11 @@ CREATE TABLE animal_control_records (
   injured INTEGER NOT NULL DEFAULT 0,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, species_id, period),
   author TEXT,
-  sync_status TEXT DEFAULT 'pending'
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, species_id, period)
 );
 
--- Crop conflict records table
 CREATE TABLE crop_conflict_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -355,12 +399,11 @@ CREATE TABLE crop_conflict_records (
   period TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, species_id, crop_type_id, period),
   author TEXT,
-  sync_status TEXT DEFAULT 'pending'
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, species_id, crop_type_id, period)
 );
 
--- Human conflict records table
 CREATE TABLE human_conflict_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -371,12 +414,11 @@ CREATE TABLE human_conflict_records (
   period TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, species_id, gender_id, period),
   author TEXT,
-  sync_status TEXT DEFAULT 'pending'
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, species_id, gender_id, period)
 );
 
--- Livestock conflict records table
 CREATE TABLE live_stock_conflict_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -387,9 +429,9 @@ CREATE TABLE live_stock_conflict_records (
   period TEXT NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, species_id, live_stock_type_id, period),
   author TEXT,
-  sync_status TEXT DEFAULT 'pending'
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, species_id, live_stock_type_id, period)
 );
 
 -- Poaching methods table
@@ -398,7 +440,9 @@ CREATE TABLE poaching_methods (
   name TEXT NOT NULL,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Poaching reasons table
@@ -407,7 +451,9 @@ CREATE TABLE poaching_reasons (
   name TEXT NOT NULL,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Poacher types table
@@ -416,7 +462,9 @@ CREATE TABLE poacher_types (
   name TEXT NOT NULL,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Offence types table
@@ -425,7 +473,9 @@ CREATE TABLE offence_types (
   name TEXT NOT NULL,
   slug TEXT,
   created_at TIMESTAMP,
-  updated_at TIMESTAMP
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Poaching incidents table
@@ -454,6 +504,8 @@ CREATE TABLE poaching_incident_methods (
   poaching_method_id INTEGER NOT NULL,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Poaching incident species table
@@ -464,6 +516,8 @@ CREATE TABLE poaching_incident_species (
   estimate_number INTEGER,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
 );
 
 -- Poachers table
@@ -498,8 +552,6 @@ CREATE TABLE human_resource_records (
   employed_by TEXT NOT NULL DEFAULT 'organisation',
   notes TEXT,
   created_at TIMESTAMP,
- author TEXT,
- sync_status TEXT DEFAULT 'pending'
   updated_at TIMESTAMP,
   author TEXT,
   sync_status TEXT DEFAULT 'pending'
@@ -514,14 +566,11 @@ CREATE TABLE income_records (
   community_share REAL NOT NULL,
   ca_share REAL NOT NULL,
   created_at TIMESTAMP,
- author TEXT,
- sync_status TEXT DEFAULT 'pending'
   updated_at TIMESTAMP,
   author TEXT,
   sync_status TEXT DEFAULT 'pending'
 );
 
--- Income beneficiary records table
 CREATE TABLE income_beneficiary_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -531,13 +580,12 @@ CREATE TABLE income_beneficiary_records (
   females INTEGER NOT NULL DEFAULT 0,
   notes TEXT,
   created_at TIMESTAMP,
- author TEXT,
- sync_status TEXT DEFAULT 'pending'
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, period),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, period)
 );
 
--- Income use records table
 CREATE TABLE income_use_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -550,10 +598,11 @@ CREATE TABLE income_use_records (
   other_description TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, period),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, period)
 );
 
--- Source of income records table
 CREATE TABLE source_of_income_records (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   organisation_id INTEGER NOT NULL,
@@ -567,48 +616,33 @@ CREATE TABLE source_of_income_records (
   other_description TEXT,
   created_at TIMESTAMP,
   updated_at TIMESTAMP,
-  UNIQUE (organisation_id, period),
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, period)
 );
 
--- Create indexes
-
--- Organizations
 CREATE INDEX idx_organisations_type ON organisations(organisation_type_id);
 CREATE INDEX idx_organisations_parent ON organisations(organisation_id);
-
--- Users
 CREATE INDEX idx_users_email ON users(email);
-
--- Conflicts
 CREATE INDEX idx_wildlife_conflict_incidents_org ON wildlife_conflict_incidents(organisation_id);
 CREATE INDEX idx_wildlife_conflict_incidents_type ON wildlife_conflict_incidents(conflict_type_id);
-
--- Wildlife conflict incidents relationships
 CREATE INDEX idx_wildlife_conflict_incident_species_incident ON wildlife_conflict_incident_species(wildlife_conflict_incident_id);
 CREATE INDEX idx_wildlife_conflict_incident_species_species ON wildlife_conflict_incident_species(species_id);
 CREATE INDEX idx_wildlife_conflict_outcomes_incident ON wildlife_conflict_outcomes(wildlife_conflict_incident_id);
 CREATE INDEX idx_wildlife_conflict_outcomes_outcome ON wildlife_conflict_outcomes(conflict_out_come_id);
-
--- Dynamic fields
 CREATE INDEX idx_dynamic_fields_org ON dynamic_fields(organisation_id);
 CREATE INDEX idx_dynamic_fields_outcome ON dynamic_fields(conflict_outcome_id);
 CREATE INDEX idx_dynamic_field_options_field ON dynamic_field_options(dynamic_field_id);
-
--- PAC
 CREATE INDEX idx_problem_animal_controls_org ON problem_animal_controls(organisation_id);
 CREATE INDEX idx_problem_animal_controls_incident ON problem_animal_controls(wildlife_conflict_incident_id);
 CREATE INDEX idx_pac_control_measures_pac ON pac_control_measures(problem_animal_control_id);
 CREATE INDEX idx_pac_control_measures_cm ON pac_control_measures(control_measure_id);
-
--- Poaching
 CREATE INDEX idx_poaching_incidents_org ON poaching_incidents(organisation_id);
 CREATE INDEX idx_poaching_incident_methods_incident ON poaching_incident_methods(poaching_incident_id);
 CREATE INDEX idx_poaching_incident_methods_method ON poaching_incident_methods(poaching_method_id);
 CREATE INDEX idx_poaching_incident_species_incident ON poaching_incident_species(poaching_incident_id);
 CREATE INDEX idx_poaching_incident_species_species ON poaching_incident_species(species_id);
 CREATE INDEX idx_poachers_incident ON poachers(poaching_incident_id);
-
--- Records
 CREATE INDEX idx_animal_control_records_org_species ON animal_control_records(organisation_id, species_id);
 CREATE INDEX idx_crop_conflict_records_org_species ON crop_conflict_records(organisation_id, species_id);
 CREATE INDEX idx_human_conflict_records_org_species ON human_conflict_records(organisation_id, species_id);

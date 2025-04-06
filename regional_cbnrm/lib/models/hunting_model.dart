@@ -1,4 +1,5 @@
-import 'wildlife_conflict_model.dart';
+import 'package:regional_cbnrm/models/species.dart';
+
 import 'user_model.dart';
 
 class HuntingActivity {
@@ -191,7 +192,7 @@ class HuntingActivitySpecies {
       'quota_allocation_balance_id': quotaAllocationBalanceId,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
-      'species': species?.toJson(),
+      'species': species?.toApiJson(),
       'quota_allocation_balance': quotaAllocationBalance?.toJson(),
     };
   }
@@ -205,7 +206,7 @@ class HuntingActivitySpecies {
       quotaAllocationBalanceId: json['quota_allocation_balance_id'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      species: json['species'] != null ? Species.fromJson(json['species']) : null,
+      species: json['species'] != null ? Species.fromApiJson(json['species']) : null,
       quotaAllocationBalance: json['quota_allocation_balance'] != null
           ? QuotaAllocationBalance.fromJson(json['quota_allocation_balance'])
           : null,
@@ -378,7 +379,7 @@ class QuotaAllocation {
       'end_date': endDate.toIso8601String().split('T')[0],
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
-      'species': species?.toJson(),
+      'species': species?.toApiJson(),
       'quota_allocation_balance': quotaAllocationBalance?.toJson(),
     };
   }
@@ -395,7 +396,7 @@ class QuotaAllocation {
       endDate: DateTime.parse(json['end_date']),
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
-      species: json['species'] != null ? Species.fromJson(json['species']) : null,
+      species: json['species'] != null ? Species.fromApiJson(json['species']) : null,
       quotaAllocationBalance: json['quota_allocation_balance'] != null
           ? QuotaAllocationBalance.fromJson(json['quota_allocation_balance'])
           : null,

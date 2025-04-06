@@ -143,7 +143,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
           longitude: double.parse(formData['longitude'] as String),
           description: formData['description'] as String,
           conflictTypeId: formData['conflict_type_id'] as int,
-          period: DateTime.now().year,
+          period: DateTime.now().year.toString(),
           // Use the ID of the first selected species, or null if none (though validated above)
           speciesId: selectedSpecies.isNotEmpty ? selectedSpecies.first.id : null, 
           speciesList: selectedSpecies,

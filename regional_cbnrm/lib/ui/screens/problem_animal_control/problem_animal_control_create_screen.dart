@@ -108,8 +108,8 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
     try {
       final incident = await _conflictRepository.getIncident(_relatedIncidentId!);
       _selectedIncident.value = incident;
-      _latitude.value = incident.latitude;
-      _longitude.value = incident.longitude;
+      _latitude.value = incident.latitude ?? 0.0;
+      _longitude.value = incident.longitude ?? 0.0;
 
       // Update the form values
       _formKey.currentState?.fields['latitude']?.didChange(_latitude.value.toString());
@@ -201,7 +201,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Date: ${_selectedIncident.value?.date != null ? DateFormat('dd MMM yyyy').format(_selectedIncident.value!.date) : 'Unknown Date'}',
+                            'Date: ${_selectedIncident.value?.incidentDate != null ? DateFormat('dd MMM yyyy').format(_selectedIncident.value!.incidentDate) : 'Unknown Date'}',
                             style: const TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],
@@ -234,7 +234,7 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                       ),
                       items: _incidents.map((incident) {
                         // ignore: unnecessary_null_comparison
-                        final formattedDate = incident.date != null ? DateFormat('dd MMM yyyy').format(incident.date) : 'Unknown Date';
+                        final formattedDate = incident.incidentDate != null ? DateFormat('dd MMM yyyy').format(incident.incidentDate) : 'Unknown Date';
                         return DropdownMenuItem(
                           value: incident.id,
                           child: Text('${incident.title} ($formattedDate)'),
@@ -247,8 +247,8 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
                         if (value != null) {
                           final incident = _incidents.firstWhere((i) => i.id == value);
                           _selectedIncident.value = incident;
-                          _latitude.value = incident.latitude;
-                          _longitude.value = incident.longitude;
+                          _latitude.value = incident.latitude ?? 0.0;
+                          _longitude.value = incident.longitude ?? 0.0;
                           _formKey.currentState?.fields['latitude']?.didChange(_latitude.value.toString());
                           _formKey.currentState?.fields['longitude']?.didChange(_longitude.value.toString());
                         }

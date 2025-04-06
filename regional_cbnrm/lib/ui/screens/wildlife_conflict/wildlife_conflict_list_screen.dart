@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+// Ensure Material is imported
+// Added import
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 import 'package:regional_cbnrm/repositories/organisation_repository.dart';
 import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';
 import 'package:regional_cbnrm/ui/widgets/empty_state.dart';
 import 'package:regional_cbnrm/utils/app_routes.dart';
 import 'package:intl/intl.dart';
+import 'package:regional_cbnrm/utils/logger.dart';
 
 class WildlifeConflictListScreen extends StatefulWidget {
   const WildlifeConflictListScreen({super.key});
@@ -68,6 +71,8 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
       _incidents.value = incidents;
       _isLoading.value = false;
     } catch (e) {
+               //log the number of incidents parsed
+          AppLogger().e('Error $e incidents from API response ');
       _isLoading.value = false;
       _hasError.value = true;
     }
@@ -143,11 +148,19 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
   }
 
   Widget _buildIncidentCard(WildlifeConflictIncident incident) {
-    final formattedDate = DateFormat('dd/MM/yyyy').format(incident.date);
-    final formattedTime = DateFormat('h:mm a').format(DateTime.parse(incident.time));
+    final formattedDate = DateFormat('dd/MM/yyyy').format(incident.incidentDate);
+    // Attempt to parse time safely
+    String formattedTime = incident.incidentTime;
+    try {
+      // Assuming time is stored as HH:mm or similar parsable format
+      formattedTime = DateFormat('h:mm a').format(DateFormat('HH:mm').parse(incident.incidentTime));
+    } catch (e) {
+      print('Error parsing time in list screen: ${incident.incidentTime} - $e');
+      // Keep original string if parsing fails
+    }
     
-    // Get appropriate icon based on conflict type
-    IconData conflictIcon = _getConflictTypeIcon(incident.conflictType?.name);
+    // Get appropriate icon based on conflict type ID (using default for now)
+    IconData conflictIcon = _getConflictTypeIcon(incident.conflictTypeId);
     
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -179,7 +192,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      incident.syncStatus?.toUpperCase() ?? 'UNKNOWN',
+                      incident.syncStatus.toUpperCase(),
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 11,
@@ -222,7 +235,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      incident.conflictType?.name ?? 'Unknown Conflict Type',
+                      incident.conflictTypeId?.toString() ?? 'Unknown Conflict Type', // Display ID
                       style: TextStyle(
                         color: Colors.red.shade900,
                         fontWeight: FontWeight.w600,
@@ -285,21 +298,24 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                   const SizedBox(height: 12),
                   
                   // Show species chips - multiple species support
-                  if (incident.speciesList != null && incident.speciesList!.isNotEmpty)
+                  // Use speciesIds - Display chips if IDs exist
+                  if (incident.speciesIds != null && incident.speciesIds!.isNotEmpty)
                     SizedBox(
                       height: 30,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: incident.speciesList!.length,
+                        itemCount: incident.speciesIds!.length,
                         itemBuilder: (context, speciesIndex) {
-                          final species = incident.speciesList![speciesIndex];
+                          final speciesId = incident.speciesIds![speciesIndex];
+                          // TODO: Fetch species name from ID for better display
+                          final speciesName = 'ID: $speciesId';
                           return Padding(
                             padding: const EdgeInsets.only(right: 4),
                             child: Chip(
                               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
                               label: Text(
-                                species.name,
+                                speciesName, // Display ID for now
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: Colors.amber.shade900,
@@ -307,7 +323,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                                 ),
                               ),
                               avatar: Icon(
-                                _getSpeciesIcon(species.name),
+                                _getSpeciesIcon(speciesId), // Pass ID
                                 size: 14,
                                 color: Colors.amber.shade800,
                               ),
@@ -318,34 +334,13 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                           );
                         },
                       ),
-                    )
-                  // Fallback to single species for backward compatibility
-                  else if (incident.species != null)
-                    Chip(
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
-                      label: Text(
-                        incident.species!.name,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: Colors.amber.shade900,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      avatar: Icon(
-                        _getSpeciesIcon(incident.species!.name),
-                        size: 14,
-                        color: Colors.amber.shade800,
-                      ),
-                      backgroundColor: Colors.amber.shade50,
-                      side: BorderSide(color: Colors.amber.shade100),
-                      visualDensity: VisualDensity.compact,
-                    ),
+                    ), // Added comma here
+                  // Removed fallback for incident.species as it doesn't exist
                   
                   const SizedBox(height: 8),
                   
                   // Description - full width
-                  if (incident.description.isNotEmpty)
+                  if (incident.description?.isNotEmpty == true) // Add null check
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(8),
@@ -358,7 +353,7 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            incident.description,
+                            incident.description!, // Use ! after null check
                             style: const TextStyle(fontSize: 13),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -400,32 +395,18 @@ class _WildlifeConflictListScreenState extends State<WildlifeConflictListScreen>
   }
 
   // Helper function to determine conflict type icon
-  IconData _getConflictTypeIcon(String? conflictType) {
-    if (conflictType == null) return Icons.warning_amber_rounded;
-    
-    conflictType = conflictType.toLowerCase();
-    
-    if (conflictType.contains('attack')) return Icons.dangerous;
-    if (conflictType.contains('damage')) return Icons.home_work;
-    if (conflictType.contains('crop')) return Icons.grass;
-    if (conflictType.contains('livestock')) return Icons.agriculture;
-    if (conflictType.contains('sighting')) return Icons.visibility;
-    
+  IconData _getConflictTypeIcon(int? conflictTypeId) {
+    // TODO: Implement logic based on ID if possible, or fetch type name
+    // Returning default for now
+    // Example: if (conflictTypeId == 1) return Icons.dangerous;
     return Icons.warning_amber_rounded;
   }
 
   // Helper function to determine species icon
-  IconData _getSpeciesIcon(String? species) {
-    if (species == null) return Icons.pets;
-    
-    species = species.toLowerCase();
-    
-    if (species.contains('elephant')) return Icons.pets;
-    if (species.contains('leopard') || species.contains('tiger') || species.contains('lion')) return Icons.catching_pokemon;
-    if (species.contains('snake') || species.contains('reptile')) return Icons.pest_control;
-    if (species.contains('monkey') || species.contains('primate')) return Icons.emoji_nature;
-    if (species.contains('bird')) return Icons.flight;
-    
+  IconData _getSpeciesIcon(int? speciesId) {
+    // TODO: Implement logic based on ID if possible, or fetch species name
+    // Returning default for now
+    // Example: if (speciesId == 1) return Icons.pets; // Assuming Elephant ID is 1
     return Icons.pets;
   }
 

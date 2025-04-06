@@ -257,14 +257,14 @@ class WildlifeConflictController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getConflictOutcomes()
+    public function getConflictOutcomes($organisation)
     {
-        $conflictOutcomes = ConflictOutCome::with('dynamicFields')->get();
+        $outcomes = ConflictOutCome::withDynamicFields($organisation)->get();
 
         return response()->json([
             'status' => 'success',
             'data' => [
-                'conflict_outcomes' => $conflictOutcomes
+                'conflict_outcomes' => $outcomes
             ]
         ], 200);
     }

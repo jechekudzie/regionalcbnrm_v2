@@ -1,11 +1,11 @@
 import 'dart:convert';
 
+// Added import for ConflictAlgorithm
 import 'package:regional_cbnrm/core/api_service.dart';
 import 'package:regional_cbnrm/core/app_exceptions.dart';
 import 'package:regional_cbnrm/core/database_helper.dart';
 import 'package:regional_cbnrm/models/poaching_model.dart';
 import 'package:regional_cbnrm/models/species.dart';
-import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 
 class PoachingRepository {
   final ApiService _apiService = ApiService();
@@ -73,7 +73,7 @@ class PoachingRepository {
                 updatedAt: speciesItem['updated_at'] != null 
                     ? DateTime.parse(speciesItem['updated_at']) 
                     : null,
-                species: Species.fromApiJson(speciesDef.first),
+                species: Species.fromDatabaseJson(speciesDef.first), // Corrected factory
               ));
             }
           }
@@ -148,6 +148,7 @@ class PoachingRepository {
         'latitude': incident.latitude,
         'longitude': incident.longitude,
         'description': incident.description,
+        'period': DateTime.now().year,
         'docket_number': incident.docketNumber,
         'docket_status': incident.docketStatus,
         'created_at': incident.createdAt?.toIso8601String(),
@@ -170,14 +171,18 @@ class PoachingRepository {
           
           // Save species if available
           if (speciesItem.species != null) {
-            await _dbHelper.insert('species', {
-              'id': speciesItem.species!.id,
-              'name': speciesItem.species!.name,
-              'species_gender_id': speciesItem.species!.speciesGenderId,
-              'maturity_id': speciesItem.species!.maturityId,
-              'created_at': speciesItem.species!.createdAt?.toIso8601String(),
-              'updated_at': speciesItem.species!.updatedAt?.toIso8601String(),
-            }, where: 'id = ?', whereArgs: [speciesItem.species!.id]);
+            // Check if species exists before inserting/updating
+            final existingSpecies = await _dbHelper.query(
+              'species',
+              where: 'id = ?',
+              whereArgs: [speciesItem.species!.id]
+            );
+            if (existingSpecies.isEmpty) {
+              await _dbHelper.insert('species', speciesItem.species!.toDatabaseJson());
+            } else {
+              // Optionally update if needed, for now just ensure it exists
+              // await _dbHelper.update('species', speciesItem.species!.toDatabaseJson(), where: 'id = ?', whereArgs: [speciesItem.species!.id]);
+            }
           }
         }
       }
@@ -281,7 +286,7 @@ class PoachingRepository {
               updatedAt: speciesItem['updated_at'] != null 
                   ? DateTime.parse(speciesItem['updated_at']) 
                   : null,
-              species: Species.fromJson(speciesDef.first),
+              species: Species.fromDatabaseJson(speciesDef.first), // Corrected factory
             ));
           }
         }
@@ -364,6 +369,7 @@ class PoachingRepository {
           'description': createdIncident.description,
           'docket_number': createdIncident.docketNumber,
           'docket_status': createdIncident.docketStatus,
+          'period': DateTime.now().year,
           'created_at': createdIncident.createdAt?.toIso8601String(),
           'updated_at': createdIncident.updatedAt?.toIso8601String(),
           'sync_status': 'synced',
@@ -420,6 +426,7 @@ class PoachingRepository {
         'updated_at': currentDateTime,
         'sync_status': 'pending',
         'remote_id': null,
+        'period': DateTime.now().year,
       });
       
       // Save related species if available
@@ -566,6 +573,23 @@ class PoachingRepository {
       return Poacher.fromJson(poacherData.first);
     }
   }
+
+  Future<PoachingIncident> postIncident(PoachingIncident incident) async {
+    try {
+      final response = await _apiService.post(
+        '/poaching-incidents',
+        data: incident.toApiJson(),
+      );
+
+      if (response['status'] == 'success') {
+        return PoachingIncident.fromJson(response['data']['incident']);
+      } else {
+        throw AppException(response['message'] ?? 'Failed to post poaching incident');
+      }
+    } catch (e) {
+      throw AppException('Failed to post poaching incident: ${e.toString()}');
+    }
+  }
   
   // Get poaching methods
   Future<List<PoachingMethod>> getPoachingMethods() async {
@@ -651,19 +675,23 @@ class PoachingRepository {
       
       if (response['status'] == 'success') {
         final species = (response['data']['species'] as List)
-            .map((s) => Species.fromJson(s))
+            .map((s) => Species.fromApiJson(s)) // Corrected factory
             .toList();
         
         // Cache species in local database
         for (var s in species) {
-          await _dbHelper.insert('species', {
-            'id': s.id,
-            'name': s.name,
-            'species_gender_id': s.speciesGenderId,
-            'maturity_id': s.maturityId,
-            'created_at': s.createdAt?.toIso8601String(),
-            'updated_at': s.updatedAt?.toIso8601String(),
-          }, where: 'id = ?', whereArgs: [s.id]);
+           // Check if species exists before inserting/updating
+           final existingSpecies = await _dbHelper.query(
+             'species',
+             where: 'id = ?',
+             whereArgs: [s.id]
+           );
+           if (existingSpecies.isEmpty) {
+             await _dbHelper.insert('species', s.toDatabaseJson());
+           } else {
+             // Optionally update if needed, for now just ensure it exists
+             // await _dbHelper.update('species', s.toDatabaseJson(), where: 'id = ?', whereArgs: [s.id]);
+           }
         }
         
         return species;
@@ -674,7 +702,7 @@ class PoachingRepository {
       // If API call fails, try to get from local database
       try {
         final speciesData = await _dbHelper.query('species');
-        return speciesData.map((s) => Species.fromJson(s)).toList();
+        return speciesData.map((s) => Species.fromDatabaseJson(s)).toList(); // Corrected factory
       } catch (dbException) {
         // If both API and DB fail, rethrow the original exception
         if (e is AppException) rethrow;

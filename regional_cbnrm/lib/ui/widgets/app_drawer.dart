@@ -193,6 +193,12 @@ class AppDrawer extends StatelessWidget {
                   ],
                   hasPermission: _hasPermission(authService, AppConstants.viewPoachingIncidents),
                 ),
+
+                _buildSubMenuItem(
+                  context,
+                  title: 'Post Incident',
+                  route: AppRoutes.poachingPostIncident,
+                ),
                 
                 // Divider for hunting section
                 const Divider(),

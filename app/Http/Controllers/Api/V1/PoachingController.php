@@ -24,11 +24,11 @@ class PoachingController extends Controller
      * @param Organisation $organisation
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getIncidents(Request $request, Organisation $organisation)
+    public function getIncidents(Request $request, $organisation)
     {
         // Check if user has access to this organisation
         $user = $request->user();
-        $hasAccess = $user->organisations()->where('organisations.id', $organisation->id)->exists();
+        $hasAccess = $user->organisations()->where('organisations.id', $organisation)->exists();
 
         if (!$hasAccess) {
             return response()->json([
@@ -38,7 +38,7 @@ class PoachingController extends Controller
         }
 
         $incidents = PoachingIncident::with(['species', 'methods'])
-            ->where('organisation_id', $organisation->id)
+            ->where('organisation_id', $organisation)
             ->orderBy('date', 'desc')
             ->paginate(15);
 
@@ -91,6 +91,7 @@ class PoachingController extends Controller
             'title' => 'required|string|max:255',
             'date' => 'required|date',
             'time' => 'required',
+            'period' => 'required|integer',
             'latitude' => 'required|numeric',
             'longitude' => 'required|numeric',
             'description' => 'required|string',
@@ -253,7 +254,7 @@ class PoachingController extends Controller
             if ($request->has('species') && is_array($request->species)) {
                 // Delete existing species
                 PoachingIncidentSpecies::where('poaching_incident_id', $incident->id)->delete();
-                
+
                 // Add new species
                 foreach ($request->species as $speciesData) {
                     PoachingIncidentSpecies::create([
@@ -268,7 +269,7 @@ class PoachingController extends Controller
             if ($request->has('methods') && is_array($request->methods)) {
                 // Delete existing methods
                 PoachingIncidentMethod::where('poaching_incident_id', $incident->id)->delete();
-                
+
                 // Add new methods
                 foreach ($request->methods as $methodData) {
                     PoachingIncidentMethod::create([

@@ -152,7 +152,7 @@ class _ProblemAnimalControlDetailsScreenState extends State<ProblemAnimalControl
                       const Divider(),
                       _buildInfoRow(
                         'Number of Animals',
-                        control.numberOfAnimals.toString(),
+                        control.estimatedNumber.toString(),
                         Icons.numbers,
                       ),
                     ],

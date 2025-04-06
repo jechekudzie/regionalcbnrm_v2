@@ -1,3 +1,5 @@
+import 'package:regional_cbnrm/models/dynamic_field.dart';
+
 class DynamicValue {
   final int? id;
   final int dynamicFieldId;
@@ -7,6 +9,7 @@ class DynamicValue {
   final DateTime? updatedAt;
   final String? author;
   final String syncStatus;
+  DynamicField? dynamicField;
 
   DynamicValue({
     this.id,
@@ -17,6 +20,7 @@ class DynamicValue {
     this.updatedAt,
     this.author,
     this.syncStatus = 'pending',
+    this.dynamicField,
   });
 
   // From API JSON
@@ -60,7 +64,7 @@ class DynamicValue {
     };
     
     if (incidentId != null) {
-      map['incident_id'] = incidentId;
+      map['incident_id'] = incidentId as int;
     }
     
     return map;
@@ -74,7 +78,7 @@ class DynamicValue {
     };
     
     if (incidentId != null) {
-      map['wildlife_conflict_incident_id'] = incidentId;
+      map['wildlife_conflict_incident_id'] = incidentId as int;
     }
     
     return map;
@@ -90,6 +94,7 @@ class DynamicValue {
     DateTime? updatedAt,
     String? author,
     String? syncStatus,
+    DynamicField? dynamicField,
   }) {
     return DynamicValue(
       id: id ?? this.id,
@@ -100,6 +105,7 @@ class DynamicValue {
       updatedAt: updatedAt ?? this.updatedAt,
       author: author ?? this.author,
       syncStatus: syncStatus ?? this.syncStatus,
+      dynamicField: dynamicField ?? this.dynamicField,
     );
   }
 

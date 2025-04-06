@@ -45,7 +45,7 @@ class ProblemAnimalControlRepository {
             final controlMeasureData = await _dbHelper.query(
               'control_measures',
               where: 'id = ?',
-              whereArgs: [control.controlMeasureId],
+              whereArgs: [],
             );
 
             final incidentData = await _dbHelper.query(
@@ -85,18 +85,18 @@ class ProblemAnimalControlRepository {
       await _dbHelper.insert('problem_animal_controls', {
         'id': control.id,
         'wildlife_conflict_incident_id': control.wildlifeConflictIncidentId,
-        'control_measure_id': control.controlMeasureId,
         'organisation_id': control.organisationId,
         'date': control.date.toIso8601String(),
         'time': control.time,
         'description': control.description,
+        'period': control.period,
+        'location': control.location,
         'latitude': control.latitude,
         'longitude': control.longitude,
-        'number_of_animals': control.numberOfAnimals,
+        'estimated_number': control.estimatedNumber,
         'created_at': control.createdAt?.toIso8601String(),
         'updated_at': control.updatedAt?.toIso8601String(),
         'sync_status': 'synced',
-        'remote_id': control.id,
       });
 
       // Save control measure if available
@@ -159,7 +159,7 @@ class ProblemAnimalControlRepository {
         final controlMeasureData = await _dbHelper.query(
           'control_measures',
           where: 'id = ?',
-          whereArgs: [control.controlMeasureId],
+          whereArgs: [],
         );
 
         final incidentData = await _dbHelper.query(
@@ -204,18 +204,18 @@ class ProblemAnimalControlRepository {
         await _dbHelper.insert('problem_animal_controls', {
           'id': createdControl.id,
           'wildlife_conflict_incident_id': createdControl.wildlifeConflictIncidentId,
-          'control_measure_id': createdControl.controlMeasureId,
           'organisation_id': createdControl.organisationId,
           'date': createdControl.date.toIso8601String(),
           'time': createdControl.time,
           'description': createdControl.description,
+          'period': createdControl.period,
+          'location': createdControl.location,
           'latitude': createdControl.latitude,
           'longitude': createdControl.longitude,
-          'number_of_animals': createdControl.numberOfAnimals,
+          'estimated_number': createdControl.estimatedNumber,
           'created_at': createdControl.createdAt?.toIso8601String(),
           'updated_at': createdControl.updatedAt?.toIso8601String(),
           'sync_status': 'synced',
-          'remote_id': createdControl.id,
         });
 
         return createdControl;
@@ -230,18 +230,18 @@ class ProblemAnimalControlRepository {
       final currentDateTime = DateTime.now().toIso8601String();
       final localId = await _dbHelper.insert('problem_animal_controls', {
         'wildlife_conflict_incident_id': control.wildlifeConflictIncidentId,
-        'control_measure_id': control.controlMeasureId,
         'organisation_id': control.organisationId,
         'date': control.date.toIso8601String(),
         'time': control.time,
         'description': control.description,
+        'period': control.period,
+        'location': control.location,
         'latitude': control.latitude,
         'longitude': control.longitude,
-        'number_of_animals': control.numberOfAnimals,
+        'estimated_number': control.estimatedNumber,
         'created_at': currentDateTime,
         'updated_at': currentDateTime,
         'sync_status': 'pending',
-        'remote_id': null,
       });
 
       // Add to sync queue

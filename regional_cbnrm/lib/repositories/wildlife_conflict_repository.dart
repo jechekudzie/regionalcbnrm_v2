@@ -3,6 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:regional_cbnrm/core/api_service.dart';
 import 'package:regional_cbnrm/core/app_exceptions.dart';
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
+import 'package:regional_cbnrm/utils/logger.dart';
 
 class WildlifeConflictRepository {
   final ApiService _apiService = ApiService();
@@ -22,7 +23,7 @@ class WildlifeConflictRepository {
           final incidents = (response['data']['data'] as List)
               .map((incident) => WildlifeConflictIncident.fromApiJson(incident))
               .toList();
-
+              
           // Cache incidents in local database
           await _saveIncidentsToDb(incidents);
 
@@ -32,13 +33,17 @@ class WildlifeConflictRepository {
           final incidents = (response['data'] as List)
               .map((incident) => WildlifeConflictIncident.fromApiJson(incident))
               .toList();
+          AppLogger().d('Parsed ${incidents.length} incidents from API response (non-paginated)');
+          print('Parsed ${incidents.length} incidents from API response (non-paginated)');
+          AppLogger().d('Parsed ${incidents.length} incidents from API response');
+          print('Parsed ${incidents.length} incidents from API response');
 
           // Cache incidents in local database
           await _saveIncidentsToDb(incidents);
 
           return incidents;
         } else {
-          print('Unexpected data format: ${response['data']}');
+          AppLogger().d('Unexpected data format: ${response['data']}');
           return [];
         }
       } else {
@@ -79,6 +84,8 @@ class WildlifeConflictRepository {
           }
         }
 
+        AppLogger().d('Loaded ${incidents.length} incidents from local database fallback');
+        print('Loaded ${incidents.length} incidents from local database fallback');
         return incidents;
       } catch (dbException) {
         // If both API and DB fail, rethrow the original exception
@@ -191,7 +198,7 @@ class WildlifeConflictRepository {
       final data = additionalData ?? incident.toApiJson();
 
       // Log the request data for debugging
-      print('Creating incident with data: $data');
+      AppLogger().d('Creating incident with data: $data');
 
       final response = await _apiService.post(
         '/wildlife-conflicts',
@@ -209,7 +216,7 @@ class WildlifeConflictRepository {
         throw AppException(response['message'] ?? 'Failed to create incident');
       }
     } catch (e) {
-      print('Error creating incident: $e');
+      AppLogger().d('Error creating incident: $e');
       // If API call fails, save to local database with pending sync status
       if (e is AppException && !(e is NoInternetException || e is TimeoutException)) rethrow;
 
@@ -414,10 +421,10 @@ class WildlifeConflictRepository {
       // Try to fetch from API first
       const String endpoint = '/species';
 
-      print('Fetching species from endpoint: $endpoint');
+      AppLogger().d('Fetching species from endpoint: $endpoint');
       final response = await _apiService.get(endpoint);
 
-      print('Species API response: $response');
+      AppLogger().d('Species API response: $response');
 
       if (response['status'] == 'success') {
         List<dynamic> speciesList;
@@ -428,7 +435,7 @@ class WildlifeConflictRepository {
         } else if (response['data'] is List) {
           speciesList = response['data'];
         } else {
-          print('Unexpected species data format: ${response['data']}');
+          AppLogger().d('Unexpected species data format: ${response['data']}');
           speciesList = [];
         }
 
@@ -449,24 +456,24 @@ class WildlifeConflictRepository {
         // Return the raw species data for use elsewhere
         return speciesList.cast<Map<String, dynamic>>();
       } else {
-        print('Failed to fetch species: ${response['message']}');
+        AppLogger().d('Failed to fetch species: ${response['message']}');
         throw AppException(response['message'] ?? 'Failed to fetch species');
       }
     } catch (e) {
-      print('Error fetching species from API: $e');
+      AppLogger().d('Error fetching species from API: $e');
       // If API call fails, try to get from local database
       try {
         final speciesData = await _db.query('species');
         
         if (speciesData.isNotEmpty) {
-          print('Loaded ${speciesData.length} species from local database');
+          AppLogger().d('Loaded ${speciesData.length} species from local database');
           return speciesData;
         } else {
-          print('No species found in local database');
+          AppLogger().d('No species found in local database');
           throw AppException('No species available. Please check your internet connection and try again.');
         }
       } catch (dbException) {
-        print('Error fetching species from database: $dbException');
+        AppLogger().d('Error fetching species from database: $dbException');
         // If both API and DB fail, rethrow the original exception
         if (e is AppException) rethrow;
         throw AppException('Failed to fetch species: ${e.toString()}');
@@ -476,155 +483,190 @@ class WildlifeConflictRepository {
 
   // Get all conflict outcomes
   Future<List<Map<String, dynamic>>> getConflictOutcomes({int? organisationId}) async {
-  try {
-    // Try to fetch from API first
-    final String endpoint = organisationId != null 
-        ? '/organisations/$organisationId/conflict-outcomes'
-        : '/conflict-outcomes';
+    try {
+      // Try to fetch from API first
+      final String endpoint = organisationId != null
+          ? '/organisations/$organisationId/conflict-outcomes'
+          : '/conflict-outcomes'; // Adjust base endpoint if needed
 
-    print('Fetching conflict outcomes from endpoint: $endpoint');
-    final response = await _apiService.get(endpoint);
+      AppLogger().d('Fetching conflict outcomes from endpoint: $endpoint');
+      final response = await _apiService.get(endpoint);
 
-    print('Conflict outcomes API response: $response');
+      AppLogger().d('Conflict outcomes API response: $response');
 
-    if (response['status'] == 'success') {
-      List<dynamic> outcomesList;
+      if (response['status'] == 'success') {
+        List<dynamic> outcomesList;
 
-      // Handle different API response structures
-      if (response['data'] is Map && response['data'].containsKey('conflict_outcomes')) {
-        outcomesList = response['data']['conflict_outcomes'] as List;
-      } else if (response['data'] is List) {
-        outcomesList = response['data'];
-      } else {
-        print('Unexpected conflict outcomes data format: ${response['data']}');
-        outcomesList = [];
-      }
+        // Handle different API response structures
+        if (response['data'] is Map && response['data'].containsKey('conflict_outcomes')) {
+          outcomesList = response['data']['conflict_outcomes'] as List;
+        } else if (response['data'] is List) {
+          outcomesList = response['data'];
+        } else {
+          AppLogger().d('Unexpected conflict outcomes data format: ${response['data']}');
+          outcomesList = [];
+        }
 
-      // Cache conflict outcomes in local database
-      for (var outcome in outcomesList) {
-        await _db.insert(
-          'conflict_out_comes',
-          {
-            'id': outcome['id'],
-            'conflict_type_id': outcome['conflict_type_id'],
-            'name': outcome['name'],
-            'description': outcome['description'],
-            'slug': outcome['slug'],
-            'created_at': outcome['created_at'],
-            'updated_at': outcome['updated_at'],
-            'author': outcome['author'],
-            'sync_status': 'synced',
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+        // Cache conflict outcomes in local database
+        for (var outcome in outcomesList) {
+          await _db.insert(
+            'conflict_outcomes', // Corrected table name
+            {
+              'id': outcome['id'],
+              'conflict_type_id': outcome['conflict_type_id'],
+              'name': outcome['name'],
+              'description': outcome['description'],
+              'slug': outcome['slug'],
+              'created_at': outcome['created_at'],
+              'updated_at': outcome['updated_at'],
+              'author': outcome['author'],
+              'sync_status': 'synced',
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
 
-        // Store dynamic fields if available
-        if (outcome['dynamic_fields'] != null && outcome['dynamic_fields'] is List) {
-          for (var field in outcome['dynamic_fields']) {
-            await _db.insert(
-              'dynamic_fields',
-              {
-                'id': field['id'],
-                'organisation_id': field['organisation_id'],
-                'conflict_outcome_id': outcome['id'],
-                'field_name': field['field_name'],
-                'field_type': field['field_type'],
-                'label': field['label'],
-                'slug': field['slug'],
-                'created_at': field['created_at'],
-                'updated_at': field['updated_at'],
-                'author': field['author'],
-                'sync_status': 'synced',
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-            
-            // Store field options if available
-            if (field['options'] != null && field['options'] is List) {
-              for (var option in field['options']) {
-                await _db.insert(
-                  'dynamic_field_options',
-                  {
-                    'id': option['id'],
-                    'dynamic_field_id': field['id'],
-                    'value': option['value'],
-                    'label': option['label'],
-                    'created_at': option['created_at'],
-                    'updated_at': option['updated_at'],
-                  },
-                  conflictAlgorithm: ConflictAlgorithm.replace,
-                );
+          // Store dynamic fields if available
+          if (outcome['dynamic_fields'] != null && outcome['dynamic_fields'] is List) {
+            for (var field in outcome['dynamic_fields']) {
+              // Ensure we have an organisation_id (use the provided one if not present in the field)
+              int fieldOrgId = field['organisation_id'] ?? organisationId;
+              
+              await _db.insert(
+                'dynamic_fields',
+                {
+                  'id': field['id'],
+                  'organisation_id': fieldOrgId,
+                  'conflict_outcome_id': outcome['id'],
+                  'field_name': field['field_name'],
+                  'field_type': field['field_type'],
+                  'label': field['label'],
+                  'slug': field['slug'],
+                  'created_at': field['created_at'],
+                  'updated_at': field['updated_at'],
+                  'author': field['author'],
+                  'sync_status': 'synced',
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              
+              // Store field options if available
+              if (field['options'] != null && field['options'] is List) {
+                for (var option in field['options']) {
+                  await _db.insert(
+                    'dynamic_field_options',
+                    {
+                      'id': option['id'],
+                      'dynamic_field_id': field['id'],
+                      'value': option['value'],
+                      'label': option['label'],
+                      'created_at': option['created_at'],
+                      'updated_at': option['updated_at'],
+                    },
+                    conflictAlgorithm: ConflictAlgorithm.replace,
+                  );
+                }
               }
             }
           }
         }
-      }
 
-      // Return the raw conflict outcomes data for use elsewhere
-      return outcomesList.cast<Map<String, dynamic>>();
-    } else {
-      print('Failed to fetch conflict outcomes: ${response['message']}');
-      throw AppException(response['message'] ?? 'Failed to fetch conflict outcomes');
-    }
-  } catch (e) {
-    print('Error fetching conflict outcomes from API: $e');
-    // If API call fails, try to get from local database
-    try {
-      final outcomesData = await _db.query('conflict_out_comes');
-      
-      if (outcomesData.isNotEmpty) {
-        print('Loaded ${outcomesData.length} conflict outcomes from local database');
+        // Return the raw conflict outcomes data for use elsewhere
+        return outcomesList.cast<Map<String, dynamic>>();
+      } else {
+        AppLogger().d('Failed to fetch conflict outcomes: ${response['message']}');
+        throw AppException(response['message'] ?? 'Failed to fetch conflict outcomes');
+      }
+    } catch (e) {
+      AppLogger().d('Error fetching conflict outcomes from API: $e');
+      // If API call fails, try to get from local database
+      try {
+        // Set up query parameters
+        String whereClause = '';
+        List<dynamic> whereArgs = [];
         
-        // For each outcome, fetch its dynamic fields
-        List<Map<String, dynamic>> outcomesWithFields = [];
-        
-        for (var outcome in outcomesData) {
-          final outcomeId = outcome['id'];
-          
-          // Query for dynamic fields associated with this outcome
-          final fields = await _db.query(
-            'dynamic_fields',
-            where: 'conflict_outcome_id = ?',
-            whereArgs: [outcomeId],
-          );
-          
-          // For each field, fetch its options
-          List<Map<String, dynamic>> fieldsWithOptions = [];
-          
-          for (var field in fields) {
-            final fieldId = field['id'];
-            
-            // Query for options associated with this field
-            final options = await _db.query(
-              'dynamic_field_options',
-              where: 'dynamic_field_id = ?',
-              whereArgs: [fieldId],
-            );
-            
-            // Add options to the field
-            final fieldWithOptions = Map<String, dynamic>.from(field);
-            fieldWithOptions['options'] = options;
-            fieldsWithOptions.add(fieldWithOptions);
-          }
-          
-          // Add fields to the outcome
-          final outcomeWithFields = Map<String, dynamic>.from(outcome);
-          outcomeWithFields['dynamic_fields'] = fieldsWithOptions;
-          outcomesWithFields.add(outcomeWithFields);
+        if (organisationId != null) {
+          // If organisationId is provided, use it to filter outcomes that have fields for this org
+          whereClause = '''
+            id IN (
+              SELECT DISTINCT conflict_outcome_id 
+              FROM dynamic_fields 
+              WHERE organisation_id = ?
+            )
+          ''';
+          whereArgs = [organisationId];
         }
         
-        return outcomesWithFields;
-      } else {
-        print('No conflict outcomes found in local database');
-        throw AppException('No conflict outcomes available. Please check your internet connection and try again.');
+        // Query outcomes
+        final outcomesData = await _db.query(
+          'conflict_out_comes',
+          where: whereClause.isNotEmpty ? whereClause : null,
+          whereArgs: whereClause.isNotEmpty ? whereArgs : null,
+        );
+        
+        if (outcomesData.isNotEmpty) {
+          AppLogger().d('Loaded ${outcomesData.length} conflict outcomes from local database');
+          
+          // For each outcome, fetch its dynamic fields
+          List<Map<String, dynamic>> outcomesWithFields = [];
+          
+          for (var outcome in outcomesData) {
+            final outcomeId = outcome['id'];
+            
+            // Query for dynamic fields, filtering by organisation if specified
+            String fieldWhereClause = 'conflict_outcome_id = ?';
+            List<dynamic> fieldWhereArgs = [outcomeId];
+            
+            if (organisationId != null) {
+              fieldWhereClause += ' AND organisation_id = ?';
+              fieldWhereArgs.add(organisationId);
+            }
+            
+            final fields = await _db.query(
+              'dynamic_fields',
+              where: fieldWhereClause,
+              whereArgs: fieldWhereArgs,
+            );
+            
+            // For each field, fetch its options
+            List<Map<String, dynamic>> fieldsWithOptions = [];
+            
+            for (var field in fields) {
+              final fieldId = field['id'];
+              
+              // Query for options associated with this field
+              final options = await _db.query(
+                'dynamic_field_options',
+                where: 'dynamic_field_id = ?',
+                whereArgs: [fieldId],
+              );
+              
+              // Add options to the field
+              final fieldWithOptions = Map<String, dynamic>.from(field);
+              fieldWithOptions['options'] = options;
+              fieldsWithOptions.add(fieldWithOptions);
+            }
+            
+            // Add fields to the outcome
+            final outcomeWithFields = Map<String, dynamic>.from(outcome);
+            outcomeWithFields['dynamic_fields'] = fieldsWithOptions;
+            
+            // Only add outcomes that have fields for this organisation (if specified)
+            if (organisationId == null || fieldsWithOptions.isNotEmpty) {
+              outcomesWithFields.add(outcomeWithFields);
+            }
+          }
+          
+          return outcomesWithFields;
+        } else {
+          AppLogger().d('No conflict outcomes found in local database');
+          throw AppException('No conflict outcomes available. Please check your internet connection and try again.');
+        }
+      } catch (dbException) {
+        AppLogger().d('Error fetching conflict outcomes from database: $dbException');
+        // If both API and DB fail, rethrow the original exception
+        if (e is AppException) rethrow;
+        throw AppException('Failed to fetch conflict outcomes: ${e.toString()}');
       }
-    } catch (dbException) {
-      print('Error fetching conflict outcomes from database: $dbException');
-      // If both API and DB fail, rethrow the original exception
-      if (e is AppException) rethrow;
-      throw AppException('Failed to fetch conflict outcomes: ${e.toString()}');
     }
   }
-}
-
 }

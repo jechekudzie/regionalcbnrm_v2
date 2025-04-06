@@ -59,7 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::post('/wildlife-conflicts', [WildlifeConflictController::class, 'createIncident']);
         Route::put('/wildlife-conflicts/{incident}', [WildlifeConflictController::class, 'updateIncident']);
         Route::get('/conflict-types', [WildlifeConflictController::class, 'getConflictTypes']);
-        Route::get('/conflict-outcomes', [WildlifeConflictController::class, 'getConflictOutcomes']);
+        Route::get('/{id}/conflict-outcomes', [WildlifeConflictController::class, 'getConflictOutcomes']);
         Route::post('/wildlife-conflicts/{incident}/outcomes', [WildlifeConflictController::class, 'addOutcome']);
 
         // Problem Animal Control routes
@@ -70,7 +70,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/control-measures', [ProblemAnimalControlController::class, 'getControlMeasures']);
 
         // Poaching routes
-        Route::get('/organisations/{organisation}/poaching-incidents', [PoachingController::class, 'getIncidents']);
+        Route::get('/organisations/{id}/poaching-incidents', [PoachingController::class, 'getIncidents']);
         Route::get('/poaching-incidents/{incident}', [PoachingController::class, 'getIncident']);
         Route::post('/poaching-incidents', [PoachingController::class, 'createIncident']);
         Route::put('/poaching-incidents/{incident}', [PoachingController::class, 'updateIncident']);

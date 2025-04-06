@@ -29,8 +29,10 @@ import 'package:regional_cbnrm/utils/app_routes.dart';
 import 'package:regional_cbnrm/utils/logger.dart';
 
 import 'package:regional_cbnrm/ui/screens/hunting_activity/hunting_activity_create_screen.dart';
+import 'package:regional_cbnrm/ui/screens/hunting_activity/hunting_activity_list_screen.dart';
 import 'package:regional_cbnrm/ui/screens/hunting_concession/hunting_concession_create_screen.dart';
 import 'package:regional_cbnrm/ui/screens/quota_allocation/quota_allocation_list_screen.dart';
+import 'package:sqflite/sqflite.dart';
 
 void main() async {
   // Add error handling for Flutter framework errors
@@ -77,10 +79,16 @@ Future<void> initServices() async {
     
     // Register and initialize the DatabaseHelper Singleton
     logger.i('Initializing Database Helper Singleton');
-    Get.put(DatabaseHelper(), permanent: true);
-    // Eagerly initialize the database by accessing the getter
-    await Get.find<DatabaseHelper>().database;
-    logger.i('Database Helper initialized and database opened/created');
+
+    final dbHelper = DatabaseHelper();
+    // Register the DatabaseHelper with GetX first
+
+    Get.put<DatabaseHelper>(dbHelper, permanent: true);
+    // Then get the database instance
+    
+    final db = await dbHelper.database;
+    // Register the Database with GetX
+    Get.put<Database>(db, tag: 'app_database', permanent: true);
 
     // Register repositories as singletons
     Get.put(OrganisationRepository(), permanent: true);
@@ -184,11 +192,14 @@ class RegionalCbnrmApp extends StatelessWidget {
           name: AppRoutes.poachingAddPoacher,
           page: () => const PoachingAddPoacherScreen(),
         ),
-
+        GetPage(
+          name: AppRoutes.poachingPostIncident,
+          page: () => const PoachingIncidentCreateScreen(),
+        ),
         // Hunting routes (placeholders - need to be implemented)
         GetPage(
           name: AppRoutes.huntingActivities,
-          page: () => const DashboardScreen(), // TODO: Implement hunting activity list screen
+          page: () => const HuntingActivityListScreen(),
         ),
         GetPage(
           name: AppRoutes.createHuntingActivity,
@@ -202,14 +213,13 @@ class RegionalCbnrmApp extends StatelessWidget {
           name: AppRoutes.quotaAllocations,
           page: () => const QuotaAllocationListScreen(),
         ),
-
         // Debug routes
         GetPage(
           name: AppRoutes.debugSettings,
           page: () => const DebugSettingsScreen(),
         ),
       ],
-    );
+    );                                                                                                                                                                                                                                                                                                                                                                                                                                                 
   }
 }
 

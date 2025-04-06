@@ -10,6 +10,7 @@ class PoachingIncident {
   final double latitude;
   final double longitude;
   final String description;
+  final int period;
   final String? docketNumber;
   final String? docketStatus;
   final DateTime? createdAt;
@@ -31,6 +32,7 @@ class PoachingIncident {
     required this.latitude,
     required this.longitude,
     required this.description,
+    int? period,
     this.docketNumber,
     this.docketStatus,
     this.createdAt,
@@ -40,7 +42,7 @@ class PoachingIncident {
     this.species,
     this.methods,
     this.poachers,
-  });
+  }) : period = period ?? date.year;
 
   Map<String, dynamic> toJson() {
     return {
@@ -52,6 +54,7 @@ class PoachingIncident {
       'latitude': latitude,
       'longitude': longitude,
       'description': description,
+      'period': period,
       'docket_number': docketNumber,
       'docket_status': docketStatus,
       'created_at': createdAt?.toIso8601String(),
@@ -74,6 +77,7 @@ class PoachingIncident {
       latitude: json['latitude'] is String ? double.parse(json['latitude']) : json['latitude'],
       longitude: json['longitude'] is String ? double.parse(json['longitude']) : json['longitude'],
       description: json['description'],
+      period: json['period'] ?? DateTime.parse(json['date']).year,
       docketNumber: json['docket_number'],
       docketStatus: json['docket_status'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
@@ -105,6 +109,7 @@ class PoachingIncident {
       'docket_status': docketStatus,
       'species': species?.map((s) => s.toApiJson()).toList(),
       'methods': methods?.map((m) => m.toApiJson()).toList(),
+      'period': period,
     };
   }
 
@@ -117,6 +122,7 @@ class PoachingIncident {
     double? latitude,
     double? longitude,
     String? description,
+    int? period,
     String? docketNumber,
     String? docketStatus,
     DateTime? createdAt,
@@ -136,6 +142,7 @@ class PoachingIncident {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       description: description ?? this.description,
+      period: period ?? this.period,
       docketNumber: docketNumber ?? this.docketNumber,
       docketStatus: docketStatus ?? this.docketStatus,
       createdAt: createdAt ?? this.createdAt,

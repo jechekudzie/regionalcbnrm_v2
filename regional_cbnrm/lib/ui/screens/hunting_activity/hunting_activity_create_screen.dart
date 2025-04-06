@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regional_cbnrm/utils/logger.dart';
 import 'package:get/get.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
@@ -81,21 +82,32 @@ class _HuntingActivityCreateScreenState extends State<HuntingActivityCreateScree
       final concessions = await _repository.getHuntingConcessions(_organisationId.value);
       _huntingConcessions.value = concessions;
     } catch (e) {
-      print('Error loading hunting concessions: $e');
+      AppLogger().d('Error loading hunting concessions: $e');
     }
   }
   
   Future<void> _loadSpecies() async {
     try {
-      final species = await _wildlifeRepository.getSpecies(
+      final speciesList = await _wildlifeRepository.getSpecies(
         organisationId: _organisationId.value > 0 ? _organisationId.value : null
       );
 
-      // Sort alphabetically
-      species.sort((a, b) => a['name'].compareTo(b['name']));
-      _species.value = species.cast<Species>();
+      // Convert each map to a Species object if necessary
+      final List<Species> convertedSpecies = [];
+
+      for (var s in speciesList) {
+        if (s is Species) {
+          convertedSpecies.add(Species.fromApiJson(s));
+        } else        convertedSpecies.add(Species.fromApiJson(s));
+      
+      }
+
+      // Sort alphabetically by species name
+      convertedSpecies.sort((a, b) => a.name.compareTo(b.name));
+
+      _species.value = convertedSpecies;
     } catch (e) {
-      print('Error loading species: $e');
+      AppLogger().d('Error loading species: $e');
     }
   }
   
@@ -104,7 +116,7 @@ class _HuntingActivityCreateScreenState extends State<HuntingActivityCreateScree
       // In a real app, you would have a repository method to fetch safari operators
       // For now, we'll use a mock list
     } catch (e) {
-      print('Error loading safari operators: $e');
+      AppLogger().d('Error loading safari operators: $e');
     }
   }
   
@@ -127,7 +139,7 @@ class _HuntingActivityCreateScreenState extends State<HuntingActivityCreateScree
         return 0;
       }
     } catch (e) {
-      print('Error checking quota: $e');
+      AppLogger().d('Error checking quota: $e');
       return 0;
     }
   }
@@ -283,7 +295,7 @@ class _HuntingActivityCreateScreenState extends State<HuntingActivityCreateScree
         
         Get.back(result: createdActivity);
       } catch (e) {
-        print('Error submitting form: $e');
+        AppLogger().d('Error submitting form: $e');
         _notificationService.showSnackBar(
           'Failed to create hunting activity. Please try again.',
           type: SnackBarType.error,
@@ -682,120 +694,123 @@ class _HuntingActivityCreateScreenState extends State<HuntingActivityCreateScree
                         const SizedBox(height: 8),
                         
                         // Species List
-                        Obx(() => Column(
-                          children: List.generate(_selectedSpecies.length, (index) {
-                            final speciesItem = _selectedSpecies[index];
-                            final quotaRemaining = speciesItem['quota_remaining'] ?? 0;
-                            
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 16.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // Species dropdown
-                                  Expanded(
-                                    flex: 3,
-                                    child: FormBuilderDropdown<int>(
-                                      name: 'species_id_$index',
-                                      decoration: const InputDecoration(
-                                        labelText: 'Species',
-                                        hintText: 'Select species',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      items: _species.map((species) {
-                                        return DropdownMenuItem(
-                                          value: species.id,
-                                          child: Text(species.name),
-                                        );
-                                      }).toList(),
-                                      validator: FormBuilderValidators.compose([
-                                        FormBuilderValidators.required(),
-                                      ]),
-                                      onChanged: (value) {
-                                        if (value != null) {
-                                          speciesItem['species_id'] = value;
-                                          _updateQuotaRemaining(index);
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  
-                                  // Quantity input
-                                  Expanded(
-                                    flex: 2,
-                                    child: FormBuilderTextField(
-                                      name: 'quantity_$index',
-                                      decoration: const InputDecoration(
-                                        labelText: 'Quantity',
-                                        hintText: 'Enter quantity',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      initialValue: '1',
-                                      keyboardType: TextInputType.number,
-                                      validator: FormBuilderValidators.compose([
-                                        FormBuilderValidators.required(),
-                                        FormBuilderValidators.numeric(),
-                                        FormBuilderValidators.min(1),
-                                        (value) {
-                                          if (value == null || value.isEmpty) return null;
-                                          final quantity = int.tryParse(value);
-                                          if (quantity != null && quantity > quotaRemaining) {
-                                            return 'Exceeds quota';
-                                          }
-                                          return null;
-                                        },
-                                      ]),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  
-                                  // Quota remaining display
-                                  Expanded(
-                                    flex: 2,
-                                    child: Container(
-                                      height: 60,
-                                      padding: const EdgeInsets.all(8),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: quotaRemaining > 0 ? Colors.green.shade300 : Colors.red.shade300,
+                        Obx(() => SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          child: Column(
+                            children: List.generate(_selectedSpecies.length, (index) {
+                              final speciesItem = _selectedSpecies[index];
+                              final quotaRemaining = speciesItem['quota_remaining'] ?? 0;
+                              
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Species dropdown
+                                    Expanded(
+                                      flex: 3,
+                                      child: FormBuilderDropdown<int>(
+                                        name: 'species_id_$index',
+                                        decoration: const InputDecoration(
+                                          labelText: 'Species',
+                                          hintText: 'Select species',
+                                          border: OutlineInputBorder(),
                                         ),
-                                        borderRadius: BorderRadius.circular(4),
-                                        color: quotaRemaining > 0 ? Colors.green.shade50 : Colors.red.shade50,
-                                      ),
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            quotaRemaining.toString(),
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                              color: quotaRemaining > 0 ? Colors.green.shade700 : Colors.red.shade700,
-                                            ),
-                                          ),
-                                          Text(
-                                            'animals',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.grey.shade700,
-                                            ),
-                                          ),
-                                        ],
+                                        items: _species.map((species) {
+                                          return DropdownMenuItem(
+                                            value: species.id,
+                                            child: Text(species.name),
+                                          );
+                                        }).toList(),
+                                        validator: FormBuilderValidators.compose([
+                                          FormBuilderValidators.required(),
+                                        ]),
+                                        onChanged: (value) {
+                                          if (value != null) {
+                                            speciesItem['species_id'] = value;
+                                            _updateQuotaRemaining(index);
+                                          }
+                                        },
                                       ),
                                     ),
-                                  ),
-                                  
-                                  // Delete button
-                                  IconButton(
-                                    icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                    onPressed: () => _removeSpecies(index),
-                                    tooltip: 'Remove Species',
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
+                                    const SizedBox(width: 8),
+                                    
+                                    // Quantity input
+                                    Expanded(
+                                      flex: 2,
+                                      child: FormBuilderTextField(
+                                        name: 'quantity_$index',
+                                        decoration: const InputDecoration(
+                                          labelText: 'Quantity',
+                                          hintText: 'Enter quantity',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        initialValue: '1',
+                                        keyboardType: TextInputType.number,
+                                        validator: FormBuilderValidators.compose([
+                                          FormBuilderValidators.required(),
+                                          FormBuilderValidators.numeric(),
+                                          FormBuilderValidators.min(1),
+                                          (value) {
+                                            if (value == null || value.isEmpty) return null;
+                                            final quantity = int.tryParse(value);
+                                            if (quantity != null && quantity > quotaRemaining) {
+                                              return 'Exceeds quota';
+                                            }
+                                            return null;
+                                          },
+                                        ]),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    
+                                    // Quota remaining display
+                                    Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                        height: 70,
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: quotaRemaining > 0 ? Colors.green.shade300 : Colors.red.shade300,
+                                          ),
+                                          borderRadius: BorderRadius.circular(4),
+                                          color: quotaRemaining > 0 ? Colors.green.shade50 : Colors.red.shade50,
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              quotaRemaining.toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 18,
+                                                color: quotaRemaining > 0 ? Colors.green.shade700 : Colors.red.shade700,
+                                              ),
+                                            ),
+                                            Text(
+                                              'animals',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey.shade700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    
+                                    // Delete button
+                                    IconButton(
+                                      icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                      onPressed: () => _removeSpecies(index),
+                                      tooltip: 'Remove Species',
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }),
+                          ),
                         )),
                       ],
                     ),

@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import 'package:regional_cbnrm/utils/logger.dart';
 
 Future<void> patchDatabaseForConflictOutcomes(Database db) async {
   // Check if dynamic_fields table exists
@@ -6,10 +7,10 @@ Future<void> patchDatabaseForConflictOutcomes(Database db) async {
     "SELECT name FROM sqlite_master WHERE type='table' AND name='dynamic_fields';"
   );
   
-  print('Patching database for conflict outcomes. Tables found: ${tables.length}');
+  AppLogger().d('Patching database for conflict outcomes. Tables found: ${tables.length}');
 
   if (tables.isEmpty) {
-    print('Creating missing tables for conflict outcomes...');
+    AppLogger().d('Creating missing tables for conflict outcomes...');
     // Create missing tables
     await db.execute('''
 CREATE TABLE conflict_outcomes (
@@ -51,8 +52,17 @@ CREATE TABLE conflict_outcome_dynamic_field_values (
     await db.execute('CREATE INDEX idx_conflict_outcome_dynamic_field_values_outcome_id ON conflict_outcome_dynamic_field_values (conflict_outcome_id);');
     await db.execute('CREATE INDEX idx_conflict_outcome_dynamic_field_values_field_id ON conflict_outcome_dynamic_field_values (dynamic_field_id);');
     
-    print('Successfully created tables: conflict_outcomes, dynamic_fields, conflict_outcome_dynamic_field_values');
+    AppLogger().d('Successfully created tables: conflict_outcomes, dynamic_fields, conflict_outcome_dynamic_field_values');
   } else {
-    print('Tables already exist, no need to patch');
+    AppLogger().d('Tables already exist, no need to patch');
+      await db.execute('''
+  CREATE TABLE wildlife_conflict_species (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    wildlife_conflict_incident_id INTEGER,
+    species_id INTEGER,
+    created_at TEXT,
+    updated_at TEXT
+  );
+  ''');
   }
 }

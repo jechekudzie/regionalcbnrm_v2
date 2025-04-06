@@ -9,6 +9,7 @@ class DynamicField {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final String? author;
+  final List<DynamicOption> options;
   final String syncStatus;
 
   DynamicField({
@@ -23,6 +24,7 @@ class DynamicField {
     this.updatedAt,
     this.author,
     this.syncStatus = 'pending',
+    this.options = const [],
   });
 
   // From API JSON
@@ -39,6 +41,11 @@ class DynamicField {
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       author: json['author'],
       syncStatus: 'synced', // API returns synced items
+      options: json['options'] != null
+          ? List<Map<String, dynamic>>.from(json['options'])
+              .map((opt) => DynamicOption.fromJson(opt))
+              .toList()
+          : [],
     );
   }
 
@@ -56,6 +63,11 @@ class DynamicField {
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       author: json['author'],
       syncStatus: json['sync_status'] ?? 'pending',
+      options: json['options'] != null
+          ? List<Map<String, dynamic>>.from(json['options'])
+              .map((opt) => DynamicOption.fromJson(opt))
+              .toList()
+          : [],
     );
   }
 
@@ -152,5 +164,22 @@ class DynamicField {
         conflictOutcomeId.hashCode ^
         fieldName.hashCode ^
         fieldType.hashCode;
+  }
+}
+
+class DynamicOption {
+  final String value;
+  final String label;
+
+  DynamicOption({
+    required this.value,
+    required this.label,
+  });
+
+  factory DynamicOption.fromJson(Map<String, dynamic> json) {
+    return DynamicOption(
+      value: json['value'].toString(),
+      label: json['label'].toString(),
+    );
   }
 }

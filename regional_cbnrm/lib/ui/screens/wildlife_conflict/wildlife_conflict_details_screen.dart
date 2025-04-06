@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:regional_cbnrm/models/conflict_outcome.dart'; // Added import
+// Added import
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';
 import 'package:regional_cbnrm/services/notification_service.dart';
@@ -194,7 +196,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        incident.syncStatus ?? 'unknown',
+                        incident.syncStatus,
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 12,
@@ -222,26 +224,25 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                       children: [
                         _buildInfoRow(
                           'Date',
-                          // ignore: unnecessary_null_comparison
-                          incident.date != null ? DateFormat('dd/MM/yyyy').format(incident.date) : 'N/A',
+                          DateFormat('dd/MM/yyyy').format(incident.incidentDate), // Use incidentDate
                           Icons.calendar_today,
                         ),
                         const Divider(),
                         _buildInfoRow(
                           'Time',
-                          incident.time,
+                          incident.incidentTime, // Use incidentTime
                           Icons.access_time,
                         ),
                         const Divider(),
-                        _buildSpeciesInfoRow(
+                        _buildSpeciesInfoRow( // Pass speciesIds instead of Species object
                           'Species Involved',
-                          incident.species,
+                          incident.speciesIds,
                           Icons.pets,
                         ),
                         const Divider(),
                         _buildInfoRow(
                           'Conflict Type',
-                          incident.conflictType?.name ?? 'N/A',
+                          incident.conflictTypeId?.toString() ?? 'N/A', // Use conflictTypeId
                           Icons.warning_amber_rounded,
                         ),
                       ],
@@ -256,7 +257,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                   elevation: 2,
                   child: Padding(
                     padding: const EdgeInsets.all(16),
-                    child: Text(incident.description.isNotEmpty ? incident.description : 'No Description Provided'),
+                    child: Text(incident.description?.isNotEmpty == true ? incident.description! : 'No Description Provided'), // Add null check
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -271,7 +272,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Lat: ${incident.latitude.toStringAsFixed(6)}, Lng: ${incident.longitude.toStringAsFixed(6)}',
+                          'Lat: ${incident.latitude?.toStringAsFixed(6) ?? 'N/A'}, Lng: ${incident.longitude?.toStringAsFixed(6) ?? 'N/A'}', // Add null checks
                           style: const TextStyle(
                             fontSize: 14,
                             fontFamily: 'monospace',
@@ -281,8 +282,8 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                         SizedBox(
                           height: 200,
                           child: LocationMapView(
-                            latitude: incident.latitude,
-                            longitude: incident.longitude,
+                            latitude: incident.latitude ?? 0.0, // Provide default value
+                            longitude: incident.longitude ?? 0.0, // Provide default value
                           ),
                         ),
                       ],
@@ -304,7 +305,14 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                   ],
                 ),
                 const SizedBox(height: 8),
-                _buildOutcomesList(incident.outcomes),
+                // _buildOutcomesList(incident.outcomes), // Removed: Outcomes are not directly on the incident model
+                const Card( // Placeholder for outcomes
+                  elevation: 2,
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: Text('Outcomes loading/display not implemented yet.')),
+                  ),
+                ),
                 const SizedBox(height: 80), // Space for FAB
               ],
             ),
@@ -357,11 +365,11 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
     );
   }
 
-  Widget _buildSpeciesInfoRow(String label, Species? species, IconData icon) {
+  Widget _buildSpeciesInfoRow(String label, List<int>? speciesIds, IconData icon) { // Changed parameter type
     final incident = _incident.value;
 
-    // Use speciesList if available and not empty
-    if (incident?.speciesList != null && incident!.speciesList!.isNotEmpty) {
+    // Display list of species IDs
+    if (speciesIds != null && speciesIds.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),
         child: Column(
@@ -378,19 +386,20 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
               ],
             ),
             const SizedBox(height: 8),
-            ...incident.speciesList!.map((s) => Padding(
-              padding: const EdgeInsets.only(left: 30, bottom: 4),
+            // TODO: Fetch species names from repository based on IDs for better display
+            Padding(
+              padding: const EdgeInsets.only(left: 30),
               child: Text(
-                '• ${s.name}',
+                'IDs: ${speciesIds.join(', ')}',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-            )).toList(),
+            ),
           ],
         ),
       );
     }
 
-    // Fallback to single species display
+    // Display if no species IDs are associated
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -404,7 +413,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              species?.name ?? 'N/A',
+              'N/A', // No species IDs provided
               style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
@@ -413,7 +422,7 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
     );
   }
 
-  Widget _buildOutcomesList(List<WildlifeConflictOutcome>? outcomes) {
+  Widget _buildOutcomesList(List<ConflictOutcome>? outcomes) { // Renamed type
     if (outcomes == null || outcomes.isEmpty) {
       return const Card(
         elevation: 2,
@@ -430,7 +439,9 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
       itemCount: outcomes.length,
       itemBuilder: (context, index) {
         final outcome = outcomes[index];
-        final outcomeDate = DateFormat('dd/MM/yyyy').format(outcome.date);
+        final outcomeDate = outcome.createdAt != null
+            ? DateFormat('dd/MM/yyyy').format(outcome.createdAt!)
+            : 'N/A'; // Use createdAt and add null check
         return Card(
           elevation: 2,
           margin: const EdgeInsets.only(bottom: 12),
@@ -448,14 +459,14 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        outcome.syncStatus ?? 'unknown',
+                        outcome.syncStatus, // syncStatus is not nullable
                         style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        outcome.conflictOutcome?.name ?? 'Unknown Outcome',
+                        outcome.name, // Use name directly
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -472,34 +483,29 @@ class _WildlifeConflictDetailsScreenState extends State<WildlifeConflictDetailsS
                     ),
                   ],
                 ),
-                if (outcome.notes != null && outcome.notes!.isNotEmpty)
+                if (outcome.description?.isNotEmpty == true) // Use description
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(outcome.notes!),
+                    child: Text(outcome.description!), // Use description
                   ),
-                if (outcome.dynamicValues != null && outcome.dynamicValues!.isNotEmpty)
+                // Display Dynamic Field Definitions (Labels) associated with this outcome type
+                if (outcome.dynamicFields?.isNotEmpty == true)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: outcome.dynamicValues!.map((value) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${value.dynamicField?.label ?? 'Field'}: ',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              Expanded(child: Text(value.value)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
+                      children: [
+                        const Text('Associated Fields:', style: TextStyle(fontWeight: FontWeight.bold)),
+                        ...outcome.dynamicFields!.map((field) { // Use dynamicFields
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 8.0, top: 4.0),
+                            child: Text('• ${field.label ?? field.fieldName} (${field.fieldType})'), // Display field label/name and type
+                          );
+                        }).toList(),
+                      ],
                     ),
                   ),
-              ],
+              ], // Keep this closing bracket
             ),
           ),
         );

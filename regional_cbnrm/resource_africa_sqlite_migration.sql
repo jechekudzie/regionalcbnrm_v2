@@ -434,6 +434,20 @@ CREATE TABLE live_stock_conflict_records (
   UNIQUE (organisation_id, species_id, live_stock_type_id, period)
 );
 
+-- Quota allocations table
+CREATE TABLE quota_allocations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  organisation_id INTEGER NOT NULL,
+  species_id INTEGER NOT NULL,
+  period INTEGER NOT NULL,
+  quota INTEGER NOT NULL,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, species_id, period)
+);
+
 -- Poaching methods table
 CREATE TABLE poaching_methods (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -498,6 +512,20 @@ CREATE TABLE poaching_incidents (
 );
 
 -- Poaching incident methods table
+
+-- Quota allocations table
+CREATE TABLE quota_allocations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  organisation_id INTEGER NOT NULL,
+  species_id INTEGER NOT NULL,
+  period INTEGER NOT NULL,
+  quota INTEGER NOT NULL,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending',
+  UNIQUE (organisation_id, species_id, period)
+);
 CREATE TABLE poaching_incident_methods (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   poaching_incident_id INTEGER NOT NULL,
@@ -649,3 +677,16 @@ CREATE INDEX idx_human_conflict_records_org_species ON human_conflict_records(or
 CREATE INDEX idx_live_stock_conflict_records_org_species ON live_stock_conflict_records(organisation_id, species_id);
 CREATE INDEX idx_human_resource_records_org ON human_resource_records(organisation_id);
 CREATE INDEX idx_income_records_org ON income_records(organisation_id);
+
+-- Hunting concessions table
+CREATE TABLE hunting_concessions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  organisation_id INTEGER NOT NULL,
+  name TEXT NOT NULL,
+  description TEXT,
+  slug TEXT,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP,
+  author TEXT,
+  sync_status TEXT DEFAULT 'pending'
+);

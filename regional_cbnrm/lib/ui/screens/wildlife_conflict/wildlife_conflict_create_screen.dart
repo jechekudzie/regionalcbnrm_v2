@@ -1,11 +1,13 @@
 
 import 'package:flutter/material.dart';
+import 'package:regional_cbnrm/models/species.dart';
 import 'package:regional_cbnrm/ui/widgets/location_picker.dart';
 import 'package:get/get.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 
 import 'package:intl/intl.dart';
+import 'package:regional_cbnrm/models/conflict_outcome.dart'; // Added import
 import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 import 'package:regional_cbnrm/repositories/wildlife_conflict_repository.dart';
 import 'package:regional_cbnrm/repositories/organisation_repository.dart';
@@ -27,7 +29,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
   
   final RxBool _isLoading = false.obs;
   final RxBool _isLoadingData = true.obs; // Start with true to show loading initially
-  final RxList<ConflictType> _conflictTypes = RxList<ConflictType>([]);
+  final RxList<ConflictOutcome> _conflictOutcomes = RxList<ConflictOutcome>([]); // Renamed and updated type
   final RxList<Species> _species = RxList<Species>([]);
   final RxDouble _latitude = 0.0.obs;
   final RxDouble _longitude = 0.0.obs;
@@ -51,7 +53,7 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
       
       // Load conflict types and species in parallel
       await Future.wait([
-        _loadConflictTypes(),
+        _loadConflictOutcomes(), // Renamed function call
         _loadSpecies(),
       ]);
     } catch (e) {
@@ -64,15 +66,25 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
     }
   }
   
-  Future<void> _loadConflictTypes() async {
+  Future<void> _loadConflictOutcomes() async { // Renamed function
     try {
-      final conflictTypes = await _repository.getConflictTypes();
-      _conflictTypes.value = conflictTypes;
+      // Fetch raw data (List<Map<String, dynamic>>)
+      final outcomesData = await _repository.getConflictOutcomes(
+        organisationId: _organisationId.value > 0 ? _organisationId.value : null
+      );
+      
+      // Map to List<ConflictOutcome>
+      final outcomes = outcomesData
+          .map((data) => ConflictOutcome.fromApiJson(data)) // Assuming API source for now
+          .toList();
+          
+      _conflictOutcomes.value = outcomes;
+      
     } catch (e) {
       // Handle error
-      print('Error loading conflict types: $e');
+      print('Error loading conflict outcomes: $e');
        _notificationService.showSnackBar(
-        'Error loading conflict types. Please try again.',
+        'Error loading conflict outcomes. Please try again.',
         type: SnackBarType.error,
       );
     }
@@ -86,19 +98,25 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
       );
       
       // Fetch species from the repository using organisation ID when available
-      final species = await _repository.getSpecies(
+      // Fetch raw data (List<Map<String, dynamic>>)
+      final speciesData = await _repository.getSpecies(
         organisationId: _organisationId.value > 0 ? _organisationId.value : null
       );
       
-      if (species.isEmpty) {
+      if (speciesData.isEmpty) {
         _notificationService.showSnackBar(
           'No species found. Please check your connection.',
           type: SnackBarType.warning,
         );
       } else {
-        // Sort the species alphabetically for better usability
-        species.sort((a, b) => a.name.compareTo(b.name));
-        _species.value = species;
+        // Map to List<Species>
+        final speciesList = speciesData
+            .map((data) => Species.fromApiJson(data)) // Assuming API source
+            .toList();
+            
+        // Sort the List<Species> alphabetically
+        speciesList.sort((a, b) => a.name.compareTo(b.name));
+        _species.value = speciesList; // Assign the converted list
       }
     } catch (e) {
       print('Error loading species: $e');
@@ -137,16 +155,14 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
         final incident = WildlifeConflictIncident(
           organisationId: _organisationId.value,
           title: formData['title'] as String,
-          date: formData['date'] as DateTime,
-          time: DateFormat('HH:mm').format(formData['time'] as DateTime),
-          latitude: double.parse(formData['latitude'] as String),
-          longitude: double.parse(formData['longitude'] as String),
-          description: formData['description'] as String,
-          conflictTypeId: formData['conflict_type_id'] as int,
+          incidentDate: formData['date'] as DateTime, // Corrected parameter name
+          incidentTime: DateFormat('HH:mm').format(formData['time'] as DateTime), // Corrected parameter name
+          latitude: double.tryParse(formData['latitude'] as String? ?? '0.0'), // Use tryParse for safety
+          longitude: double.tryParse(formData['longitude'] as String? ?? '0.0'), // Use tryParse for safety
+          description: formData['description'] as String?, // Allow null
+          conflictTypeId: formData['conflict_type_id'] as int?, // Allow null if dropdown allows
           period: DateTime.now().year.toString(),
-          // Use the ID of the first selected species, or null if none (though validated above)
-          speciesId: selectedSpecies.isNotEmpty ? selectedSpecies.first.id : null, 
-          speciesList: selectedSpecies,
+          speciesIds: selectedSpecies.map((s) => s.id).toList(), // Corrected parameter name and value
         );
           
         // Send to the repository (repository handles API conversion)
@@ -289,10 +305,10 @@ class _WildlifeConflictCreateScreenState extends State<WildlifeConflictCreateScr
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.warning_amber_rounded),
                   ),
-                  items: _conflictTypes.map((type) {
+                  items: _conflictOutcomes.map((outcome) { // Use updated list
                     return DropdownMenuItem(
-                      value: type.id,
-                      child: Text(type.name),
+                      value: outcome.id, // Access id directly
+                      child: Text(outcome.name), // Access name directly
                     );
                   }).toList(),
                   validator: FormBuilderValidators.compose([

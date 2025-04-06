@@ -59,12 +59,15 @@ class _QuotaAllocationCreateScreenState extends State<QuotaAllocationCreateScree
   
   Future<void> _loadSpecies() async {
     try {
-      final species = await _wildlifeRepository.getSpecies(
+      final speciesData = await _wildlifeRepository.getSpecies(
         organisationId: _organisationId.value > 0 ? _organisationId.value : null
       );
+      final speciesList = speciesData
+          .map<Species>((json) => Species.fromApiJson(json))
+          .toList();
       // Sort alphabetically
-      species.sort((a, b) => a.name.compareTo(b.name));
-      _species.value = species;
+      speciesList.sort((a, b) => a.name.compareTo(b.name));
+      _species.value = speciesList;
     } catch (e) {
       print('Error loading species: $e');
     }

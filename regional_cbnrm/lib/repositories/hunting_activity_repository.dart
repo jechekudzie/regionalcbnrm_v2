@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'package:regional_cbnrm/utils/logger.dart';
 
 import 'package:regional_cbnrm/core/api_service.dart';
 import 'package:regional_cbnrm/core/app_exceptions.dart';
 import 'package:regional_cbnrm/core/database_helper.dart';
 import 'package:regional_cbnrm/models/hunting_model.dart';
 import 'package:regional_cbnrm/models/species.dart';
-import 'package:regional_cbnrm/models/wildlife_conflict_model.dart';
 
 class HuntingActivityRepository {
   final ApiService _apiService = ApiService();
@@ -42,7 +42,7 @@ class HuntingActivityRepository {
           
           return activities;
         } else {
-          print('Unexpected data format: ${response['data']}');
+          AppLogger().d('Unexpected data format: ${response['data']}');
           return [];
         }
       } else {
@@ -223,7 +223,7 @@ class HuntingActivityRepository {
       final data = additionalData ?? activity.toApiJson();
       
       // Log the request data for debugging
-      print('Creating hunting activity with data: $data');
+      AppLogger().d('Creating hunting activity with data: $data');
       
       final response = await _apiService.post(
         '/hunting-activities',
@@ -351,7 +351,7 @@ class HuntingActivityRepository {
           
           return concessions;
         } else {
-          print('Unexpected data format: ${response['data']}');
+          AppLogger().d('Unexpected data format: ${response['data']}');
           return [];
         }
       } else {
@@ -555,7 +555,7 @@ class HuntingActivityRepository {
           
           return allocations;
         } else {
-          print('Unexpected data format: ${response['data']}');
+          AppLogger().d('Unexpected data format: ${response['data']}');
           return [];
         }
       } else {

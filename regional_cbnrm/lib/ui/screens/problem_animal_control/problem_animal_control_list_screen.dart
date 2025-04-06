@@ -215,7 +215,7 @@ class _ProblemAnimalControlListScreenState extends State<ProblemAnimalControlLis
                   const Icon(Icons.numbers, size: 16, color: Colors.grey),
                   const SizedBox(width: 4),
                   Text(
-                    '${control.numberOfAnimals} animal(s)',
+                    '${control.estimatedNumber} animal(s)',
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ],

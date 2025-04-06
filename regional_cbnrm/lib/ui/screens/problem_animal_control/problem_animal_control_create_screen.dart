@@ -131,14 +131,15 @@ class _ProblemAnimalControlCreateScreenState extends State<ProblemAnimalControlC
           wildlifeConflictIncidentId: _isRelatedToIncident.value && _selectedIncident.value != null
               ? _selectedIncident.value!.id!
               : 0, // Use 0 as a placeholder if no incident is selected
-          controlMeasureId: formData['control_measure_id'],
           organisationId: _organisationId.value,
-          date: formData['date'],
-          time: DateFormat('HH:mm').format(formData['time']),
+          date: (formData['date'] as DateTime),
+          time: DateFormat('HH:mm').format(formData['time'] as DateTime),
           description: formData['description'],
+          period: formData['period'],
+          location: formData['location'],
           latitude: double.parse(formData['latitude']),
           longitude: double.parse(formData['longitude']),
-          numberOfAnimals: int.parse(formData['number_of_animals']),
+          estimatedNumber: int.parse(formData['number_of_animals']),
         );
 
         final createdControl = await _repository.createControl(control);

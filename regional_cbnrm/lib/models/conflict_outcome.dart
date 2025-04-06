@@ -1,3 +1,5 @@
+import 'package:regional_cbnrm/models/dynamic_field.dart';
+
 class ConflictOutcome {
   final int? id;
   final int conflictTypeId;
@@ -8,6 +10,7 @@ class ConflictOutcome {
   final DateTime? updatedAt;
   final String? author;
   final String syncStatus;
+  final List<DynamicField>? dynamicFields;
 
   ConflictOutcome({
     this.id,
@@ -19,10 +22,18 @@ class ConflictOutcome {
     this.updatedAt,
     this.author,
     this.syncStatus = 'pending',
+    this.dynamicFields,
   });
 
   // From API JSON
-  factory ConflictOutcome.fromApiJson(Map<String, dynamic> json) {
+  factory ConflictOutcome.fromApiJson(Map json) {
+    List<DynamicField> dynamicFields = [];
+    if (json['dynamic_fields'] != null && json['dynamic_fields'] is List) {
+      dynamicFields = (json['dynamic_fields'] as List)
+          .map((field) => DynamicField.fromApiJson(field))
+          .toList();
+    }
+
     return ConflictOutcome(
       id: json['id'],
       conflictTypeId: json['conflict_type_id'],
@@ -33,11 +44,19 @@ class ConflictOutcome {
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       author: json['author'],
       syncStatus: 'synced', // API returns synced items
+      dynamicFields: dynamicFields.isNotEmpty ? dynamicFields : null,
     );
   }
 
   // From database JSON
-  factory ConflictOutcome.fromDatabaseJson(Map<String, dynamic> json) {
+  factory ConflictOutcome.fromDatabaseJson(Map json) {
+    List<DynamicField> dynamicFields = [];
+    if (json['dynamic_fields'] != null && json['dynamic_fields'] is List) {
+      dynamicFields = (json['dynamic_fields'] as List)
+          .map((field) => DynamicField.fromDatabaseJson(field))
+          .toList();
+    }
+
     return ConflictOutcome(
       id: json['id'],
       conflictTypeId: json['conflict_type_id'],
@@ -48,11 +67,12 @@ class ConflictOutcome {
       updatedAt: json['updated_at'] != null ? DateTime.parse(json['updated_at']) : null,
       author: json['author'],
       syncStatus: json['sync_status'] ?? 'pending',
+      dynamicFields: dynamicFields.isNotEmpty ? dynamicFields : null,
     );
   }
 
   // To database JSON
-  Map<String, dynamic> toDatabaseJson() {
+  Map toDatabaseJson() {
     return {
       'id': id,
       'conflict_type_id': conflictTypeId,
@@ -63,16 +83,18 @@ class ConflictOutcome {
       'updated_at': updatedAt?.toIso8601String(),
       'author': author,
       'sync_status': syncStatus,
+      'dynamic_fields': dynamicFields?.map((field) => field.toDatabaseJson()).toList(),
     };
   }
 
   // To API JSON
-  Map<String, dynamic> toApiJson() {
+  Map toApiJson() {
     return {
       'conflict_type_id': conflictTypeId,
       'name': name,
       'description': description,
       'slug': slug,
+      'dynamic_fields': dynamicFields?.map((field) => field.toApiJson()).toList(),
     };
   }
 
@@ -86,6 +108,7 @@ class ConflictOutcome {
     DateTime? updatedAt,
     String? author,
     String? syncStatus,
+    List<DynamicField>? dynamicFields,
   }) {
     return ConflictOutcome(
       id: id ?? this.id,
@@ -97,18 +120,19 @@ class ConflictOutcome {
       updatedAt: updatedAt ?? this.updatedAt,
       author: author ?? this.author,
       syncStatus: syncStatus ?? this.syncStatus,
+      dynamicFields: dynamicFields ?? this.dynamicFields,
     );
   }
 
   @override
   String toString() {
-    return 'ConflictOutcome(id: $id, name: $name, conflictTypeId: $conflictTypeId)';
+    return 'ConflictOutcome(id: $id, name: $name, conflictTypeId: $conflictTypeId, dynamicFields: ${dynamicFields?.length ?? 0})';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    
+
     return other is ConflictOutcome &&
         other.id == id &&
         other.conflictTypeId == conflictTypeId &&

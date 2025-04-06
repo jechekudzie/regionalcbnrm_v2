@@ -28,6 +28,7 @@ class AppRoutes {
   static const String poachingDetails = '/poaching-incidents/details';
   static const String poachingCreate = '/poaching-incidents/create';
   static const String poachingAddPoacher = '/poaching-incidents/add-poacher';
+  static const String poachingPostIncident = '/poaching-incidents/post';
 
   // Hunting routes
   static const String huntingActivities = '/hunting-activities';

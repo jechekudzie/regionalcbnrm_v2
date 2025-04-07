@@ -141,100 +141,105 @@ Route::middleware('auth')->group(function () {
     Route::get('/organisation/dashboard/check/{organisation}', [OrganisationDashboardController::class, 'checkDashboardAccess'])->name('organisation.check-dashboard-access')->middleware('auth');
     Route::get('/organisation/dashboard', [OrganisationDashboardController::class, 'dashboard'])->name('organisation.dashboard')->middleware('auth');
     Route::get('/{organisation}/index', [OrganisationDashboardController::class, 'index'])->name('organisation.dashboard.index')->middleware('auth');
+    Route::get('/{organisation}/historical-dashboard', [OrganisationDashboardController::class, 'historicalDashboard'])->name('organisation.dashboard.historical')->middleware('auth');
 
+    Route::get('/rural-district-councils', [OrganisationDashboardController::class, 'ruralDistrictCouncils'])->name('organisation.dashboard.rural-district-councils')->middleware('auth');
 
-    Route::prefix('historical-data/{organisation:slug}')->group(function () {
-        //main_dashboard
-        Route::get('/main-dashboard', [DashboardController::class, 'index'])->name('main-dashboard');
-        Route::get('/main-dashboard-2', [DashboardController::class, 'index2'])->name('main-dashboard-2');
-
-        Route::get('/report-dashboard', [DashboardController::class, 'huntingDashboard'])->name('report-dashboard');
-        Route::get('/hunting-dashboard/district', [DashboardController::class, 'huntingDashboardByDistrict'])->name('hunting-dashboard-district');
-        Route::get('/hunting_dashboard/species', [DashboardController::class, 'huntingDashboardBySpecies'])->name('hunting-dashboard-species');
-
-        //conflict dashboard
-        Route::get('/conflict-dashboard', [DashboardController::class, 'conflictDashboard'])->name('conflict-dashboard');
-        Route::get('/conflict-dashboard/district', [DashboardController::class, 'conflictDashboardByDistrict'])->name('conflict-dashboard-district');
-        Route::get('/conflict-dashboard/species', [DashboardController::class, 'conflictDashboardBySpecies'])->name('conflict-dashboard-species');
-
-        //control cases dashboard
-        Route::get('/control-case_dashboard', [DashboardController::class, 'controlDashboard'])->name('control-cases-dashboard');
-        Route::get('/control-cases/district', [DashboardController::class, 'controlDashboardByDistrict'])->name('control-dashboard-district');
-        Route::get('/control-cases/species', [DashboardController::class, 'controlDashboardBySpecies'])->name('control-dashboard-species');
-
-        //income records dashboard
-        Route::get('/income-records-dashboard', [DashboardController::class, 'incomeRecordsDashboard'])->name('income-records-dashboard');
-        Route::get('/income-records-dashboard/district', [DashboardController::class, 'incomeRecordsDashboardByDistrict'])->name('income-records-dashboard-district');
-        Route::get('/income-records-dashboard/species', [DashboardController::class, 'incomeRecordsDashboardBySpecies'])->name('income-records-dashboard-species');
-
-        //income dashboard bar chart
-        Route::get('/income-records-dashboard/bar-chart', [DashboardController::class, 'incomeRecordDashboardBarChart'])->name('income-records-dashboard-bar-chart');
-
-        //forms sections for reports
-        Route::get('hunting-records', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'index'])->name('hunting_records.index');
-        Route::get('hunting-records/create', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'create'])->name('hunting_records.create');
-        Route::post('hunting-records', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'store'])->name('hunting_records.store');
-        Route::get('hunting-records/{record}', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'show'])->name('hunting_records.show');
-        Route::get('hunting-records/{record}/edit', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'edit'])->name('hunting_records.edit');
-        Route::patch('hunting-records/{record}', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'update'])->name('hunting_records.update');
-        Route::delete('hunting-records/{record}', [\App\Http\Controllers\HistoricalData\HuntingRecordController::class, 'destroy'])->name('hunting_records.destroy');
-
-        //crop conflict records
-        Route::get('/crop-conflict-records', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'index'])->name('crop_conflict_records.index');
-        Route::get('/crop-conflict-records/create', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'create'])->name('crop_conflict_records.create');
-        Route::post('/crop-conflict-records', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'store'])->name('crop_conflict_records.store');
-        Route::get('/crop-conflict-records/{cropConflict}', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'show'])->name('crop_conflict_records.show');
-        Route::get('/crop-conflict-records/{cropConflict}/edit', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'edit'])->name('crop_conflict_records.edit');
-        Route::patch('/crop-conflict-records/{cropConflict}', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'update'])->name('crop_conflict_records.update');
-        Route::delete('/crop-conflict-records/{cropConflict}', [\App\Http\Controllers\HistoricalData\CropConflictRecordController::class, 'destroy'])->name('crop_conflict_records.destroy');
-
-        //livestock conflict records
-        Route::get('/livestock-conflict-records', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'index'])->name('livestock_conflict_records.index');
-        Route::get('/livestock-conflict-records/create', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'create'])->name('livestock_conflict_records.create');
-        Route::post('/livestock-conflict-records', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'store'])->name('livestock_conflict_records.store');
-        Route::get('/livestock-conflict-records/{liveStockConflict}', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'show'])->name('livestock_conflict_records.show');
-        Route::get('/livestock-conflict-records/{liveStockConflict}/edit', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'edit'])->name('livestock_conflict_records.edit');
-        Route::patch('/livestock-conflict-records/{liveStockConflict}', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'update'])->name('livestock_conflict_records.update');
-        Route::delete('/livestock-conflict-records/{liveStockConflict}', [\App\Http\Controllers\HistoricalData\LiveStockConflictRecordController::class, 'destroy'])->name('livestock_conflict_records.destroy');
-
-        //human conflict records
-        Route::get('/human-conflict-records', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'index'])->name('human_conflict_records.index');
-        Route::get('/human-conflict-records/create', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'create'])->name('human_conflict_records.create');
-        Route::post('/human-conflict-records', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'store'])->name('human_conflict_records.store');
-        Route::get('/human-conflict-records/{humanConflict}', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'show'])->name('human_conflict_records.show');
-        Route::get('/human-conflict-records/{humanConflict}/edit', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'edit'])->name('human_conflict_records.edit');
-        Route::patch('/human-conflict-records/{humanConflict}', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'update'])->name('human_conflict_records.update');
-        Route::delete('/human-conflict-records/{humanConflict}', [\App\Http\Controllers\HistoricalData\HumanConflictRecordController::class, 'destroy'])->name('human_conflict_records.destroy');
-
-        //animal control records
-        Route::get('/animal-control-records', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'index'])->name('animal_control_records.index');
-        Route::get('/animal-control-records/create', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'create'])->name('animal_control_records.create');
-        Route::post('/animal-control-records', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'store'])->name('animal_control_records.store');
-        Route::get('/animal-control-records/{animalControl}', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'show'])->name('animal_control_records.show');
-        Route::get('/animal-control-records/{animalControl}/edit', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'edit'])->name('animal_control_records.edit');
-        Route::patch('/animal-control-records/{animalControl}', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'update'])->name('animal_control_records.update');
-        Route::delete('/animal-control-records/{animalControl}', [\App\Http\Controllers\HistoricalData\AnimalControlRecordController::class, 'destroy'])->name('animal_control_records.destroy');
-
-        //poaching records
-        Route::get('/poaching-records', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'index'])->name('poaching_records.index');
-        Route::get('/poaching-records/create', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'create'])->name('poaching_records.create');
-        Route::post('/poaching-records', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'store'])->name('poaching_records.store');
-        Route::get('/poaching-records/{poachingRecord}', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'show'])->name('poaching_records.show');
-        Route::get('/poaching-records/{poachingRecord}/edit', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'edit'])->name('poaching_records.edit');
-        Route::patch('/poaching-records/{poachingRecord}', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'update'])->name('poaching_records.update');
-        Route::delete('/poaching-records/{poachingRecord}', [\App\Http\Controllers\HistoricalData\PoachingRecordController::class, 'destroy'])->name('poaching_records.destroy');
-
-        //poachers records
-        Route::get('/poachers-records', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'index'])->name('poachers_records.index');
-        Route::get('/poachers-records/create', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'create'])->name('poachers_records.create');
-        Route::post('/poachers-records', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'store'])->name('poachers_records.store');
-        Route::get('/poachers-records/{poachersRecord}', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'show'])->name('poachers_records.show');
-        Route::get('/poachers-records/{poachersRecord}/edit', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'edit'])->name('poachers_records.edit');
-        Route::patch('/poachers-records/{poachersRecord}', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'update'])->name('poachers_records.update');
-        Route::delete('/poachers-records/{poachersRecord}', [\App\Http\Controllers\HistoricalData\PoachersRecordController::class, 'destroy'])->name('poachers_records.destroy');
-
-        //income records
-        Route::resource('income-records', \App\Http\Controllers\HistoricalData\IncomeRecordController::class)->names([
+    // Historical Data Routes
+    Route::prefix('/{organisation}')->group(function () {
+        // Hunting Records routes
+        Route::resource('hunting-records', HuntingRecordController::class)->names([
+            'index' => 'hunting_records.index',
+            'create' => 'hunting_records.create',
+            'store' => 'hunting_records.store',
+            'show' => 'hunting_records.show',
+            'edit' => 'hunting_records.edit',
+            'update' => 'hunting_records.update',
+            'destroy' => 'hunting_records.destroy',
+        ])->parameters([
+            'hunting-records' => 'record'
+        ]);
+        
+        // Crop Conflict Records routes
+        Route::resource('crop-conflict-records', CropConflictRecordController::class)->names([
+            'index' => 'crop_conflict_records.index',
+            'create' => 'crop_conflict_records.create',
+            'store' => 'crop_conflict_records.store',
+            'show' => 'crop_conflict_records.show',
+            'edit' => 'crop_conflict_records.edit',
+            'update' => 'crop_conflict_records.update',
+            'destroy' => 'crop_conflict_records.destroy',
+        ])->parameters([
+            'crop-conflict-records' => 'cropConflict'
+        ]);
+        
+        // Livestock Conflict Records routes
+        Route::resource('livestock-conflict-records', LiveStockConflictRecordController::class)->names([
+            'index' => 'livestock_conflict_records.index',
+            'create' => 'livestock_conflict_records.create',
+            'store' => 'livestock_conflict_records.store',
+            'show' => 'livestock_conflict_records.show',
+            'edit' => 'livestock_conflict_records.edit',
+            'update' => 'livestock_conflict_records.update',
+            'destroy' => 'livestock_conflict_records.destroy',
+        ])->parameters([
+            'livestock-conflict-records' => 'liveStockConflict'
+        ]);
+        
+        // Human Conflict Records routes
+        Route::resource('human-conflict-records', HumanConflictRecordController::class)->names([
+            'index' => 'human_conflict_records.index',
+            'create' => 'human_conflict_records.create',
+            'store' => 'human_conflict_records.store',
+            'show' => 'human_conflict_records.show',
+            'edit' => 'human_conflict_records.edit',
+            'update' => 'human_conflict_records.update',
+            'destroy' => 'human_conflict_records.destroy',
+        ])->parameters([
+            'human-conflict-records' => 'humanConflict'
+        ]);
+        
+        // Animal Control Records routes
+        Route::resource('animal-control-records', AnimalControlRecordController::class)->names([
+            'index' => 'animal_control_records.index',
+            'create' => 'animal_control_records.create',
+            'store' => 'animal_control_records.store',
+            'show' => 'animal_control_records.show',
+            'edit' => 'animal_control_records.edit',
+            'update' => 'animal_control_records.update',
+            'destroy' => 'animal_control_records.destroy',
+        ])->parameters([
+            'animal-control-records' => 'animalControl'
+        ]);
+        
+        // Poaching Records routes
+        Route::resource('poaching-records', PoachingRecordController::class)->names([
+            'index' => 'poaching_records.index',
+            'create' => 'poaching_records.create',
+            'store' => 'poaching_records.store',
+            'show' => 'poaching_records.show',
+            'edit' => 'poaching_records.edit',
+            'update' => 'poaching_records.update',
+            'destroy' => 'poaching_records.destroy',
+        ])->parameters([
+            'poaching-records' => 'poachingRecord'
+        ]);
+        
+        // Poachers Records routes
+        Route::resource('poachers-records', PoachersRecordController::class)->names([
+            'index' => 'poachers_records.index',
+            'create' => 'poachers_records.create',
+            'store' => 'poachers_records.store', 
+            'show' => 'poachers_records.show',
+            'edit' => 'poachers_records.edit',
+            'update' => 'poachers_records.update',
+            'destroy' => 'poachers_records.destroy',
+        ])->parameters([
+            'poachers-records' => 'poachersRecord'
+        ]);
+        
+        // Income Records routes
+        Route::resource('income-records', IncomeRecordController::class)->names([
             'index' => 'income_records.index',
             'create' => 'income_records.create',
             'store' => 'income_records.store',
@@ -242,10 +247,12 @@ Route::middleware('auth')->group(function () {
             'edit' => 'income_records.edit',
             'update' => 'income_records.update',
             'destroy' => 'income_records.destroy',
+        ])->parameters([
+            'income-records' => 'incomeRecord'
         ]);
-
-        //income use records
-        Route::resource('income-use-records', \App\Http\Controllers\HistoricalData\IncomeUseRecordController::class)->names([
+        
+        // Income Use Records routes 
+        Route::resource('income-use-records', IncomeUseRecordController::class)->names([
             'index' => 'income_use_records.index',
             'create' => 'income_use_records.create',
             'store' => 'income_use_records.store',
@@ -253,10 +260,12 @@ Route::middleware('auth')->group(function () {
             'edit' => 'income_use_records.edit',
             'update' => 'income_use_records.update',
             'destroy' => 'income_use_records.destroy',
+        ])->parameters([
+            'income-use-records' => 'incomeUseRecord'
         ]);
-
-        //source of income records
-        Route::resource('source-of-income-records', \App\Http\Controllers\HistoricalData\SourceOfIncomeRecordController::class)->names([
+        
+        // Source of Income Records routes
+        Route::resource('source-of-income-records', SourceOfIncomeRecordController::class)->names([
             'index' => 'source_of_income_records.index',
             'create' => 'source_of_income_records.create',
             'store' => 'source_of_income_records.store',
@@ -264,10 +273,12 @@ Route::middleware('auth')->group(function () {
             'edit' => 'source_of_income_records.edit',
             'update' => 'source_of_income_records.update',
             'destroy' => 'source_of_income_records.destroy',
+        ])->parameters([
+            'source-of-income-records' => 'sourceOfIncomeRecord'
         ]);
-
-        //income beneficiary records
-        Route::resource('income-beneficiary-records', \App\Http\Controllers\HistoricalData\IncomeBeneficiaryRecordController::class)->names([
+        
+        // Income Beneficiary Records routes
+        Route::resource('income-beneficiary-records', IncomeBeneficiaryRecordController::class)->names([
             'index' => 'income_beneficiary_records.index',
             'create' => 'income_beneficiary_records.create',
             'store' => 'income_beneficiary_records.store',
@@ -275,29 +286,24 @@ Route::middleware('auth')->group(function () {
             'edit' => 'income_beneficiary_records.edit',
             'update' => 'income_beneficiary_records.update',
             'destroy' => 'income_beneficiary_records.destroy',
+        ])->parameters([
+            'income-beneficiary-records' => 'incomeBeneficiaryRecord'
         ]);
-
-        //human resource records
-        Route::resource('human-resource-records', \App\Http\Controllers\HistoricalData\HumanResourceRecordController::class)->names([
-            'index' => 'human-resource-records.index',
-            'create' => 'human-resource-records.create',
-            'store' => 'human-resource-records.store',
-            'show' => 'human-resource-records.show',
-            'edit' => 'human-resource-records.edit',
-            'update' => 'human-resource-records.update',
-            'destroy' => 'human-resource-records.destroy',
+        
+        // Human Resource Records routes
+        Route::resource('human-resource-records', HumanResourceRecordController::class)->names([
+            'index' => 'human_resource_records.index',
+            'create' => 'human_resource_records.create',
+            'store' => 'human_resource_records.store',
+            'show' => 'human_resource_records.show',
+            'edit' => 'human_resource_records.edit',
+            'update' => 'human_resource_records.update',
+            'destroy' => 'human_resource_records.destroy',
+        ])->parameters([
+            'human-resource-records' => 'humanResourceRecord'
         ]);
-
     });
-
-
-    //organisation dashboard
-    Route::get('/organisation/dashboard/check/{organisation}', [OrganisationDashboardController::class, 'checkDashboardAccess'])->name('organisation.check-dashboard-access')->middleware('auth');
-    Route::get('/organisation/dashboard', [OrganisationDashboardController::class, 'dashboard'])->name('organisation.dashboard')->middleware('auth');
-    Route::get('/{organisation}/index', [OrganisationDashboardController::class, 'index'])->name('organisation.dashboard.index')->middleware('auth');
-
-    Route::get('/rural-district-councils', [OrganisationDashboardController::class, 'ruralDistrictCouncils'])->name('organisation.dashboard.rural-district-councils')->middleware('auth');
-
+    
     // Species Routes
     Route::get('/{organisation}/species', [SpeciesController::class, 'index'])->name('species.index');
     Route::get('/{organisation}/species/create', [SpeciesController::class, 'create'])->name('species.create');

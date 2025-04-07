@@ -118,6 +118,45 @@
                 <div class="navbar-vertical-content">
                     <ul class="navbar-nav flex-column" id="navbarVerticalNav">
 
+                    <!-- Dashboard Section -->
+                    <li class="nav-item">
+                            <p class="navbar-vertical-label">Dashboards</p>
+                            <hr class="navbar-vertical-line" />
+                            <div class="nav-item-wrapper">
+                                <a class="nav-link dropdown-indicator label-1 {{ Request::routeIs('organisation.dashboard.*') ? 'active' : '' }}" href="#dashboards" role="button"
+                                    data-bs-toggle="collapse" aria-expanded="{{ Request::routeIs('organisation.dashboard.*') ? 'true' : 'false' }}" aria-controls="dashboards">
+                                    <div class="d-flex align-items-center">
+                                        <div class="dropdown-indicator-icon">
+                                            <span class="fas fa-caret-right"></span>
+                                        </div>
+                                        <span class="nav-link-icon">
+                                            <span class="fas fa-chart-pie"></span>
+                                        </span>
+                                        <span class="nav-link-text">Dashboards</span>
+                                    </div>
+                                </a>
+                                <div class="parent-wrapper label-1">
+                                    <ul class="nav collapse parent" data-bs-parent="#navbarVerticalCollapse"
+                                        id="dashboards">
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.dashboard.index') ? 'active' : '' }}" href="{{ route('organisation.dashboard.index', $organisation->slug ?? '') }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Current Dashboard</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link {{ Request::routeIs('organisation.dashboard.historical') ? 'active' : '' }}" href="{{ route('organisation.dashboard.historical', $organisation->slug ?? '') }}">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="nav-link-text">Historical Dashboard</span>
+                                                </div>
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </li>
+
                         <!-- Real Time Data Section -->
                         <li class="nav-item">
                             <p class="navbar-vertical-label">System Modules</p>
@@ -225,6 +264,8 @@
                                 </div>
                             </div>
                         </li>
+
+                        
 
                         <!-- Historical Data Section -->
                         <li class="nav-item">
@@ -359,7 +400,7 @@
                                             </div>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link {{ Request::routeIs('human-resource-records.*') ? 'active' : '' }}" href="{{ route('human-resource-records.index', $organisation->slug ?? '') }}">
+                                            <a class="nav-link {{ Request::routeIs('human_resource_records.*') ? 'active' : '' }}" href="{{ route('human_resource_records.index', $organisation->slug ?? '') }}">
                                                 <div class="d-flex align-items-center">
                                                     <span class="nav-link-text">Staff Records</span>
                                                 </div>

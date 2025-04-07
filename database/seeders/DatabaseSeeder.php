@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
             UsersTableSeeder::class,
             CropTypeSeeder::class,
             LiveStockTypeSeeder::class,
-           
+            DashboardDummyDataSeeder::class,
         ]);
     
     }

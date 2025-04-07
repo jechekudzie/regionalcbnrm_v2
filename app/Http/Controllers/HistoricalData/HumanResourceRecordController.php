@@ -59,7 +59,7 @@ class HumanResourceRecordController extends Controller
         $humanResourceRecord->notes = $request->notes;
         $humanResourceRecord->save();
 
-        return redirect()->route('organisations.historical-data.human-resource-records.index', $organisation)->with('success', 'Human Resource Record created successfully.');
+        return redirect()->route('human-resource-records.index', $organisation)->with('success', 'Human Resource Record created successfully.');
     }
 
     /**
@@ -100,7 +100,7 @@ class HumanResourceRecordController extends Controller
         $humanResourceRecord->notes = $request->notes;
         $humanResourceRecord->save();
 
-        return redirect()->route('organisations.historical-data.human-resource-records.index', $organisation)->with('success', 'Human Resource Record updated successfully.');
+        return redirect()->route('human-resource-records.index', $organisation)->with('success', 'Human Resource Record updated successfully.');
     }
 
     /**
@@ -110,6 +110,6 @@ class HumanResourceRecordController extends Controller
     {
         $humanResourceRecord->delete();
 
-        return redirect()->route('organisations.historical-data.human-resource-records.index', $organisation)->with('success', 'Human Resource Record deleted successfully.');
+        return redirect()->route('human-resource-records.index', $organisation)->with('success', 'Human Resource Record deleted successfully.');
     }
 }

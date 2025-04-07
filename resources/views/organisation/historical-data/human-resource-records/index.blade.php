@@ -17,7 +17,7 @@
                     Human Resource Records
                 </div>
                 <div>
-                    <a href="{{ route('organisations.historical-data.human-resource-records.create', $organisation) }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('human-resource-records.create', $organisation) }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus me-1"></i> Add New Record
                     </a>
                     <a href="{{ route('main-dashboard', $organisation) }}" class="btn btn-secondary btn-sm">
@@ -56,13 +56,13 @@
                                     <td>{{ $record->employed_by == 'community' ? 'Community' : $organisation->name }}</td>
                                     <td>
                                         <div class="d-flex gap-1">
-                                            <a href="{{ route('organisations.historical-data.human-resource-records.show', [$organisation, $record]) }}" class="btn btn-info btn-sm">
+                                            <a href="{{ route('human-resource-records.show', [$organisation, $record]) }}" class="btn btn-info btn-sm">
                                                 <i class="fas fa-eye"></i>
                                             </a>
-                                            <a href="{{ route('organisations.historical-data.human-resource-records.edit', [$organisation, $record]) }}" class="btn btn-primary btn-sm">
+                                            <a href="{{ route('human-resource-records.edit', [$organisation, $record]) }}" class="btn btn-primary btn-sm">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('organisations.historical-data.human-resource-records.destroy', [$organisation, $record]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this record?');">
+                                            <form action="{{ route('human-resource-records.destroy', [$organisation, $record]) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this record?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger btn-sm">

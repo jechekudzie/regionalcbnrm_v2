@@ -13,13 +13,13 @@
                     Add Human Resource Record
                 </div>
                 <div>
-                    <a href="{{ route('organisations.historical-data.human-resource-records.index', $organisation) }}" class="btn btn-secondary btn-sm">
+                    <a href="{{ route('human-resource-records.index', $organisation) }}" class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('organisations.historical-data.human-resource-records.store', $organisation) }}" method="POST">
+                <form action="{{ route('human-resource-records.store', $organisation) }}" method="POST">
                     @csrf
                     
                     <div class="row mb-3">
@@ -101,7 +101,7 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="d-flex justify-content-end gap-2">
-                                <a href="{{ route('organisations.historical-data.human-resource-records.index', $organisation) }}" class="btn btn-secondary">Cancel</a>
+                                <a href="{{ route('human-resource-records.index', $organisation) }}" class="btn btn-secondary">Cancel</a>
                                 <button type="submit" class="btn btn-primary">Save Record</button>
                             </div>
                         </div>

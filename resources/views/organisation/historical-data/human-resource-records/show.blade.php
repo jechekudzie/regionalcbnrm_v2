@@ -17,7 +17,7 @@
                     Human Resource Record Details - {{ $humanResourceRecord->period }}
                 </div>
                 <div>
-                    <a href="{{ route('organisations.historical-data.human-resource-records.index', $organisation) }}" class="btn btn-secondary btn-sm">
+                    <a href="{{ route('human-resource-records.index', $organisation) }}" class="btn btn-secondary btn-sm">
                         <i class="fas fa-arrow-left me-1"></i> Back to List
                     </a>
                 </div>
@@ -82,10 +82,10 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="{{ route('organisations.historical-data.human-resource-records.edit', [$organisation, $humanResourceRecord]) }}" class="btn btn-primary">
+                            <a href="{{ route('human-resource-records.edit', [$organisation, $humanResourceRecord]) }}" class="btn btn-primary">
                                 <i class="fas fa-edit me-1"></i> Edit
                             </a>
-                            <form action="{{ route('organisations.historical-data.human-resource-records.destroy', [$organisation, $humanResourceRecord]) }}" method="POST" class="delete-form">
+                            <form action="{{ route('human-resource-records.destroy', [$organisation, $humanResourceRecord]) }}" method="POST" class="delete-form">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-danger">

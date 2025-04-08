@@ -22,7 +22,7 @@ Regional CBNRM - {{ $organisation->name }} - Income Distribution Records
                 <p class="mb-0 text-muted small">Manage historical income distribution data for {{ $organisation->name }}</p>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('main-dashboard', $organisation->slug) }}" class="btn btn-outline-primary">
+                <a href="{{ route('organisation.dashboard', $organisation->slug) }}" class="btn btn-outline-primary">
                     <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
                 </a>
                 <a href="{{ route('income_records.create', $organisation->slug) }}" class="btn btn-primary">

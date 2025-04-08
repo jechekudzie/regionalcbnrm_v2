@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
@@ -13,6 +13,7 @@ class OrganisationRolesController extends Controller
     //
     public function index(Organisation $organisation)
     {
+
         $roles = $organisation->organisationRoles;
         return view('admin.organisation_roles.index', compact('roles', 'organisation'));
     }

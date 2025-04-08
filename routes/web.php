@@ -439,5 +439,12 @@ Route::middleware('auth')->group(function () {
     });
 });
 
+// Add test route for chart
+Route::get('/test-chart', function() {
+    return view('test-chart');
+});
+
+Route::get('{organisation}/test-chart', [App\Http\Controllers\Organisation\OrganisationDashboardController::class, 'testChart'])
+    ->name('organisation.dashboard.test-chart');
 
 require __DIR__ . '/auth.php';

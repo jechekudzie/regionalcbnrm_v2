@@ -437,4 +437,9 @@ class OrganisationDashboardController extends Controller
             'incomeSourcesData'
         ));
     }
+
+    public function testChart(Organisation $organisation)
+    {
+        return view('organisation.dashboard.test-single-chart', compact('organisation'));
+    }
 }

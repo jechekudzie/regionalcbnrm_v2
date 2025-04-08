@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Admin\Module;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use App\Models\Organisation;
+use App\Models\Admin\Organisation;
 
 use Illuminate\Support\Str;
 

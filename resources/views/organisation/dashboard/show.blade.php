@@ -4,12 +4,14 @@
     Regional CBNRM - {{ $organisation->name }} Dashboard
 @endsection
 
-@section('head')
+@push('head')
+    <!-- Add jQuery (if not already in the layout) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Add Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <!-- Add DataTables -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
-@endsection
+@endpush
 
 @section('content')
 <div class="container-fluid px-4">
@@ -292,75 +294,124 @@
             </div>
         </div>
     </div>
+    
+    <!-- Debug Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-bug me-1"></i>
+                    Debug Information
+                </div>
+                <div class="card-body">
+                    <h5>Check Canvas Elements:</h5>
+                    <div id="debug-info"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function loadChartsWhenReady() {
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded yet, retrying in 100ms');
+        setTimeout(loadChartsWhenReady, 100);
+        return;
+    }
+    
+    console.log('Chart.js loaded, initializing charts');
+    
+    // Debug canvas elements
+    const debugInfo = document.getElementById('debug-info');
+    const canvases = document.querySelectorAll('canvas');
+    
+    debugInfo.innerHTML += '<p>Number of canvas elements found: ' + canvases.length + '</p>';
+    
+    canvases.forEach((canvas, index) => {
+        const rect = canvas.getBoundingClientRect();
+        debugInfo.innerHTML += `
+            <p>Canvas #${index + 1}: ${canvas.id}</p>
+            <ul>
+                <li>Width: ${rect.width}px</li>
+                <li>Height: ${rect.height}px</li>
+                <li>Visible: ${rect.width > 0 && rect.height > 0 ? 'Yes' : 'No'}</li>
+                <li>Style: ${window.getComputedStyle(canvas).display}</li>
+            </ul>
+        `;
+    });
+    
     // Monthly Activities Chart
-    var monthlyCtx = document.getElementById('monthlyActivitiesChart').getContext('2d');
-    var monthlyChart = new Chart(monthlyCtx, {
-        type: 'line',
-        data: {
-            labels: @json($months),
-            datasets: [
-                {
-                    label: 'Hunting Activities',
-                    data: @json(array_values($monthlyHuntingData)),
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                },
-                {
-                    label: 'Wildlife Conflicts',
-                    data: @json(array_values($monthlyConflictData)),
-                    borderColor: 'rgba(255, 193, 7, 1)',
-                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                },
-                {
-                    label: 'Poaching Incidents',
-                    data: @json(array_values($monthlyPoachingData)),
-                    borderColor: 'rgba(220, 53, 69, 1)',
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    position: 'top',
-                },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Number of Activities'
+    try {
+        var monthlyCtx = document.getElementById('monthlyActivitiesChart').getContext('2d');
+        var monthlyChart = new Chart(monthlyCtx, {
+            type: 'line',
+            data: {
+                labels: @json($months),
+                datasets: [
+                    {
+                        label: 'Hunting Activities',
+                        data: @json(array_values($monthlyHuntingData)),
+                        borderColor: 'rgba(0, 123, 255, 1)',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
                     },
-                    ticks: {
-                        precision: 0
+                    {
+                        label: 'Wildlife Conflicts',
+                        data: @json(array_values($monthlyConflictData)),
+                        borderColor: 'rgba(255, 193, 7, 1)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Poaching Incidents',
+                        data: @json(array_values($monthlyPoachingData)),
+                        borderColor: 'rgba(220, 53, 69, 1)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Number of Activities'
+                        },
+                        ticks: {
+                            precision: 0
+                        }
                     }
                 }
             }
-        }
-    });
+        });
+        console.log('Monthly activities chart created');
+    } catch (e) {
+        console.error('Error creating monthly activities chart:', e);
+    }
 
     // Quota Utilization Chart
     var quotaData = @json(array_values($quotaUtilization));
@@ -502,33 +553,34 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+}
 
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded, loading charts');
+    loadChartsWhenReady();
+    
     // Initialize DataTables
     $('#huntingConcessionsTable').DataTable({
         responsive: true,
-        paging: true,
-        searching: true,
+        order: [[3, 'desc']],
         pageLength: 5,
         lengthMenu: [5, 10, 25, 50],
-        order: [[0, 'asc']]
+        language: {
+            search: '',
+            searchPlaceholder: 'Search concessions...'
+        }
     });
-
-    $('#quotaAllocationsTable').DataTable({
-        responsive: true,
-        paging: true,
-        searching: true,
-        pageLength: 5,
-        lengthMenu: [5, 10, 25, 50],
-        order: [[0, 'asc']]
-    });
-
+    
     $('#recentActivitiesTable').DataTable({
         responsive: true,
-        paging: true,
-        searching: true,
-        pageLength: 10,
-        order: [[2, 'desc']]
+        order: [[2, 'desc']],
+        pageLength: 5,
+        lengthMenu: [5, 10, 25, 50],
+        language: {
+            search: '',
+            searchPlaceholder: 'Search activities...'
+        }
     });
 });
 </script>
-@endsection
+@endpush
